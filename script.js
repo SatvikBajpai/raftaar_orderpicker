@@ -16,9 +16,6 @@ class OrderPickingTool {
         this.directionsService = null; // Google Routes Service (newer API)
         this.directionsRenderer = null; // Google Directions Renderer
         
-        // Add a test order for debugging
-        this.addTestOrder();
-        
         this.initializeApp();
         this.bindEvents();
         this.loadStoredData();
@@ -2297,28 +2294,6 @@ class OrderPickingTool {
             distance: totalDistanceKm,
             duration: totalDurationMin
         });
-    }
-    
-    addTestOrder() {
-        // Add a test order for debugging - using real geocoding only
-        const testOrder = {
-            id: Date.now(),
-            orderId: 'TEST-001',
-            customerName: 'Test Customer',
-            customerPincode: '440001', // Nagpur Civil Lines - will be geocoded
-            orderTime: new Date(),
-            status: 'pending',
-            distance: null,
-            priority: 50
-        };
-        
-        testOrder.slaDeadline = this.calculateSLADeadline(testOrder.orderTime);
-        this.orders.push(testOrder);
-        
-        console.log('Test order added (will be geocoded):', testOrder);
-        
-        // Use real geocoding - no hardcoded coordinates
-        this.autoFillCoordinates(testOrder.customerPincode);
     }
 
     // Batch action methods
