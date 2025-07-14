@@ -1197,7 +1197,7 @@ class OrderPickingTool {
         });
     }
     
-    // Batch optimization method
+    // Intelligent route-based batch optimization
     optimizeBatch(maxOrdersPerBatch, maxDistanceFromStore, strategy = 'maximize_orders') {
         console.log('optimizeBatch called with:', { maxOrdersPerBatch, maxDistanceFromStore, strategy });
         
@@ -1215,7 +1215,7 @@ class OrderPickingTool {
                 return [];
             }
 
-            // Ensure all orders have coordinates
+            // Ensure all orders have coordinates and are within distance limit
             const ordersWithCoords = availableOrders.map(order => {
                 const coords = this.pincodeData.get(order.customerPincode);
                 return {
@@ -1232,69 +1232,251 @@ class OrderPickingTool {
                 return [];
             }
 
-            // Create batches - for now, simple approach
-            const batches = [];
-            let currentBatch = [];
+            // Use intelligent route-based clustering instead of simple grouping
+            const batches = this.createRouteClusters(ordersWithCoords, maxOrdersPerBatch, strategy);
             
-            // Sort orders by strategy
-            let sortedOrders;
-            if (strategy === 'maximize_sla') {
-                sortedOrders = ordersWithCoords.sort((a, b) => {
-                    const aMinutes = this.getSLAMinutesLeft(a);
-                    const bMinutes = this.getSLAMinutesLeft(b);
-                    return aMinutes - bMinutes; // Most urgent first
-                });
-            } else {
-                sortedOrders = ordersWithCoords.sort((a, b) => a.distance - b.distance); // Closest first
-            }
+            // Optimize the route within each batch for minimum travel time
+            const optimizedBatches = batches.map(batch => this.optimizeRouteWithinBatch(batch, strategy));
             
-            for (const order of sortedOrders) {
-                if (currentBatch.length < maxOrdersPerBatch) {
-                    currentBatch.push(order);
-                } else {
-                    batches.push([...currentBatch]);
-                    currentBatch = [order];
-                }
-            }
-            
-            if (currentBatch.length > 0) {
-                batches.push(currentBatch);
-            }
-            
-            console.log('Generated batches:', batches);
-            return batches;
+            console.log('Generated route-optimized batches:', optimizedBatches);
+            return optimizedBatches;
             
         } catch (error) {
             console.error('Error in optimizeBatch:', error);
             throw error;
         }
     }
+
+    // Create clusters based on geographical proximity and route efficiency
+    createRouteClusters(orders, maxBatchSize, strategy) {
+        if (orders.length === 0) return [];
+        
+        const clusters = [];
+        const unassigned = [...orders];
+        
+        while (unassigned.length > 0) {
+            const cluster = [];
+            
+            // Start with the best seed order based on strategy
+            let seedOrder;
+            if (strategy === 'maximize_sla') {
+                // Most urgent order that hasn't been assigned
+                seedOrder = unassigned.reduce((mostUrgent, order) => {
+                    const urgentMinutes = this.getSLAMinutesLeft(mostUrgent);
+                    const orderMinutes = this.getSLAMinutesLeft(order);
+                    return orderMinutes < urgentMinutes ? order : mostUrgent;
+                });
+            } else {
+                // Closest order to store that hasn't been assigned
+                seedOrder = unassigned.reduce((closest, order) => 
+                    order.distance < closest.distance ? order : closest
+                );
+            }
+            
+            cluster.push(seedOrder);
+            unassigned.splice(unassigned.indexOf(seedOrder), 1);
+            
+            // Build cluster by finding nearby orders that create efficient routes
+            while (cluster.length < maxBatchSize && unassigned.length > 0) {
+                const nextOrder = this.findBestRouteAddition(cluster, unassigned, strategy);
+                if (nextOrder) {
+                    cluster.push(nextOrder);
+                    unassigned.splice(unassigned.indexOf(nextOrder), 1);
+                } else {
+                    break; // No more suitable orders for this cluster
+                }
+            }
+            
+            clusters.push(cluster);
+        }
+        
+        return clusters;
+    }
+
+    // Find the best order to add to current cluster based on route efficiency
+    findBestRouteAddition(currentCluster, availableOrders, strategy) {
+        if (availableOrders.length === 0) return null;
+        
+        let bestOrder = null;
+        let bestScore = Infinity;
+        
+        for (const candidateOrder of availableOrders) {
+            const score = this.calculateRouteAdditionScore(currentCluster, candidateOrder, strategy);
+            if (score < bestScore) {
+                bestScore = score;
+                bestOrder = candidateOrder;
+            }
+        }
+        
+        // Only add if the route addition is reasonably efficient
+        const maxAcceptableScore = this.getMaxAcceptableRouteScore(currentCluster.length);
+        return bestScore <= maxAcceptableScore ? bestOrder : null;
+    }
+
+    // Calculate how good it would be to add this order to the current route
+    calculateRouteAdditionScore(currentCluster, candidateOrder, strategy) {
+        // Find the best position to insert this order in the current route
+        const bestInsertion = this.findBestInsertionPosition(currentCluster, candidateOrder);
+        
+        let score = bestInsertion.additionalDistance; // Base score on route efficiency
+        
+        // Adjust score based on strategy
+        if (strategy === 'maximize_sla') {
+            const slaMinutes = this.getSLAMinutesLeft(candidateOrder);
+            const urgencyMultiplier = Math.max(0.1, 1 - (slaMinutes / 120)); // More urgent = lower score
+            score *= urgencyMultiplier;
+        }
+        
+        // Penalty for orders that are too far from the cluster centroid
+        const clusterCentroid = this.calculateClusterCentroid(currentCluster);
+        const distanceFromCentroid = this.calculateDistance(
+            clusterCentroid.lat, clusterCentroid.lng,
+            candidateOrder.lat, candidateOrder.lng
+        );
+        
+        // Add distance penalty (orders too far from cluster center get higher scores)
+        score += distanceFromCentroid * 0.5;
+        
+        return score;
+    }
+
+    // Find the best position to insert a new order in the existing route
+    findBestInsertionPosition(currentRoute, newOrder) {
+        if (currentRoute.length === 0) {
+            return { position: 0, additionalDistance: newOrder.distance };
+        }
+        
+        if (currentRoute.length === 1) {
+            const distanceToFirst = this.calculateDistance(
+                this.storeLocation.lat, this.storeLocation.lng,
+                newOrder.lat, newOrder.lng
+            );
+            const distanceFromFirst = this.calculateDistance(
+                currentRoute[0].lat, currentRoute[0].lng,
+                newOrder.lat, newOrder.lng
+            );
+            return { position: 1, additionalDistance: distanceToFirst + distanceFromFirst - currentRoute[0].distance };
+        }
+        
+        let bestPosition = 0;
+        let minAdditionalDistance = Infinity;
+        
+        // Try inserting at each position and calculate additional distance
+        for (let i = 0; i <= currentRoute.length; i++) {
+            const additionalDistance = this.calculateInsertionCost(currentRoute, newOrder, i);
+            if (additionalDistance < minAdditionalDistance) {
+                minAdditionalDistance = additionalDistance;
+                bestPosition = i;
+            }
+        }
+        
+        return { position: bestPosition, additionalDistance: minAdditionalDistance };
+    }
+
+    // Calculate the additional distance if we insert the order at given position
+    calculateInsertionCost(route, newOrder, position) {
+        if (position === 0) {
+            // Insert at beginning
+            const newDistanceToFirst = this.calculateDistance(
+                this.storeLocation.lat, this.storeLocation.lng,
+                newOrder.lat, newOrder.lng
+            );
+            const newDistanceFromFirst = route.length > 0 ? this.calculateDistance(
+                newOrder.lat, newOrder.lng,
+                route[0].lat, route[0].lng
+            ) : 0;
+            const oldDistanceToFirst = route.length > 0 ? route[0].distance : 0;
+            
+            return newDistanceToFirst + newDistanceFromFirst - oldDistanceToFirst;
+        } else if (position === route.length) {
+            // Insert at end
+            const lastOrder = route[route.length - 1];
+            return this.calculateDistance(
+                lastOrder.lat, lastOrder.lng,
+                newOrder.lat, newOrder.lng
+            );
+        } else {
+            // Insert in middle
+            const prevOrder = route[position - 1];
+            const nextOrder = route[position];
+            
+            const oldDistance = this.calculateDistance(
+                prevOrder.lat, prevOrder.lng,
+                nextOrder.lat, nextOrder.lng
+            );
+            const newDistance1 = this.calculateDistance(
+                prevOrder.lat, prevOrder.lng,
+                newOrder.lat, newOrder.lng
+            );
+            const newDistance2 = this.calculateDistance(
+                newOrder.lat, newOrder.lng,
+                nextOrder.lat, nextOrder.lng
+            );
+            
+            return newDistance1 + newDistance2 - oldDistance;
+        }
+    }
+
+    // Calculate the geographic center of a cluster
+    calculateClusterCentroid(cluster) {
+        if (cluster.length === 0) return this.storeLocation;
+        
+        const sumLat = cluster.reduce((sum, order) => sum + order.lat, 0);
+        const sumLng = cluster.reduce((sum, order) => sum + order.lng, 0);
+        
+        return {
+            lat: sumLat / cluster.length,
+            lng: sumLng / cluster.length
+        };
+    }
+
+    // Get maximum acceptable route score based on cluster size
+    getMaxAcceptableRouteScore(clusterSize) {
+        // As cluster grows, we become more selective about additions
+        const baseScore = 15; // km base acceptable additional distance
+        const sizeMultiplier = Math.max(0.3, 1 - (clusterSize * 0.2));
+        return baseScore * sizeMultiplier;
+    }
     
-    // Optimize route within a single batch
+    // Optimize route within a single batch using improved algorithms
     optimizeRouteWithinBatch(batchOrders, strategy = 'maximize_orders') {
         if (batchOrders.length <= 1) return batchOrders;
         
-        const route = [];
-        const remaining = [...batchOrders];
+        // For small batches, use nearest neighbor with smart starting point
+        if (batchOrders.length <= 4) {
+            return this.nearestNeighborRoute(batchOrders, strategy);
+        }
         
-        // Start with the order that makes most sense based on strategy
+        // For larger batches, use 2-opt improvement on nearest neighbor solution
+        const initialRoute = this.nearestNeighborRoute(batchOrders, strategy);
+        return this.improve2Opt(initialRoute);
+    }
+
+    // Nearest neighbor algorithm with strategic starting point
+    nearestNeighborRoute(orders, strategy) {
+        const route = [];
+        const remaining = [...orders];
+        
+        // Choose starting order based on strategy
         let current;
         if (strategy === 'maximize_sla') {
-            // Start with most urgent SLA order
-            current = remaining.reduce((mostUrgent, order) => 
-                order.slaMinutesLeft < mostUrgent.slaMinutesLeft ? order : mostUrgent
-            );
+            // Start with most urgent order
+            current = remaining.reduce((mostUrgent, order) => {
+                const urgentMinutes = this.getSLAMinutesLeft(mostUrgent);
+                const orderMinutes = this.getSLAMinutesLeft(order);
+                return orderMinutes < urgentMinutes ? order : mostUrgent;
+            });
         } else {
-            // Start with the order closest to store
+            // Start with order closest to store
             current = remaining.reduce((closest, order) => 
-                order.distanceFromStore < closest.distanceFromStore ? order : closest
+                order.distance < closest.distance ? order : closest
             );
         }
         
         route.push(current);
         remaining.splice(remaining.indexOf(current), 1);
         
-        // Build route using nearest neighbor approach
+        // Build route using nearest neighbor
         while (remaining.length > 0) {
             const next = remaining.reduce((nearest, order) => {
                 const distanceToCurrent = this.calculateDistance(
@@ -1313,54 +1495,151 @@ class OrderPickingTool {
         
         return route;
     }
+
+    // 2-opt improvement algorithm to optimize route further
+    improve2Opt(route) {
+        if (route.length < 4) return route; // 2-opt needs at least 4 points
+        
+        let improved = true;
+        let bestRoute = [...route];
+        let bestDistance = this.calculateRouteDistance(bestRoute);
+        
+        while (improved) {
+            improved = false;
+            
+            for (let i = 1; i < route.length - 2; i++) {
+                for (let j = i + 1; j < route.length; j++) {
+                    if (j - i === 1) continue; // Skip adjacent edges
+                    
+                    // Create new route by reversing the segment between i and j
+                    const newRoute = this.reverse2OptSegment(bestRoute, i, j);
+                    const newDistance = this.calculateRouteDistance(newRoute);
+                    
+                    if (newDistance < bestDistance) {
+                        bestRoute = newRoute;
+                        bestDistance = newDistance;
+                        improved = true;
+                    }
+                }
+            }
+        }
+        
+        return bestRoute;
+    }
+
+    // Reverse a segment of the route for 2-opt
+    reverse2OptSegment(route, i, j) {
+        const newRoute = [...route];
+        const segment = newRoute.slice(i, j + 1).reverse();
+        newRoute.splice(i, j - i + 1, ...segment);
+        return newRoute;
+    }
+
+    // Calculate total distance of a complete route
+    calculateRouteDistance(route) {
+        if (route.length === 0) return 0;
+        
+        let totalDistance = route[0].distance; // Store to first order
+        
+        // Distance between consecutive orders
+        for (let i = 0; i < route.length - 1; i++) {
+            totalDistance += this.calculateDistance(
+                route[i].lat, route[i].lng,
+                route[i + 1].lat, route[i + 1].lng
+            );
+        }
+        
+        // Distance from last order back to store
+        const lastOrder = route[route.length - 1];
+        totalDistance += this.calculateDistance(
+            lastOrder.lat, lastOrder.lng,
+            this.storeLocation.lat, this.storeLocation.lng
+        );
+        
+        return totalDistance;
+    }
     
-    // Calculate batch metrics
+    // Calculate comprehensive batch metrics including route efficiency
     calculateBatchMetrics(batch) {
-        if (batch.length === 0) return { totalDistance: 0, estimatedTime: 0, slaRisk: 0 };
+        if (batch.length === 0) return { 
+            totalDistance: 0, 
+            estimatedTime: 0, 
+            slaRisk: 0,
+            routeEfficiency: 0,
+            averageOrderDistance: 0
+        };
         
         try {
             // Ensure all orders have required properties
             const validOrders = batch.filter(order => order.lat && order.lng && order.distance);
             if (validOrders.length === 0) {
-                return { totalDistance: 0, estimatedTime: 0, slaRisk: 0 };
+                return { 
+                    totalDistance: 0, 
+                    estimatedTime: 0, 
+                    slaRisk: 0,
+                    routeEfficiency: 0,
+                    averageOrderDistance: 0
+                };
             }
             
-            let totalDistance = validOrders[0].distance || 0; // Distance from store to first order
+            // Calculate actual route distance
+            const totalDistance = this.calculateRouteDistance(validOrders);
             
-            // Add distances between consecutive orders
-            for (let i = 0; i < validOrders.length - 1; i++) {
-                const dist = this.calculateDistance(
-                    validOrders[i].lat, validOrders[i].lng,
-                    validOrders[i + 1].lat, validOrders[i + 1].lng
-                );
-                totalDistance += dist;
+            // Calculate direct distances for efficiency comparison
+            const directDistanceSum = validOrders.reduce((sum, order) => sum + (order.distance || 0) * 2, 0); // Round trip to each
+            const routeEfficiency = directDistanceSum > 0 ? Math.min(100, (directDistanceSum / totalDistance) * 100) : 0;
+            
+            // Estimate time including preparation and delivery time at each stop
+            const travelTime = totalDistance / 25; // hours at 25 km/h
+            const stopTime = validOrders.length * 0.25; // 15 minutes per stop
+            const estimatedTime = (travelTime + stopTime) * 60; // convert to minutes
+            
+            // Calculate SLA risk with more sophisticated logic
+            const now = new Date();
+            let cumulativeTime = 0;
+            let ordersAtRisk = 0;
+            
+            for (let i = 0; i < validOrders.length; i++) {
+                // Estimate when we'll reach this order
+                if (i === 0) {
+                    cumulativeTime = (validOrders[i].distance / 25) * 60; // Minutes to first order
+                } else {
+                    const distanceToNext = this.calculateDistance(
+                        validOrders[i-1].lat, validOrders[i-1].lng,
+                        validOrders[i].lat, validOrders[i].lng
+                    );
+                    cumulativeTime += (distanceToNext / 25) * 60; // Travel time
+                }
+                cumulativeTime += 15; // 15 minutes delivery time
+                
+                const estimatedArrival = new Date(now.getTime() + cumulativeTime * 60 * 1000);
+                const slaDeadline = validOrders[i].slaDeadline || this.calculateSLADeadline(validOrders[i].orderTime);
+                
+                if (estimatedArrival > slaDeadline) {
+                    ordersAtRisk++;
+                }
             }
             
-            // Add return distance to store
-            const lastOrder = validOrders[validOrders.length - 1];
-            const returnDistance = this.calculateDistance(
-                lastOrder.lat, lastOrder.lng,
-                this.storeLocation.lat, this.storeLocation.lng
-            );
-            totalDistance += returnDistance;
-            
-            const estimatedTime = (totalDistance / 25) * 60; // minutes at 25 km/h
-            
-            // Calculate SLA risk (orders that might breach SLA)
-            const ordersAtRisk = validOrders.filter(order => {
-                const slaMinutes = this.getSLAMinutesLeft(order);
-                return slaMinutes < estimatedTime;
-            }).length;
             const slaRisk = validOrders.length > 0 ? (ordersAtRisk / validOrders.length) * 100 : 0;
+            const averageOrderDistance = validOrders.reduce((sum, order) => sum + order.distance, 0) / validOrders.length;
             
             return {
                 totalDistance: Math.round(totalDistance * 100) / 100,
                 estimatedTime: Math.round(estimatedTime),
-                slaRisk: Math.round(slaRisk)
+                slaRisk: Math.round(slaRisk),
+                routeEfficiency: Math.round(routeEfficiency),
+                averageOrderDistance: Math.round(averageOrderDistance * 100) / 100,
+                ordersCount: validOrders.length
             };
         } catch (error) {
             console.error('Error calculating batch metrics:', error);
-            return { totalDistance: 0, estimatedTime: 0, slaRisk: 0 };
+            return { 
+                totalDistance: 0, 
+                estimatedTime: 0, 
+                slaRisk: 0,
+                routeEfficiency: 0,
+                averageOrderDistance: 0
+            };
         }
     }
     
@@ -1384,22 +1663,30 @@ class OrderPickingTool {
         // Clear existing highlights
         this.clearOrderHighlights();
         
-        // Find the best batch (considering total distance and SLA risk)
+        // Find the best batch using improved scoring that considers route efficiency
         const bestBatch = batches.reduce((best, current) => {
             const bestMetrics = this.calculateBatchMetrics(best);
             const currentMetrics = this.calculateBatchMetrics(current);
             
-            // Score based on fewer orders at risk and shorter distance
-            const bestScore = bestMetrics.slaRisk + (bestMetrics.totalDistance / 10);
-            const currentScore = currentMetrics.slaRisk + (currentMetrics.totalDistance / 10);
+            // Improved scoring: lower is better
+            // Factors: SLA risk (high penalty), route efficiency (bonus for efficient routes), total distance
+            const bestScore = (bestMetrics.slaRisk * 2) + bestMetrics.totalDistance - (bestMetrics.routeEfficiency * 0.5);
+            const currentScore = (currentMetrics.slaRisk * 2) + currentMetrics.totalDistance - (currentMetrics.routeEfficiency * 0.5);
             
             return currentScore < bestScore ? current : best;
         });
 
         const bestMetrics = this.calculateBatchMetrics(bestBatch);
 
-        // Build result HTML
+        // Build enhanced result HTML
         let resultHTML = `
+            <div class="batch-header">
+                <h3><i class="fas fa-route"></i> Optimized Route Batch</h3>
+                <div class="route-efficiency-badge" style="background: ${bestMetrics.routeEfficiency > 70 ? '#10b981' : bestMetrics.routeEfficiency > 50 ? '#f59e0b' : '#ef4444'}">
+                    ${bestMetrics.routeEfficiency}% Route Efficiency
+                </div>
+            </div>
+            
             <div class="batch-summary">
                 <div class="batch-summary-item">
                     <div class="batch-summary-value">${bestBatch.length}</div>
@@ -1413,39 +1700,107 @@ class OrderPickingTool {
                     <div class="batch-summary-value">${bestMetrics.estimatedTime}min</div>
                     <div class="batch-summary-label">EST. TIME</div>
                 </div>
+                <div class="batch-summary-item">
+                    <div class="batch-summary-value">${bestMetrics.slaRisk}%</div>
+                    <div class="batch-summary-label">SLA RISK</div>
+                </div>
+            </div>
+            
+            <div class="route-insights">
+                <div class="insight-item">
+                    📊 <strong>Avg Distance per Order:</strong> ${bestMetrics.averageOrderDistance}km
+                </div>
+                <div class="insight-item">
+                    🎯 <strong>Route Optimization:</strong> ${bestMetrics.routeEfficiency > 70 ? 'Excellent' : bestMetrics.routeEfficiency > 50 ? 'Good' : 'Fair'} - ${(100 - bestMetrics.routeEfficiency).toFixed(0)}% distance saved vs individual trips
+                </div>
             </div>
             
             <div class="route-highlight">
-                📍 Start at Store → Follow sequence below → 🏠 Return to Store
+                📍 Start at Store → Follow optimized sequence below → 🏠 Return to Store
             </div>
             
             <div class="batch-orders">`;
 
+        // Display orders in optimized sequence
         bestBatch.forEach((order, index) => {
             const slaMinutesLeft = this.getSLAMinutesLeft(order);
-            const slaStatus = slaMinutesLeft < bestMetrics.estimatedTime ? '⚠️ At Risk' : '✅ Safe';
+            const estimatedArrivalTime = this.calculateEstimatedArrival(bestBatch, index);
+            const slaStatus = estimatedArrivalTime > order.slaDeadline ? '⚠️ At Risk' : '✅ Safe';
             const customerName = order.customerName || `Customer ${order.customerPincode}`;
             const distance = order.distance || 0;
             
+            // Calculate distance from previous order (or store if first)
+            let legDistance = 0;
+            if (index === 0) {
+                legDistance = distance; // Distance from store
+            } else {
+                legDistance = this.calculateDistance(
+                    bestBatch[index - 1].lat, bestBatch[index - 1].lng,
+                    order.lat, order.lng
+                );
+            }
+            
             resultHTML += `
                 <div class="batch-order-item">
+                    <div class="batch-sequence">${index + 1}</div>
                     <div class="batch-order-details">
-                        <div class="batch-order-id">${order.orderId} - ${customerName}</div>
+                        <div class="batch-order-id">
+                            <strong>${order.orderId}</strong> - ${customerName}
+                            <span class="order-priority-badge priority-${this.getPriorityLevel(order.orderTime, order.slaDeadline)}">
+                                ${order.priority}
+                            </span>
+                        </div>
                         <div class="batch-order-meta">
-                            ${distance.toFixed(1)}km from store • SLA: ${slaMinutesLeft}min left ${slaStatus}
+                            <span class="distance-info">
+                                <i class="fas fa-route"></i> ${legDistance.toFixed(1)}km ${index === 0 ? 'from store' : 'from prev'}
+                            </span>
+                            <span class="sla-info">
+                                <i class="fas fa-clock"></i> SLA: ${slaMinutesLeft}min left ${slaStatus}
+                            </span>
+                            <span class="eta-info">
+                                <i class="fas fa-map-marker-alt"></i> ETA: ${this.formatTime(estimatedArrivalTime)}
+                            </span>
                         </div>
                     </div>
-                    <div class="batch-sequence">${index + 1}</div>
                 </div>`;
         });
 
         resultHTML += `</div>`;
 
+        // Add batch comparison info if multiple batches exist
         if (batches.length > 1) {
-            resultHTML += `<div style="margin-top: 15px; padding: 10px; background: rgba(255,255,255,0.1); border-radius: 6px; font-size: 12px;">
-                💡 Found ${batches.length} possible batches. Showing the most efficient route.
-            </div>`;
+            const alternativeBatches = batches.filter(b => b !== bestBatch).slice(0, 2); // Show up to 2 alternatives
+            resultHTML += `
+                <div class="batch-alternatives">
+                    <h4><i class="fas fa-exchange-alt"></i> Alternative Batches:</h4>`;
+            
+            alternativeBatches.forEach((batch, altIndex) => {
+                const altMetrics = this.calculateBatchMetrics(batch);
+                resultHTML += `
+                    <div class="alternative-batch">
+                        <strong>Option ${altIndex + 2}:</strong> 
+                        ${batch.length} orders, ${altMetrics.totalDistance}km, ${altMetrics.estimatedTime}min, 
+                        ${altMetrics.routeEfficiency}% efficiency
+                    </div>`;
+            });
+            
+            resultHTML += `
+                    <div class="batch-note">
+                        💡 Found ${batches.length} possible batches. Showing most efficient route-optimized batch.
+                    </div>
+                </div>`;
         }
+
+        // Add batch action buttons
+        resultHTML += `
+            <div class="batch-actions">
+                <button class="btn btn-primary" onclick="orderPickingTool.startBatchDelivery('${JSON.stringify(bestBatch.map(o => o.id))}')">
+                    <i class="fas fa-truck"></i> Start Batch Delivery
+                </button>
+                <button class="btn btn-secondary" onclick="orderPickingTool.selectBatchOrders('${JSON.stringify(bestBatch.map(o => o.id))}')">
+                    <i class="fas fa-check-circle"></i> Select All Orders
+                </button>
+            </div>`;
 
         // Display in result panel
         const resultPanel = document.getElementById('optimizationResult');
@@ -1461,8 +1816,31 @@ class OrderPickingTool {
         // Highlight orders on the map and in the queue
         this.highlightBatchOrders(bestBatch);
         
-        // Show route on map
+        // Show optimized route on map
         this.showRouteOnMap(bestBatch);
+    }
+
+    // Calculate estimated arrival time for a specific order in the batch
+    calculateEstimatedArrival(batch, orderIndex) {
+        const now = new Date();
+        let cumulativeTime = 0; // in minutes
+        
+        for (let i = 0; i <= orderIndex; i++) {
+            if (i === 0) {
+                // Time to reach first order from store
+                cumulativeTime += (batch[i].distance / 25) * 60;
+            } else {
+                // Travel time between orders
+                const distanceToNext = this.calculateDistance(
+                    batch[i-1].lat, batch[i-1].lng,
+                    batch[i].lat, batch[i].lng
+                );
+                cumulativeTime += (distanceToNext / 25) * 60;
+            }
+            cumulativeTime += 15; // 15 minutes delivery time at each stop
+        }
+        
+        return new Date(now.getTime() + cumulativeTime * 60 * 1000);
     }
 
     highlightBatchOrders(batch) {
@@ -1941,6 +2319,74 @@ class OrderPickingTool {
         
         // Use real geocoding - no hardcoded coordinates
         this.autoFillCoordinates(testOrder.customerPincode);
+    }
+
+    // Batch action methods
+    startBatchDelivery(orderIdsJson) {
+        try {
+            const orderIds = JSON.parse(orderIdsJson);
+            const orders = this.orders.filter(order => orderIds.includes(order.id));
+            
+            if (orders.length === 0) {
+                this.showNotification('No valid orders found for batch delivery', 'error');
+                return;
+            }
+            
+            if (confirm(`Start delivery for ${orders.length} orders in this batch?`)) {
+                orders.forEach(order => {
+                    const orderIndex = this.orders.findIndex(o => o.id === order.id);
+                    if (orderIndex !== -1) {
+                        this.orders[orderIndex].status = 'out_for_delivery';
+                        this.orders[orderIndex].deliveryStartedAt = new Date();
+                        this.orders[orderIndex].batchId = Date.now(); // Group them with same batch ID
+                    }
+                });
+                
+                this.saveOrdersToStorage();
+                this.refreshOrdersDisplay();
+                
+                // Update map markers
+                orders.forEach(order => this.updateOrderMarkerStyle(order));
+                
+                this.showNotification(`Started batch delivery for ${orders.length} orders! 🚚`, 'success');
+                this.hideOptimizationResult();
+            }
+        } catch (error) {
+            console.error('Error starting batch delivery:', error);
+            this.showNotification('Error starting batch delivery', 'error');
+        }
+    }
+
+    selectBatchOrders(orderIdsJson) {
+        try {
+            const orderIds = JSON.parse(orderIdsJson);
+            const orders = this.orders.filter(order => orderIds.includes(order.id));
+            
+            if (orders.length === 0) {
+                this.showNotification('No valid orders found for batch selection', 'error');
+                return;
+            }
+            
+            orders.forEach(order => {
+                const orderIndex = this.orders.findIndex(o => o.id === order.id);
+                if (orderIndex !== -1) {
+                    this.orders[orderIndex].status = 'selected';
+                    this.orders[orderIndex].selectedAt = new Date();
+                    this.orders[orderIndex].batchId = Date.now(); // Group them with same batch ID
+                }
+            });
+            
+            this.saveOrdersToStorage();
+            this.refreshOrdersDisplay();
+            
+            // Update map markers
+            orders.forEach(order => this.updateOrderMarkerStyle(order));
+            
+            this.showNotification(`Selected ${orders.length} orders for batch delivery! 📋`, 'success');
+        } catch (error) {
+            console.error('Error selecting batch orders:', error);
+            this.showNotification('Error selecting batch orders', 'error');
+        }
     }
 }
 
