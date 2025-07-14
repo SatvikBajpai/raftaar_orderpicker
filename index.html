@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raftaar Order Picker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDr-DYch4S-JeL-sTlbixPKSjgOJiHLe8A&libraries=routes,geometry,places&callback=initMap"></script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1><i class="fas fa-shipping-fast"></i> Raftaar Order Picker</h1>
+            <p>Intelligent order prioritization for optimal SLA management</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Top Row: Order Input and Orders Queue -->
+            <div class="top-row">
+                <!-- Add New Order Panel -->
+                <div class="order-input-panel">
+                    <h2><i class="fas fa-plus-circle"></i> Add New Order</h2>
+                    <form id="orderForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="orderId">Order ID:</label>
+                                <input type="text" id="orderId" required placeholder="ORD-001">
+                            </div>
+                            <div class="form-group">
+                                <label for="orderTime">Order Time:</label>
+                                <input type="datetime-local" id="orderTime" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="customerPincode">Customer Pincode:</label>
+                                <input type="text" id="customerPincode" required placeholder="440001">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Add Order
+                        </button>
+                    </form>
+
+                    <!-- Optimization Mode Selection -->
+                    <div class="optimization-panel">
+                        <h3><i class="fas fa-cogs"></i> Optimization Strategy</h3>
+                        <div class="radio-group">
+                            <label class="radio-option">
+                                <input type="radio" name="optimization" value="maximize_orders">
+                                <span class="radio-label">
+                                    <i class="fas fa-shipping-fast"></i>
+                                    <strong>Maximize Orders</strong>
+                                    <small>Deliver closest orders first</small>
+                                </span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="optimization" value="maximize_sla" checked>
+                                <span class="radio-label">
+                                    <i class="fas fa-clock"></i>
+                                    <strong>Maximize SLA %</strong>
+                                    <small>Prioritize SLA compliance</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <!-- Batch Toggle -->
+                        <div class="batch-toggle">
+                            <label class="checkbox-option">
+                                <input type="checkbox" id="enableBatching" name="enableBatching">
+                                <span class="checkbox-label">
+                                    <i class="fas fa-route"></i>
+                                    <strong>Enable Batch Optimization</strong>
+                                    <small>Optimize route for multiple orders</small>
+                                </span>
+                            </label>
+                        </div>
+                        
+                        <div class="batch-settings" id="batchSettings" style="display: none;">
+                            <div class="form-group">
+                                <label for="max-orders-per-batch">Max Orders per Batch:</label>
+                                <select id="max-orders-per-batch">
+                                    <option value="2">2 Orders</option>
+                                    <option value="3" selected>3 Orders</option>
+                                    <option value="4">4 Orders</option>
+                                    <option value="5">5 Orders</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="max-distance-from-store">Max Distance from Store (km):</label>
+                                <select id="max-distance-from-store">
+                                    <option value="5">5 km</option>
+                                    <option value="10" selected>10 km</option>
+                                    <option value="15">15 km</option>
+                                    <option value="20">20 km</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Orders Queue Panel -->
+                <div class="orders-panel">
+                    <div class="panel-header">
+                        <h2><i class="fas fa-list"></i> Orders Queue</h2>
+                        <div class="panel-controls">
+                            <button id="refreshOrders" class="btn btn-secondary">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                            <button id="optimizeOrders" class="btn btn-primary">
+                                <i class="fas fa-brain"></i> <span id="optimizeButtonText">Get Next Order</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="orders-stats">
+                        <div class="stat-card high-priority">
+                            <div class="stat-number" id="highPriorityCount">0</div>
+                            <div class="stat-label">High Priority</div>
+                        </div>
+                        <div class="stat-card normal">
+                            <div class="stat-number" id="normalCount">0</div>
+                            <div class="stat-label">Normal Priority</div>
+                        </div>
+                        <div class="stat-card next-day">
+                            <div class="stat-number" id="nextDayCount">0</div>
+                            <div class="stat-label">Next Day</div>
+                        </div>
+                    </div>
+
+                    <div class="orders-list" id="ordersList">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No orders in queue. Add an order to get started.</p>
+                        </div>
+                    </div>
+
+                    <!-- Optimization Result Panel -->
+                    <div id="optimizationResult" class="optimization-result hidden">
+                        <h3><i class="fas fa-route"></i> Next Order Recommendation</h3>
+                        <div id="recommendedOrder" class="recommended-order"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row: Full Width Map -->
+            <div class="maps-panel-full">
+                <h2><i class="fas fa-map-marked-alt"></i> Orders Map - Live Tracking</h2>
+                <div id="map" class="map-container-full"></div>
+            </div>
+        </div>
+
+        <!-- SLA Information Panel -->
+        <div class="sla-info">
+            <h3><i class="fas fa-clock"></i> SLA Rules</h3>
+            <ul>
+                <li><strong>Before 10:00 AM:</strong> Deliver by 12:00 PM (same day)</li>
+                <li><strong>10:00 AM - 6:00 PM:</strong> Deliver within 2 hours</li>
+                <li><strong>After 6:00 PM:</strong> Deliver next day by 12:00 PM</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
