@@ -44,6 +44,19 @@ class OrderPickingTool {
             this.refreshOrdersDisplay();
         });
 
+        // Add click handler for order cards to show route
+        document.addEventListener('click', (e) => {
+            const orderCard = e.target.closest('.order-card');
+            if (orderCard && !e.target.closest('button')) {
+                const orderId = orderCard.getAttribute('data-order-id');
+                const order = this.orders.find(o => o.id === parseInt(orderId));
+                if (order && order.lat && order.lng) {
+                    this.showRouteOnMap([order]);
+                    this.showNotification(`Showing route to ${order.orderId}`, 'info');
+                }
+            }
+        });
+
         const optimizeButton = document.getElementById('optimizeOrders');
         console.log('Optimize button found:', optimizeButton);
         
@@ -345,9 +358,9 @@ class OrderPickingTool {
             const statusLabel = this.getStatusLabel(order.status);
             
             return `
-                <div class="order-card ${priorityLevel} ${statusClass}" data-order-id="${order.id}">
+                <div class="order-card ${priorityLevel} ${statusClass}" data-order-id="${order.id}" title="Click to show route on map">
                     <div class="order-header">
-                        <span class="order-id">${order.orderId}</span>
+                        <span class="order-id">${order.orderId} <i class="fas fa-map-marker-alt" style="color: #6b7280; font-size: 0.8em;" title="Click to view route"></i></span>
                         <div class="order-actions">
                             <span class="priority-badge ${priorityLevel}">${priorityLevel.replace('-', ' ')}</span>
                             <span class="status-badge ${statusClass}">${statusIcon} ${statusLabel}</span>
@@ -748,6 +761,9 @@ class OrderPickingTool {
             this.refreshOrdersDisplay();
             this.updateOrderMarkerStyle(order);
             
+            // Show route to the selected order
+            this.showRouteOnMap([order]);
+            
             this.showNotification(`Order ${order.orderId} selected for delivery! 📋`, 'success');
         }
     }
@@ -765,6 +781,9 @@ class OrderPickingTool {
             this.saveOrdersToStorage();
             this.refreshOrdersDisplay();
             this.updateOrderMarkerStyle(order);
+            
+            // Show route to the delivery order
+            this.showRouteOnMap([order]);
             
             this.showNotification(`Delivery started for order ${order.orderId}! 🚚`, 'success');
         }
@@ -784,6 +803,9 @@ class OrderPickingTool {
             this.refreshOrdersDisplay();
             this.updateOrderMarkerStyle(order);
             
+            // Clear the route when cancelling selection
+            this.clearExistingRoutes();
+            
             this.showNotification(`Selection cancelled for order ${order.orderId}`, 'info');
         }
     }
@@ -801,6 +823,9 @@ class OrderPickingTool {
             this.saveOrdersToStorage();
             this.refreshOrdersDisplay();
             this.updateOrderMarkerStyle(order);
+            
+            // Show route again since order is back to selected status
+            this.showRouteOnMap([order]);
             
             this.showNotification(`Delivery cancelled for order ${order.orderId}`, 'info');
         }
@@ -1969,7 +1994,7 @@ class OrderPickingTool {
             computeAlternativeRoutes: false,
             routeModifiers: {
                 avoidTolls: false,
-                avoidHighways: false,
+                               avoidHighways: false,
                 avoidFerries: false
             },
             languageCode: 'en-US',
