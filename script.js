@@ -120,12 +120,25 @@ class OrderPickingTool {
                         // Update the specific order if it exists
                         const order = this.orders.find(o => o.customerPincode === pincode);
                         if (order && !order.distance) {
-                            order.distance = this.calculateDistance(
+                            const distance = this.calculateDistance(
                                 this.storeLocation.lat, this.storeLocation.lng,
                                 coords.lat, coords.lng
                             );
+                            
+                            // Update order with distance and priority
+                            order.distance = distance;
+                            order.priority = this.calculatePriority(
+                                order.orderTime, order.slaDeadline, distance
+                            );
+                            
+                            // Save and refresh display
                             this.saveOrdersToStorage();
                             this.refreshOrdersDisplay();
+                            
+                            // Create map marker for this order
+                            this.addOrderToMap(order);
+                            
+                            console.log(`Order ${order.orderId} updated with distance ${distance}km and added to map`);
                         }
                     } else {
                         console.log('Geocoding failed for pincode:', pincode, 'Status:', status);
@@ -172,36 +185,16 @@ class OrderPickingTool {
             priority: 50 // Default priority, will be recalculated after distance is known
         };
 
+        // Add order immediately to show in list
         this.orders.push(order);
-        
-        // Trigger geocoding for this pincode
-        this.autoFillCoordinates(formData.customerPincode).then(() => {
-            // After geocoding, calculate distance and update order
-            const coords = this.pincodeData.get(formData.customerPincode);
-            if (coords) {
-                const distance = this.calculateDistance(
-                    this.storeLocation.lat, this.storeLocation.lng,
-                    coords.lat, coords.lng
-                );
-                
-                // Update the order with distance and recalculated priority
-                const orderIndex = this.orders.findIndex(o => o.id === order.id);
-                if (orderIndex !== -1) {
-                    this.orders[orderIndex].distance = distance;
-                    this.orders[orderIndex].priority = this.calculatePriority(
-                        formData.orderTime, slaDeadline, distance
-                    );
-                    
-                    this.saveOrdersToStorage();
-                    this.refreshOrdersDisplay();
-                    this.addOrderToMap(this.orders[orderIndex]);
-                }
-            }
-        });
-        
         this.saveOrdersToStorage();
         this.refreshOrdersDisplay();
         this.clearOrderForm();
+        
+        // Start geocoding in background
+        this.autoFillCoordinates(formData.customerPincode);
+        
+        this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
         
         this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
     }
@@ -363,9 +356,9 @@ class OrderPickingTool {
             const statusLabel = this.getStatusLabel(order.status);
             
             return `
-                <div class="order-card ${priorityLevel} ${statusClass}" data-order-id="${order.id}" title="Click to show route on map">
+                <div class="order-card ${priorityLevel} ${statusClass}" data-order-id="${order.id}" onclick="orderPickingTool.showOrderOnMap('${order.id}')" title="Click to show order location and route on map" style="cursor: pointer;">
                     <div class="order-header">
-                        <span class="order-id">${order.orderId} <i class="fas fa-map-marker-alt" style="color: #6b7280; font-size: 0.8em;" title="Click to view route"></i></span>
+                        <span class="order-id">${order.orderId} <i class="fas fa-map-marker-alt" style="color: #6b7280; font-size: 0.8em;" title="Click to view on map"></i></span>
                         <div class="order-actions">
                             <span class="priority-badge ${priorityLevel}">${priorityLevel.replace('-', ' ')}</span>
                             <span class="status-badge ${statusClass}">${statusIcon} ${statusLabel}</span>
