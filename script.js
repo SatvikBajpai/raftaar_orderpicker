@@ -1394,21 +1394,42 @@ class OrderPickingTool {
     
     // Intelligent route-based batch optimization
     optimizeBatch(maxOrdersPerBatch, maxDistanceFromStore, strategy = 'maximize_orders') {
+        console.log('=== BATCH OPTIMIZATION DEBUG ===');
         console.log('optimizeBatch called with:', { maxOrdersPerBatch, maxDistanceFromStore, strategy });
         
         try {
             if (this.orders.length === 0) {
-                console.log('No orders available');
+                console.log('❌ No orders available');
                 return [];
             }
             
             const availableOrders = this.orders.filter(order => order.status === 'pending');
-            console.log('Available orders for batching:', availableOrders.length);
+            console.log('📋 Total orders:', this.orders.length);
+            console.log('📋 Pending orders:', availableOrders.length);
+            console.log('📋 Pending orders details:', availableOrders.map(o => ({
+                id: o.orderId,
+                pincode: o.customerPincode,
+                distance: o.distance,
+                status: o.status
+            })));
             
             if (availableOrders.length === 0) {
-                console.log('No pending orders available');
+                console.log('❌ No pending orders available');
                 return [];
             }
+
+            // Check each order individually
+            console.log('🔍 Checking each order for batch eligibility:');
+            availableOrders.forEach(order => {
+                const coords = this.pincodeData.get(order.customerPincode);
+                console.log(`Order ${order.orderId}:`);
+                console.log(`  - Pincode: ${order.customerPincode}`);
+                console.log(`  - Has coordinates: ${!!coords}`);
+                console.log(`  - Distance: ${order.distance}km`);
+                console.log(`  - Max distance limit: ${maxDistanceFromStore}km`);
+                console.log(`  - Within limit: ${order.distance <= maxDistanceFromStore}`);
+                console.log(`  - Status: ${order.status}`);
+            });
 
             // Ensure all orders have coordinates and are within distance limit
             const ordersWithCoords = availableOrders.map(order => {
@@ -1423,19 +1444,31 @@ class OrderPickingTool {
                 const hasDistance = order.distance;
                 const withinDistance = order.distance && order.distance <= maxDistanceFromStore;
                 
-                console.log(`Order ${order.orderId}: hasCoords=${hasCoords}, hasDistance=${hasDistance}, withinDistance=${withinDistance}, distance=${order.distance}km`);
+                console.log(`✅ Order ${order.orderId} eligibility:`);
+                console.log(`  - hasCoords: ${hasCoords}`);
+                console.log(`  - hasDistance: ${hasDistance}`);
+                console.log(`  - withinDistance: ${withinDistance} (${order.distance}km <= ${maxDistanceFromStore}km)`);
+                console.log(`  - ELIGIBLE: ${hasCoords && hasDistance && withinDistance}`);
                 
                 return hasCoords && hasDistance && withinDistance;
             });
 
-            console.log('Orders with coordinates and within distance:', ordersWithCoords.length);
-            console.log('Valid orders:', ordersWithCoords.map(o => ({ id: o.orderId, distance: o.distance })));
+            console.log('✅ Orders eligible for batching:', ordersWithCoords.length);
+            console.log('✅ Eligible orders:', ordersWithCoords.map(o => ({ 
+                id: o.orderId, 
+                distance: o.distance,
+                coords: { lat: o.lat, lng: o.lng }
+            })));
 
             if (ordersWithCoords.length === 0) {
-                console.log('No orders found with valid coordinates within distance limit');
-                console.log('Available orders details:');
+                console.log('❌ No orders found with valid coordinates within distance limit');
+                console.log('🔍 Detailed analysis:');
                 availableOrders.forEach(order => {
-                    console.log(`- Order ${order.orderId}: distance=${order.distance}km, has coords=${this.pincodeData.has(order.customerPincode)}`);
+                    const coords = this.pincodeData.get(order.customerPincode);
+                    console.log(`  - Order ${order.orderId}:`);
+                    console.log(`    • Coordinates available: ${!!coords}`);
+                    console.log(`    • Distance calculated: ${!!order.distance} (${order.distance}km)`);
+                    console.log(`    • Within max distance: ${order.distance <= maxDistanceFromStore}`);
                 });
                 return [];
             }
@@ -1444,27 +1477,43 @@ class OrderPickingTool {
             const batches = [];
             const remainingOrders = [...ordersWithCoords];
             
+            console.log('🔄 Creating batches...');
+            let batchNumber = 1;
+            
             while (remainingOrders.length > 0) {
                 const batchSize = Math.min(maxOrdersPerBatch, remainingOrders.length);
                 const batch = remainingOrders.splice(0, batchSize);
                 
+                console.log(`📦 Batch ${batchNumber}: ${batch.length} orders`);
+                console.log(`   Orders: ${batch.map(o => o.orderId).join(', ')}`);
+                
                 // Sort batch by urgency if using SLA strategy, otherwise by distance
                 if (strategy === 'maximize_sla') {
                     batch.sort((a, b) => this.getSLAMinutesLeft(a) - this.getSLAMinutesLeft(b));
+                    console.log(`   Sorted by SLA urgency`);
                 } else {
                     batch.sort((a, b) => a.distance - b.distance);
+                    console.log(`   Sorted by distance`);
                 }
                 
                 batches.push(batch);
+                batchNumber++;
             }
             
-            console.log('Generated simple batches:', batches.length, 'batches');
-            console.log('Batch details:', batches.map(b => ({ count: b.length, orders: b.map(o => o.orderId) })));
+            console.log('🎉 Generated batches:', batches.length);
+            console.log('🎉 Batch summary:', batches.map((b, i) => ({ 
+                batch: i + 1,
+                count: b.length, 
+                orders: b.map(o => o.orderId),
+                totalDistance: b.reduce((sum, o) => sum + o.distance, 0).toFixed(1) + 'km'
+            })));
+            console.log('=== END BATCH OPTIMIZATION DEBUG ===');
             
             return batches;
             
         } catch (error) {
-            console.error('Error in optimizeBatch:', error);
+            console.error('❌ Error in optimizeBatch:', error);
+            console.error('Stack trace:', error.stack);
             throw error;
         }
     }
@@ -1874,14 +1923,18 @@ class OrderPickingTool {
     }
 
     displayBatchResults(batches) {
+        console.log('=== DISPLAY BATCH RESULTS DEBUG ===');
         console.log('displayBatchResults called with:', batches);
+        console.log('Number of batches:', batches.length);
         
         if (batches.length === 0) {
-            console.log('No batches to display');
+            console.log('❌ No batches to display - showing "no suitable batches" message');
             this.displayOptimizationResult('No suitable batches found with current settings.');
             return;
         }
 
+        console.log('✅ Found batches, proceeding with display...');
+        
         // Clear existing highlights
         this.clearOrderHighlights();
         
@@ -2108,7 +2161,13 @@ class OrderPickingTool {
             return;
         }
 
-        // For single order, show route from store to order location
+        // Store the current orders for batch toggle controls persistence
+        this.currentBatchOrders = orders.length > 1 ? orders : null;
+
+        // Clear existing routes but preserve space for controls
+        this.clearExistingRoutesOnly();
+
+        // For single order, show individual route controls
         if (orders.length === 1) {
             const order = orders[0];
             const coords = this.pincodeData.get(order.customerPincode);
@@ -2118,22 +2177,22 @@ class OrderPickingTool {
                 return;
             }
 
-            // Clear existing routes but preserve controls for single order view
-            this.clearExistingRoutesOnly();
-
             // Show outbound route (store to order) by default
             this.showOutboundRoute(order, coords);
             
-            // Add route toggle controls
+            // Add single-order route toggle controls
             this.addRouteToggleControls(order, coords);
             return;
         }
 
-        // For multiple orders, clear everything including controls
-        this.clearExistingRoutes();
-        
-        // Create optimized route
+        // For multiple orders, show batch route controls
+        // Show optimized batch route by default
         this.showMultipleOrdersRoute(orders);
+        
+        // Add batch-specific route toggle controls  
+        console.log('About to add batch route toggle controls for', orders.length, 'orders');
+        this.addBatchRouteToggleControls(orders);
+        console.log('Batch route toggle controls should now be visible');
     }
 
     showOutboundRoute(order, coords) {
@@ -2365,6 +2424,414 @@ class OrderPickingTool {
             btn.classList.remove('active');
         });
         document.getElementById(activeButtonId)?.classList.add('active');
+    }
+
+    addBatchRouteToggleControls(orders) {
+        console.log('=== addBatchRouteToggleControls DEBUG ===');
+        console.log('Orders received:', orders.length);
+        
+        // Check if controls already exist
+        const existingControls = document.getElementById('routeToggleControls');
+        if (existingControls) {
+            console.log('Existing controls found, updating...');
+            // Update the header to show batch info
+            const header = existingControls.querySelector('h4');
+            if (header) {
+                header.textContent = `Route Display for ${orders.length} Orders (Batch)`;
+            }
+            
+            // Update event listeners for the batch
+            this.updateBatchRouteToggleEventListeners(orders);
+            
+            // Set full route as active by default
+            this.setActiveRouteButton('showFullRoute');
+            
+            // Ensure controls are visible
+            existingControls.style.display = 'block';
+            existingControls.style.visibility = 'visible';
+            console.log('✅ Existing controls updated and made visible');
+            return;
+        }
+
+        console.log('Creating new batch route controls...');
+
+        // Generate route segment buttons
+        let routeButtons = `
+            <button id="showFullRoute" class="route-btn active">
+                🚚 Full Route
+            </button>
+            <button id="routeToFirst" class="route-btn">
+                🏪→📍 Store → ${orders[0].orderId}
+            </button>`;
+
+        // Add buttons for routes between orders
+        for (let i = 0; i < orders.length - 1; i++) {
+            routeButtons += `
+                <button id="routeSegment${i}" class="route-btn">
+                    📍→📍 ${orders[i].orderId} → ${orders[i + 1].orderId}
+                </button>`;
+        }
+
+        // Add return to store button
+        routeButtons += `
+            <button id="routeToStore" class="route-btn">
+                📍→🏪 ${orders[orders.length - 1].orderId} → Store
+            </button>
+            <button id="clearRoutes" class="route-btn clear-btn">
+                ❌ Clear Routes
+            </button>`;
+
+        // Create toggle controls if they don't exist
+        const controlsDiv = document.createElement('div');
+        controlsDiv.id = 'routeToggleControls';
+        controlsDiv.innerHTML = `
+            <div class="route-controls">
+                <h4>Route Display for ${orders.length} Orders (Batch)</h4>
+                <div class="route-toggle-buttons">
+                    ${routeButtons}
+                </div>
+                <div class="batch-info">
+                    📊 ${orders.length} stops • Click segments to view individual routes
+                </div>
+            </div>
+        `;
+
+        // Add styles if not present
+        if (!document.querySelector('.route-controls-styles')) {
+            const style = document.createElement('style');
+            style.className = 'route-controls-styles';
+            style.innerHTML = `
+                .route-controls {
+                    background: rgba(255, 255, 255, 0.95);
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                    margin: 10px;
+                    font-family: Arial, sans-serif;
+                    border: 2px solid #e5e7eb;
+                }
+                .route-controls h4 {
+                    margin: 0 0 10px 0;
+                    color: #1f2937;
+                    font-size: 14px;
+                    font-weight: 600;
+                }
+                .route-toggle-buttons {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .route-btn {
+                    padding: 8px 12px;
+                    border: 1px solid #d1d5db;
+                    border-radius: 6px;
+                    background: #f9fafb;
+                    color: #374151;
+                    font-size: 12px;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .route-btn:hover {
+                    background: #e5e7eb;
+                    border-color: #9ca3af;
+                }
+                .route-btn.active {
+                    background: #3b82f6;
+                    color: white;
+                    border-color: #3b82f6;
+                }
+                .route-btn.clear-btn {
+                    background: #dc2626;
+                    color: white;
+                    border-color: #dc2626;
+                }
+                .route-btn.clear-btn:hover {
+                    background: #dc2626;
+                    border-color: #dc2626;
+                }
+                .batch-info {
+                    margin-top: 8px;
+                    font-size: 11px;
+                    color: #6b7280;
+                    text-align: center;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add to map container
+        const mapContainer = document.getElementById('map');
+        if (!mapContainer) {
+            console.error('❌ Map container not found!');
+            return;
+        }
+        
+        mapContainer.appendChild(controlsDiv);
+        console.log('✅ Route toggle controls added to map container');
+
+        // Ensure controls are visible with important styles
+        controlsDiv.style.display = 'block';
+        controlsDiv.style.visibility = 'visible';
+        controlsDiv.style.position = 'absolute';
+        controlsDiv.style.top = '10px';
+        controlsDiv.style.left = '10px';
+        controlsDiv.style.zIndex = '1000';
+        
+        console.log('✅ Visibility styles applied to controls');
+
+        // Add event listeners
+        this.updateBatchRouteToggleEventListeners(orders);
+        
+        // Set full route as active by default
+        this.setActiveRouteButton('showFullRoute');
+        
+        console.log('✅ Batch route toggle controls fully initialized');
+    }
+
+    updateBatchRouteToggleEventListeners(orders) {
+        // Collect all button IDs dynamically
+        const buttonIds = ['showFullRoute', 'routeToFirst', 'routeToStore', 'clearRoutes'];
+        
+        // Add segment button IDs
+        for (let i = 0; i < orders.length - 1; i++) {
+            buttonIds.push(`routeSegment${i}`);
+        }
+
+        // Remove existing event listeners by cloning buttons
+        buttonIds.forEach(buttonId => {
+            const oldButton = document.getElementById(buttonId);
+            if (oldButton) {
+                const newButton = oldButton.cloneNode(true);
+                oldButton.parentNode.replaceChild(newButton, oldButton);
+            }
+        });
+
+        // Add new event listeners
+        const fullRouteBtn = document.getElementById('showFullRoute');
+        const routeToFirstBtn = document.getElementById('routeToFirst');
+        const routeToStoreBtn = document.getElementById('routeToStore');
+        const clearBtn = document.getElementById('clearRoutes');
+
+        if (fullRouteBtn) {
+            fullRouteBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
+                this.showMultipleOrdersRoute(orders);
+                this.setActiveRouteButton('showFullRoute');
+            });
+        }
+
+        if (routeToFirstBtn) {
+            routeToFirstBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
+                this.showRouteSegment('store', orders[0]);
+                this.setActiveRouteButton('routeToFirst');
+            });
+        }
+
+        // Add event listeners for segment buttons
+        for (let i = 0; i < orders.length - 1; i++) {
+            const segmentBtn = document.getElementById(`routeSegment${i}`);
+            if (segmentBtn) {
+                segmentBtn.addEventListener('click', () => {
+                    this.clearExistingRoutesOnly();
+                    this.showRouteSegment(orders[i], orders[i + 1]);
+                    this.setActiveRouteButton(`routeSegment${i}`);
+                });
+            }
+        }
+
+        if (routeToStoreBtn) {
+            routeToStoreBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
+                this.showRouteSegment(orders[orders.length - 1], 'store');
+                this.setActiveRouteButton('routeToStore');
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearExistingRoutes();
+            });
+        }
+    }
+
+    showRouteSegment(fromLocation, toLocation) {
+        if (!this.map || !this.directionsService) {
+            console.log('Map or directions service not ready');
+            return;
+        }
+
+        // Determine coordinates for from and to locations
+        let originCoords, destinationCoords;
+        let routeDescription;
+
+        // Handle 'store' as a special case
+        if (fromLocation === 'store') {
+            originCoords = this.storeLocation;
+            routeDescription = `Store → ${toLocation.orderId}`;
+        } else {
+            const fromCoords = this.pincodeData.get(fromLocation.customerPincode);
+            if (!fromCoords) {
+                console.log('No coordinates found for from order:', fromLocation.orderId);
+                return;
+            }
+            originCoords = fromCoords;
+            routeDescription = `${fromLocation.orderId} →`;
+        }
+
+        if (toLocation === 'store') {
+            destinationCoords = this.storeLocation;
+            routeDescription += ` Store`;
+        } else {
+            const toCoords = this.pincodeData.get(toLocation.customerPincode);
+            if (!toCoords) {
+                console.log('No coordinates found for to order:', toLocation.orderId);
+                return;
+            }
+            destinationCoords = toCoords;
+            routeDescription += ` ${toLocation.orderId}`;
+        }
+
+        // Create the route request
+        const request = {
+            origin: originCoords,
+            destination: destinationCoords,
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+        };
+
+        console.log('Calculating route segment:', routeDescription);
+        
+        this.directionsService.route(request, (result, status) => {
+            if (status === 'OK') {
+                // Use blue renderer for individual segments
+                this.goingDirectionsRenderer.setDirections(result);
+                
+                // Get route details
+                const route = result.routes[0];
+                const leg = route.legs[0];
+                
+                console.log('Route segment calculated successfully:');
+                console.log('- Distance:', leg.distance.text);
+                console.log('- Duration:', leg.duration.text);
+                
+                // Show notification with route info
+                this.showNotification(
+                    `${routeDescription}: ${leg.distance.text}, ${leg.duration.text}`,
+                    'info'
+                );
+                
+            } else {
+                console.error('Route segment calculation failed:', status);
+                this.showNotification(`Could not calculate route ${routeDescription}: ${status}`, 'error');
+            }
+        });
+    }
+
+    showMultipleOrdersRoute(orders) {
+        if (!this.map || !this.directionsService) {
+            console.log('Map or directions service not ready for multiple orders route');
+            return;
+        }
+
+        if (orders.length === 0) {
+            console.log('No orders to show route for');
+            return;
+        }
+
+        console.log('Showing route for multiple orders:', orders.length);
+
+        // Get coordinates for all orders
+        const waypoints = [];
+        const validOrders = [];
+
+        orders.forEach(order => {
+            const coords = this.pincodeData.get(order.customerPincode);
+            if (coords) {
+                waypoints.push({
+                    location: { lat: coords.lat, lng: coords.lng },
+                    stopover: true
+                });
+                validOrders.push(order);
+            } else {
+                console.warn('No coordinates found for order:', order.orderId);
+            }
+        });
+
+        if (waypoints.length === 0) {
+            console.log('No valid coordinates found for any orders');
+            return;
+        }
+
+        // Create the route request for multiple waypoints
+        const request = {
+            origin: this.storeLocation,
+            destination: this.storeLocation, // Return to store
+            waypoints: waypoints,
+            optimizeWaypoints: true, // Let Google optimize the order
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+        };
+
+        console.log('Calculating optimized route for', waypoints.length, 'stops');
+        
+        this.directionsService.route(request, (result, status) => {
+            if (status === 'OK') {
+                console.log('Multi-stop route calculated successfully');
+                
+                // Display the route
+                this.goingDirectionsRenderer.setDirections(result);
+                
+                // Get route details
+                const route = result.routes[0];
+                let totalDistance = 0;
+                let totalDuration = 0;
+                
+                route.legs.forEach(leg => {
+                    totalDistance += leg.distance.value; // in meters
+                    totalDuration += leg.duration.value; // in seconds
+                });
+                
+                // Convert to readable format
+                const totalDistanceKm = (totalDistance / 1000).toFixed(1);
+                const totalDurationMin = Math.round(totalDuration / 60);
+                
+                console.log('Route summary:');
+                console.log('- Total distance:', totalDistanceKm + ' km');
+                console.log('- Total duration:', totalDurationMin + ' min');
+                console.log('- Waypoint order:', result.routes[0].waypoint_order);
+                
+                // Show route info notification
+                this.showNotification(
+                    `Batch route calculated: ${totalDistanceKm}km, ${totalDurationMin} minutes for ${validOrders.length} orders`,
+                    'success'
+                );
+                
+                // Highlight markers for orders in the route
+                validOrders.forEach((order, index) => {
+                    const markerData = this.orderMarkers.get(order.id);
+                    if (markerData) {
+                        // Make the marker bounce briefly
+                        markerData.marker.setAnimation(google.maps.Animation.BOUNCE);
+                        setTimeout(() => {
+                            markerData.marker.setAnimation(null);
+                        }, 2000);
+                        
+                        // Highlight with different color
+                        markerData.marker.setIcon(this.createMarkerIcon('#10b981', index + 1)); // Green with sequence number
+                    }
+                });
+                
+            } else {
+                console.error('Multi-stop route calculation failed:', status);
+                this.showNotification(`Could not calculate route for batch: ${status}`, 'error');
+            }
+        });
     }
 
     // New method using Google Routes API (REST)
@@ -2638,11 +3105,15 @@ class OrderPickingTool {
             console.log('Return route polyline cleared');
         }
 
-        // Remove route controls
-        const routeControls = document.getElementById('routeToggleControls');
-        if (routeControls) {
-            routeControls.remove();
-            console.log('Route toggle controls removed');
+        // Remove route controls ONLY if not in batch mode
+        if (!this.currentBatchOrders || this.currentBatchOrders.length <= 1) {
+            const routeControls = document.getElementById('routeToggleControls');
+            if (routeControls) {
+                routeControls.remove();
+                console.log('Route toggle controls removed');
+            }
+        } else {
+            console.log('Keeping route toggle controls for batch mode');
         }
 
         // Remove route info
