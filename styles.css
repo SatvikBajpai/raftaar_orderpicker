@@ -78,45 +78,6 @@ body {
     margin-top: 10px;
 }
 
-.map-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-.map-header h2 {
-    color: #4a5568;
-    font-size: 1.5rem;
-    margin: 0;
-}
-
-.route-controls {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-#toggleRouteDirection {
-    background: #3b82f6;
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-}
-
-#toggleRouteDirection:hover {
-    background: #2563eb;
-    transform: translateY(-1px);
-}
-
-#toggleRouteDirection i {
-    margin-right: 8px;
-}
-
 /* Map Container */
 .map-container-full {
     width: 100%;

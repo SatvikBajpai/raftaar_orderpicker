@@ -1403,7 +1403,7 @@ class OrderPickingTool {
             }
             
             const availableOrders = this.orders.filter(order => order.status === 'pending');
-            console.log('Available orders for batching:', availableOrders);
+            console.log('Available orders for batching:', availableOrders.length);
             
             if (availableOrders.length === 0) {
                 console.log('No pending orders available');
@@ -1418,23 +1418,50 @@ class OrderPickingTool {
                     lat: coords ? coords.lat : null,
                     lng: coords ? coords.lng : null
                 };
-            }).filter(order => order.lat && order.lng && order.distance <= maxDistanceFromStore);
+            }).filter(order => {
+                const hasCoords = order.lat && order.lng;
+                const hasDistance = order.distance;
+                const withinDistance = order.distance && order.distance <= maxDistanceFromStore;
+                
+                console.log(`Order ${order.orderId}: hasCoords=${hasCoords}, hasDistance=${hasDistance}, withinDistance=${withinDistance}, distance=${order.distance}km`);
+                
+                return hasCoords && hasDistance && withinDistance;
+            });
 
-            console.log('Orders with coordinates and within distance:', ordersWithCoords);
+            console.log('Orders with coordinates and within distance:', ordersWithCoords.length);
+            console.log('Valid orders:', ordersWithCoords.map(o => ({ id: o.orderId, distance: o.distance })));
 
             if (ordersWithCoords.length === 0) {
                 console.log('No orders found with valid coordinates within distance limit');
+                console.log('Available orders details:');
+                availableOrders.forEach(order => {
+                    console.log(`- Order ${order.orderId}: distance=${order.distance}km, has coords=${this.pincodeData.has(order.customerPincode)}`);
+                });
                 return [];
             }
 
-            // Use intelligent route-based clustering instead of simple grouping
-            const batches = this.createRouteClusters(ordersWithCoords, maxOrdersPerBatch, strategy);
+            // Use simple batching for now - create batches of up to maxOrdersPerBatch
+            const batches = [];
+            const remainingOrders = [...ordersWithCoords];
             
-            // Optimize the route within each batch for minimum travel time
-            const optimizedBatches = batches.map(batch => this.optimizeRouteWithinBatch(batch, strategy));
+            while (remainingOrders.length > 0) {
+                const batchSize = Math.min(maxOrdersPerBatch, remainingOrders.length);
+                const batch = remainingOrders.splice(0, batchSize);
+                
+                // Sort batch by urgency if using SLA strategy, otherwise by distance
+                if (strategy === 'maximize_sla') {
+                    batch.sort((a, b) => this.getSLAMinutesLeft(a) - this.getSLAMinutesLeft(b));
+                } else {
+                    batch.sort((a, b) => a.distance - b.distance);
+                }
+                
+                batches.push(batch);
+            }
             
-            console.log('Generated route-optimized batches:', optimizedBatches);
-            return optimizedBatches;
+            console.log('Generated simple batches:', batches.length, 'batches');
+            console.log('Batch details:', batches.map(b => ({ count: b.length, orders: b.map(o => o.orderId) })));
+            
+            return batches;
             
         } catch (error) {
             console.error('Error in optimizeBatch:', error);
