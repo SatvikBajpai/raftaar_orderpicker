@@ -1473,41 +1473,27 @@ class OrderPickingTool {
                 return [];
             }
 
-            // Use simple batching for now - create batches of up to maxOrdersPerBatch
-            const batches = [];
-            const remainingOrders = [...ordersWithCoords];
+            // Smart route-optimized batching using geographic clustering and route optimization
+            console.log('🔄 Creating intelligent route-optimized clusters...');
+            const clusters = this.createRouteClusters(ordersWithCoords, maxOrdersPerBatch, strategy);
             
-            console.log('🔄 Creating batches...');
-            let batchNumber = 1;
+            console.log('🔄 Optimizing delivery sequence within each cluster...');
+            const batches = clusters.map((cluster, index) => {
+                console.log(`📦 Optimizing cluster ${index + 1} with ${cluster.length} orders: ${cluster.map(o => o.orderId).join(', ')}`);
+                const optimizedBatch = this.optimizeRouteWithinBatch(cluster, strategy);
+                console.log(`   ✅ Optimized sequence: ${optimizedBatch.map(o => o.orderId).join(' → ')}`);
+                return optimizedBatch;
+            });
             
-            while (remainingOrders.length > 0) {
-                const batchSize = Math.min(maxOrdersPerBatch, remainingOrders.length);
-                const batch = remainingOrders.splice(0, batchSize);
-                
-                console.log(`📦 Batch ${batchNumber}: ${batch.length} orders`);
-                console.log(`   Orders: ${batch.map(o => o.orderId).join(', ')}`);
-                
-                // Sort batch by urgency if using SLA strategy, otherwise by distance
-                if (strategy === 'maximize_sla') {
-                    batch.sort((a, b) => this.getSLAMinutesLeft(a) - this.getSLAMinutesLeft(b));
-                    console.log(`   Sorted by SLA urgency`);
-                } else {
-                    batch.sort((a, b) => a.distance - b.distance);
-                    console.log(`   Sorted by distance`);
-                }
-                
-                batches.push(batch);
-                batchNumber++;
-            }
-            
-            console.log('🎉 Generated batches:', batches.length);
-            console.log('🎉 Batch summary:', batches.map((b, i) => ({ 
+            console.log('🎉 Generated route-optimized batches:', batches.length);
+            console.log('🎉 Smart batch summary:', batches.map((b, i) => ({ 
                 batch: i + 1,
                 count: b.length, 
                 orders: b.map(o => o.orderId),
-                totalDistance: b.reduce((sum, o) => sum + o.distance, 0).toFixed(1) + 'km'
+                totalDistance: this.calculateRouteDistance(b).toFixed(1) + 'km',
+                routeEfficiency: this.calculateBatchMetrics(b).routeEfficiency + '%'
             })));
-            console.log('=== END BATCH OPTIMIZATION DEBUG ===');
+            console.log('=== END SMART BATCH OPTIMIZATION DEBUG ===');
             
             return batches;
             
@@ -1521,13 +1507,10 @@ class OrderPickingTool {
     // Create clusters based on geographical proximity and route efficiency
     createRouteClusters(orders, maxBatchSize, strategy) {
         if (orders.length === 0) return [];
-        
         const clusters = [];
         const unassigned = [...orders];
-        
         while (unassigned.length > 0) {
             const cluster = [];
-            
             // Start with the best seed order based on strategy
             let seedOrder;
             if (strategy === 'maximize_sla') {
@@ -1543,10 +1526,8 @@ class OrderPickingTool {
                     order.distance < closest.distance ? order : closest
                 );
             }
-            
             cluster.push(seedOrder);
             unassigned.splice(unassigned.indexOf(seedOrder), 1);
-            
             // Build cluster by finding nearby orders that create efficient routes
             while (cluster.length < maxBatchSize && unassigned.length > 0) {
                 const nextOrder = this.findBestRouteAddition(cluster, unassigned, strategy);
@@ -1557,10 +1538,8 @@ class OrderPickingTool {
                     break; // No more suitable orders for this cluster
                 }
             }
-            
             clusters.push(cluster);
         }
-        
         return clusters;
     }
 
