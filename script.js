@@ -1120,8 +1120,21 @@ class OrderPickingTool {
         });
 
         // Load existing orders on map
+        console.log('Loading existing orders on map:', this.orders.length);
         this.orders.forEach(order => {
-            this.addOrderToMap(order);
+            console.log(`Processing order ${order.orderId}:`, {
+                hasDistance: !!order.distance,
+                pincode: order.customerPincode,
+                hasCachedCoords: this.pincodeData.has(order.customerPincode)
+            });
+            
+            // If order doesn't have distance calculated, try to calculate it
+            if (!order.distance && order.customerPincode) {
+                this.autoFillCoordinates(order.orderId);
+            } else if (order.distance) {
+                // Order already has distance, add it to map directly
+                this.addOrderToMap(order);
+            }
         });
     }
 
