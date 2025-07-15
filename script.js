@@ -337,6 +337,11 @@ class OrderPickingTool {
     renderOrdersList() {
         const container = document.getElementById('ordersList');
         
+        if (!container) {
+            console.error('ordersList element not found in DOM');
+            return;
+        }
+        
         if (this.orders.length === 0) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -639,62 +644,85 @@ class OrderPickingTool {
     }
 
     displayOptimizationResult(orderOrMessage, reason) {
-        const resultPanel = document.getElementById('optimizationResult');
-        const orderContainer = document.getElementById('recommendedOrder');
-        
-        // Handle string messages (like "No orders found")
-        if (typeof orderOrMessage === 'string') {
-            orderContainer.innerHTML = `
-                <div class="no-orders-message">
-                    <i class="fas fa-info-circle"></i>
-                    <p>${orderOrMessage}</p>
-                </div>
-            `;
-            resultPanel.classList.remove('hidden');
-            return;
-        }
-        
-        // Handle order objects
-        const order = orderOrMessage;
-        const deliveryTime = this.calculateDeliveryTime(order.distance);
-        const now = new Date();
-        const estimatedDelivery = new Date(now.getTime() + deliveryTime * 60 * 60 * 1000);
-        const willMeetSLA = estimatedDelivery <= order.slaDeadline;
-        
-        orderContainer.innerHTML = `
-            <div class="order-info">
-                <div><strong>Order ID:</strong> ${order.orderId}</div>
-                <div><strong>Pincode:</strong> ${order.customerPincode}</div>
-                <div><strong>Distance:</strong> ${order.distance} km</div>
-                <div><strong>Priority:</strong> ${order.priority}</div>
-                <div><strong>SLA Deadline:</strong> ${this.formatTime(order.slaDeadline)}</div>
-                <div><strong>Current Time:</strong> ${this.formatTime(now)}</div>
-            </div>
-            <div class="delivery-estimate">
-                🚛 Estimated Delivery: ${this.formatTime(estimatedDelivery)}<br>
-                ⏱️ Total Time: ${this.formatDuration(deliveryTime)}<br>
-                ${willMeetSLA ? 
-                    '<span style="color: #10b981;">✅ Will Meet SLA</span>' : 
-                    '<span style="color: #ef4444;">⚠️ May Miss SLA</span>'
+        // Wait a bit to ensure DOM is ready
+        setTimeout(() => {
+            try {
+                const resultPanel = document.getElementById('optimizationResult');
+                const orderContainer = document.getElementById('recommendedOrder');
+                
+                // Check if required DOM elements exist
+                if (!resultPanel) {
+                    console.error('optimizationResult element not found in DOM');
+                    return;
                 }
-            </div>
-            <div class="optimization-reason">
-                💡 ${reason}
-            </div>
-            <div class="order-actions-panel">
-                <button class="btn btn-select-order" onclick="orderPickingTool.markOrderAsSelected('${order.id}')">
-                    <i class="fas fa-hand-pointer"></i> Select for Delivery
-                </button>
-                <button class="btn btn-start-delivery" onclick="orderPickingTool.startDelivery('${order.id}')">
-                    <i class="fas fa-truck"></i> Start Delivery Now
-                </button>
-            </div>
-        `;
-        
-        resultPanel.classList.remove('hidden');
-        
-        // Highlight the recommended order
-        this.highlightRecommendedOrder(order.id);
+                
+                if (!orderContainer) {
+                    console.error('recommendedOrder element not found in DOM');
+                    return;
+                }
+                
+                // Handle string messages (like "No orders found")
+                if (typeof orderOrMessage === 'string') {
+                    orderContainer.innerHTML = `
+                        <div class="no-orders-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>${orderOrMessage}</p>
+                        </div>
+                    `;
+                    resultPanel.classList.remove('hidden');
+                    resultPanel.style.display = 'block';
+                    return;
+                }
+                
+                // Handle order objects
+                const order = orderOrMessage;
+                const deliveryTime = this.calculateDeliveryTime(order.distance);
+                const now = new Date();
+                const estimatedDelivery = new Date(now.getTime() + deliveryTime * 60 * 60 * 1000);
+                const willMeetSLA = estimatedDelivery <= order.slaDeadline;
+                
+                orderContainer.innerHTML = `
+                    <div class="order-info">
+                        <div><strong>Order ID:</strong> ${order.orderId}</div>
+                        <div><strong>Pincode:</strong> ${order.customerPincode}</div>
+                        <div><strong>Distance:</strong> ${order.distance} km</div>
+                        <div><strong>Priority:</strong> ${order.priority}</div>
+                        <div><strong>SLA Deadline:</strong> ${this.formatTime(order.slaDeadline)}</div>
+                        <div><strong>Current Time:</strong> ${this.formatTime(now)}</div>
+                    </div>
+                    <div class="delivery-estimate">
+                        🚛 Estimated Delivery: ${this.formatTime(estimatedDelivery)}<br>
+                        ⏱️ Total Time: ${this.formatDuration(deliveryTime)}<br>
+                        ${willMeetSLA ? 
+                            '<span style="color: #10b981;">✅ Will Meet SLA</span>' : 
+                            '<span style="color: #ef4444;">⚠️ May Miss SLA</span>'
+                        }
+                    </div>
+                    <div class="optimization-reason">
+                        💡 ${reason}
+                    </div>
+                    <div class="order-actions-panel">
+                        <button class="btn btn-select-order" onclick="orderPickingTool.markOrderAsSelected('${order.id}')">
+                            <i class="fas fa-hand-pointer"></i> Select for Delivery
+                        </button>
+                        <button class="btn btn-start-delivery" onclick="orderPickingTool.startDelivery('${order.id}')">
+                            <i class="fas fa-truck"></i> Start Delivery Now
+                        </button>
+                    </div>
+                `;
+                
+                resultPanel.classList.remove('hidden');
+                resultPanel.style.display = 'block';
+                
+                // Highlight the recommended order
+                this.highlightRecommendedOrder(order.id);
+                
+            } catch (error) {
+                console.error('Error in displayOptimizationResult:', error);
+                // Show a basic notification instead
+                this.showNotification('Optimization complete! Check the results above.', 'info');
+            }
+        }, 10); // Small delay to ensure DOM is ready
     }
 
     formatDuration(hours) {
@@ -710,7 +738,11 @@ class OrderPickingTool {
     }
 
     hideOptimizationResult() {
-        document.getElementById('optimizationResult').classList.add('hidden');
+        const resultPanel = document.getElementById('optimizationResult');
+        if (resultPanel) {
+            resultPanel.classList.add('hidden');
+            resultPanel.style.display = 'none';
+        }
         this.removeHighlights();
         this.clearOrderHighlights(); // Also clear batch highlights and routes
     }
