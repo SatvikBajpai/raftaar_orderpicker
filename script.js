@@ -957,6 +957,10 @@ class OrderPickingTool {
 
     saveOrdersToStorage() {
         localStorage.setItem('orders', JSON.stringify(this.orders));
+        
+        // Also save pincode coordinates cache
+        const pincodeDataArray = Array.from(this.pincodeData.entries());
+        localStorage.setItem('pincodeData', JSON.stringify(pincodeDataArray));
     }
 
     loadStoredData() {
@@ -969,11 +973,25 @@ class OrderPickingTool {
                 slaDeadline: new Date(order.slaDeadline),
                 addedAt: new Date(order.addedAt)
             }));
+            
+            // Load pincode coordinates cache
+            const storedPincodeData = localStorage.getItem('pincodeData');
+            if (storedPincodeData) {
+                const pincodeDataArray = JSON.parse(storedPincodeData);
+                this.pincodeData = new Map(pincodeDataArray);
+                console.log('Loaded pincode data cache:', this.pincodeData.size, 'entries');
+            }
+            
             this.refreshOrdersDisplay();
             
-            // Initialize map after loading orders
-            if (window.google) {
+            // Initialize map after loading orders if Google Maps is ready
+            if (window.google && window.google.maps) {
+                console.log('Google Maps available, initializing map with stored data');
                 this.initializeMap();
+            } else {
+                console.log('Google Maps not yet available, will initialize map when ready');
+                // Set a flag so we know data is loaded
+                this.dataLoaded = true;
             }
         }
     }
@@ -1032,6 +1050,8 @@ class OrderPickingTool {
             console.log('Google Maps API not loaded yet');
             return;
         }
+
+        console.log('Initializing Google Maps with', this.orders.length, 'orders');
 
         this.map = new google.maps.Map(document.getElementById('map'), {
             zoom: 12,
@@ -1119,8 +1139,14 @@ class OrderPickingTool {
             storeInfoWindow.open(this.map, this.storeMarker);
         });
 
-        // Load existing orders on map
-        console.log('Loading existing orders on map:', this.orders.length);
+        // Process existing orders and add them to the map
+        this.processOrdersForMap();
+    }
+
+    processOrdersForMap() {
+        console.log('Processing orders for map display:', this.orders.length, 'orders');
+        console.log('Pincode data cache size:', this.pincodeData.size);
+        
         this.orders.forEach(order => {
             console.log(`Processing order ${order.orderId}:`, {
                 hasDistance: !!order.distance,
@@ -1128,12 +1154,16 @@ class OrderPickingTool {
                 hasCachedCoords: this.pincodeData.has(order.customerPincode)
             });
             
-            // If order doesn't have distance calculated, try to calculate it
-            if (!order.distance && order.customerPincode) {
-                this.autoFillCoordinates(order.orderId);
-            } else if (order.distance) {
-                // Order already has distance, add it to map directly
+            // If order has distance and coordinates are cached, add to map immediately
+            if (order.distance && this.pincodeData.has(order.customerPincode)) {
+                console.log(`Adding order ${order.orderId} to map immediately`);
                 this.addOrderToMap(order);
+            } else if (!order.distance && order.customerPincode) {
+                // If order doesn't have distance calculated, try to calculate it
+                console.log(`Calculating coordinates for order ${order.orderId} with pincode ${order.customerPincode}`);
+                this.autoFillCoordinates(order.customerPincode);
+            } else {
+                console.log(`Order ${order.orderId} has insufficient data for map display`);
             }
         });
     }
@@ -1957,9 +1987,6 @@ class OrderPickingTool {
             return;
         }
 
-        // Clear existing routes
-        this.clearExistingRoutes();
-
         if (orders.length === 0) {
             console.log('No orders to show route for');
             return;
@@ -1975,6 +2002,9 @@ class OrderPickingTool {
                 return;
             }
 
+            // Clear existing routes but preserve controls for single order view
+            this.clearExistingRoutesOnly();
+
             // Show outbound route (store to order) by default
             this.showOutboundRoute(order, coords);
             
@@ -1983,7 +2013,10 @@ class OrderPickingTool {
             return;
         }
 
-        // For multiple orders, create optimized route
+        // For multiple orders, clear everything including controls
+        this.clearExistingRoutes();
+        
+        // Create optimized route
         this.showMultipleOrdersRoute(orders);
     }
 
@@ -2054,13 +2087,24 @@ class OrderPickingTool {
     }
 
     addRouteToggleControls(order, coords) {
-        // Remove existing controls
+        // Check if controls already exist
         const existingControls = document.getElementById('routeToggleControls');
         if (existingControls) {
-            existingControls.remove();
+            // Update the header to show the new order
+            const header = existingControls.querySelector('h4');
+            if (header) {
+                header.textContent = `Route Display for Order ${order.orderId}`;
+            }
+            
+            // Update event listeners for the new order
+            this.updateRouteToggleEventListeners(order, coords);
+            
+            // Set outbound route as active by default
+            this.setActiveRouteButton('showOutboundRoute');
+            return;
         }
 
-        // Create toggle controls
+        // Create toggle controls if they don't exist
         const controlsDiv = document.createElement('div');
         controlsDiv.id = 'routeToggleControls';
         controlsDiv.innerHTML = `
@@ -2146,31 +2190,58 @@ class OrderPickingTool {
         mapContainer.appendChild(controlsDiv);
 
         // Add event listeners
-        document.getElementById('showOutboundRoute').addEventListener('click', () => {
-            this.clearExistingRoutes();
-            this.showOutboundRoute(order, coords);
-            this.setActiveRouteButton('showOutboundRoute');
+        this.updateRouteToggleEventListeners(order, coords);
+    }
+
+    updateRouteToggleEventListeners(order, coords) {
+        // Remove existing event listeners by cloning buttons
+        const buttons = ['showOutboundRoute', 'showReturnRoute', 'showBothRoutes', 'clearRoutes'];
+        buttons.forEach(buttonId => {
+            const oldButton = document.getElementById(buttonId);
+            if (oldButton) {
+                const newButton = oldButton.cloneNode(true);
+                oldButton.parentNode.replaceChild(newButton, oldButton);
+            }
         });
 
-        document.getElementById('showReturnRoute').addEventListener('click', () => {
-            this.clearExistingRoutes();
-            this.showReturnRoute(order, coords);
-            this.setActiveRouteButton('showReturnRoute');
-        });
+        // Add new event listeners
+        const outboundBtn = document.getElementById('showOutboundRoute');
+        const returnBtn = document.getElementById('showReturnRoute');
+        const bothBtn = document.getElementById('showBothRoutes');
+        const clearBtn = document.getElementById('clearRoutes');
 
-        document.getElementById('showBothRoutes').addEventListener('click', () => {
-            this.clearExistingRoutes();
-            this.showOutboundRoute(order, coords);
-            setTimeout(() => {
+        if (outboundBtn) {
+            outboundBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
+                this.showOutboundRoute(order, coords);
+                this.setActiveRouteButton('showOutboundRoute');
+            });
+        }
+
+        if (returnBtn) {
+            returnBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
                 this.showReturnRoute(order, coords);
-            }, 500); // Small delay to show both routes clearly
-            this.setActiveRouteButton('showBothRoutes');
-        });
+                this.setActiveRouteButton('showReturnRoute');
+            });
+        }
 
-        document.getElementById('clearRoutes').addEventListener('click', () => {
-            this.clearExistingRoutes();
-            controlsDiv.remove();
-        });
+        if (bothBtn) {
+            bothBtn.addEventListener('click', () => {
+                this.clearExistingRoutesOnly();
+                this.showOutboundRoute(order, coords);
+                setTimeout(() => {
+                    this.showReturnRoute(order, coords);
+                }, 500); // Small delay to show both routes clearly
+                this.setActiveRouteButton('showBothRoutes');
+            });
+        }
+
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                this.clearExistingRoutes();
+            });
+        }
     }
 
     setActiveRouteButton(activeButtonId) {
@@ -2459,6 +2530,64 @@ class OrderPickingTool {
         }
 
         // Remove route info
+        const routeInfo = document.getElementById('routeInfo');
+        if (routeInfo) {
+            routeInfo.remove();
+            console.log('Route info removed');
+        }
+        
+        // Ensure all order markers remain visible
+        this.orderMarkers.forEach((markerData, orderId) => {
+            if (markerData.marker) {
+                markerData.marker.setVisible(true);
+                markerData.marker.setMap(this.map);
+                console.log(`Ensured marker ${orderId} is visible`);
+            }
+        });
+    }
+
+    clearExistingRoutesOnly() {
+        console.log('Clearing existing routes only (preserving controls)...');
+        
+        // Clear old single renderer (if exists)
+        if (this.directionsRenderer) {
+            this.directionsRenderer.setMap(null);
+            this.directionsRenderer = null;
+            console.log('Old single directions renderer cleared');
+        }
+        
+        // Clear dual renderers
+        if (this.goingDirectionsRenderer) {
+            this.goingDirectionsRenderer.setDirections({routes: []});
+            console.log('Going directions renderer cleared');
+        }
+        
+        if (this.returnDirectionsRenderer) {
+            this.returnDirectionsRenderer.setDirections({routes: []});
+            console.log('Return directions renderer cleared');
+        }
+        
+        // Clear old single polyline
+        if (this.routePolyline) {
+            this.routePolyline.setMap(null);
+            this.routePolyline = null;
+            console.log('Old route polyline cleared');
+        }
+        
+        // Clear dual polylines
+        if (this.goingRoutePolyline) {
+            this.goingRoutePolyline.setMap(null);
+            this.goingRoutePolyline = null;
+            console.log('Going route polyline cleared');
+        }
+        
+        if (this.returnRoutePolyline) {
+            this.returnRoutePolyline.setMap(null);
+            this.returnRoutePolyline = null;
+            console.log('Return route polyline cleared');
+        }
+
+        // Remove route info but keep controls
         const routeInfo = document.getElementById('routeInfo');
         if (routeInfo) {
             routeInfo.remove();
@@ -2773,9 +2902,12 @@ class OrderPickingTool {
 
 // Global function for Google Maps API callback
 function initMap() {
+    console.log('Google Maps API loaded, initMap called');
     if (window.orderPickingTool) {
+        console.log('OrderPickingTool exists, initializing map');
         window.orderPickingTool.initializeMap();
     } else {
+        console.log('OrderPickingTool not ready, storing callback flag');
         // Store the callback for later execution
         window.mapInitCallback = true;
     }
@@ -2787,9 +2919,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.orderPickingTool = new OrderPickingTool();
     console.log('OrderPickingTool initialized:', window.orderPickingTool);
     
-    // Initialize map if Google Maps API is already loaded
-    if (window.google && window.mapInitCallback) {
+    // Check if Google Maps API is already loaded and initialize map if needed
+    if (window.google && window.google.maps) {
+        console.log('Google Maps already available, initializing map');
         window.orderPickingTool.initializeMap();
+    } else if (window.mapInitCallback) {
+        console.log('Google Maps callback flag set, initializing map');
+        window.orderPickingTool.initializeMap();
+    } else {
+        console.log('Google Maps not yet available, waiting for callback');
     }
     
     // Auto-refresh orders display every minute to update time remaining and map markers
