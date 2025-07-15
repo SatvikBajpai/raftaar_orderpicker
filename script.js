@@ -91,8 +91,41 @@ class OrderPickingTool {
         if (!pincode || pincode.length !== 6) return;
 
         try {
-            // Check cache first
+            // Check cache first and process existing coordinates if available
             if (this.pincodeData.has(pincode)) {
+                console.log(`Using cached coordinates for pincode ${pincode}`);
+                const coords = this.pincodeData.get(pincode);
+                
+                // Check if there are any orders with this pincode that don't have distance calculated
+                const ordersToUpdate = this.orders.filter(o => 
+                    o.customerPincode === pincode && !o.distance
+                );
+                
+                if (ordersToUpdate.length > 0) {
+                    console.log(`Found ${ordersToUpdate.length} orders with pincode ${pincode} that need distance calculation`);
+                    
+                    ordersToUpdate.forEach(order => {
+                        const distance = this.calculateDistance(
+                            this.storeLocation.lat, this.storeLocation.lng,
+                            coords.lat, coords.lng
+                        );
+                        
+                        // Update order with distance and priority
+                        order.distance = distance;
+                        order.priority = this.calculatePriority(
+                            order.orderTime, order.slaDeadline, distance
+                        );
+                        
+                        console.log(`Updated order ${order.orderId} with distance ${distance}km from cache`);
+                        
+                        // Create map marker for this order
+                        this.addOrderToMap(order);
+                    });
+                    
+                    // Save and refresh display after updating all orders
+                    this.saveOrdersToStorage();
+                    this.refreshOrdersDisplay();
+                }
                 return;
             }
 
@@ -117,9 +150,14 @@ class OrderPickingTool {
                         console.log(`Geocoded pincode ${pincode}:`, coords);
                         this.pincodeData.set(pincode, coords);
                         
-                        // Update the specific order if it exists
-                        const order = this.orders.find(o => o.customerPincode === pincode);
-                        if (order && !order.distance) {
+                        // Update ALL orders with this pincode that don't have distance
+                        const ordersToUpdate = this.orders.filter(o => 
+                            o.customerPincode === pincode && !o.distance
+                        );
+                        
+                        console.log(`Found ${ordersToUpdate.length} orders to update with new geocoded data`);
+                        
+                        ordersToUpdate.forEach(order => {
                             const distance = this.calculateDistance(
                                 this.storeLocation.lat, this.storeLocation.lng,
                                 coords.lat, coords.lng
@@ -131,14 +169,16 @@ class OrderPickingTool {
                                 order.orderTime, order.slaDeadline, distance
                             );
                             
-                            // Save and refresh display
-                            this.saveOrdersToStorage();
-                            this.refreshOrdersDisplay();
+                            console.log(`Updated order ${order.orderId} with distance ${distance}km from geocoding`);
                             
                             // Create map marker for this order
                             this.addOrderToMap(order);
-                            
-                            console.log(`Order ${order.orderId} updated with distance ${distance}km and added to map`);
+                        });
+                        
+                        if (ordersToUpdate.length > 0) {
+                            // Save and refresh display after updating all orders
+                            this.saveOrdersToStorage();
+                            this.refreshOrdersDisplay();
                         }
                     } else {
                         console.log('Geocoding failed for pincode:', pincode, 'Status:', status);
@@ -174,15 +214,30 @@ class OrderPickingTool {
         // Calculate SLA deadline
         const slaDeadline = this.calculateSLADeadline(formData.orderTime);
 
-        // Create order object (distance will be calculated after geocoding)
+        // Check if we have cached coordinates for this pincode
+        let distance = null;
+        let priority = 50; // Default priority
+        
+        if (this.pincodeData.has(formData.customerPincode)) {
+            console.log(`Using cached coordinates for new order with pincode ${formData.customerPincode}`);
+            const coords = this.pincodeData.get(formData.customerPincode);
+            distance = this.calculateDistance(
+                this.storeLocation.lat, this.storeLocation.lng,
+                coords.lat, coords.lng
+            );
+            priority = this.calculatePriority(formData.orderTime, slaDeadline, distance);
+            console.log(`New order ${formData.orderId} calculated distance from cache: ${distance}km`);
+        }
+
+        // Create order object
         const order = {
             ...formData,
             id: Date.now(), // Unique ID
-            distance: null, // Will be calculated after geocoding
+            distance: distance, // Will be distance if cached, null otherwise
             slaDeadline: slaDeadline,
             status: 'pending',
             addedAt: new Date(),
-            priority: 50 // Default priority, will be recalculated after distance is known
+            priority: priority // Will be calculated if distance available, default otherwise
         };
 
         // Add order immediately to show in list
@@ -191,12 +246,15 @@ class OrderPickingTool {
         this.refreshOrdersDisplay();
         this.clearOrderForm();
         
-        // Start geocoding in background
-        this.autoFillCoordinates(formData.customerPincode);
-        
-        this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
-        
-        this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
+        // If we already had cached coordinates, add to map immediately
+        if (distance) {
+            this.addOrderToMap(order);
+            this.showNotification(`Order ${order.orderId} added with distance ${distance}km!`, 'success');
+        } else {
+            // Start geocoding in background for new pincode
+            this.autoFillCoordinates(formData.customerPincode);
+            this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
+        }
     }
 
     calculateDistance(lat1, lng1, lat2, lng2) {
@@ -980,6 +1038,9 @@ class OrderPickingTool {
                 const pincodeDataArray = JSON.parse(storedPincodeData);
                 this.pincodeData = new Map(pincodeDataArray);
                 console.log('Loaded pincode data cache:', this.pincodeData.size, 'entries');
+                
+                // Recalculate distances for orders that might not have them
+                this.recalculateMissingDistances();
             }
             
             this.refreshOrdersDisplay();
@@ -993,6 +1054,34 @@ class OrderPickingTool {
                 // Set a flag so we know data is loaded
                 this.dataLoaded = true;
             }
+        }
+    }
+
+    // Recalculate distances for orders that don't have them but have cached coordinates
+    recalculateMissingDistances() {
+        let updated = false;
+        
+        this.orders.forEach(order => {
+            if (!order.distance && order.customerPincode && this.pincodeData.has(order.customerPincode)) {
+                const coords = this.pincodeData.get(order.customerPincode);
+                const distance = this.calculateDistance(
+                    this.storeLocation.lat, this.storeLocation.lng,
+                    coords.lat, coords.lng
+                );
+                
+                order.distance = distance;
+                order.priority = this.calculatePriority(
+                    order.orderTime, order.slaDeadline, distance
+                );
+                
+                console.log(`Recalculated distance for order ${order.orderId}: ${distance}km`);
+                updated = true;
+            }
+        });
+        
+        if (updated) {
+            console.log('Updated orders with missing distances from cache');
+            this.saveOrdersToStorage();
         }
     }
 
