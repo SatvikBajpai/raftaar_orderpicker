@@ -1021,20 +1021,36 @@ class OrderPickingTool {
             ]
         });
 
-        // Initialize Directions Service and Renderer for actual road routes
-        // Using the newer Routes API instead of legacy DirectionsService
+        // Initialize Directions Service and Renderers for actual road routes
+        // Using separate renderers for going (blue) and return (green) routes
         if (window.google && window.google.maps.DirectionsService) {
             this.directionsService = new google.maps.DirectionsService();
-            this.directionsRenderer = new google.maps.DirectionsRenderer({
+            
+            // Blue renderer for outbound journey (going to deliver orders)
+            this.goingDirectionsRenderer = new google.maps.DirectionsRenderer({
                 suppressMarkers: true, // We'll use our own custom markers
                 polylineOptions: {
-                    strokeColor: '#f59e0b',
-                    strokeOpacity: 0.8,
-                    strokeWeight: 6
+                    strokeColor: '#3b82f6', // Blue color
+                    strokeOpacity: 0.9,
+                    strokeWeight: 6,
+                    zIndex: 50
                 }
             });
-            this.directionsRenderer.setMap(this.map);
-            console.log('Google Directions API initialized');
+            
+            // Green renderer for return journey (coming back to store)
+            this.returnDirectionsRenderer = new google.maps.DirectionsRenderer({
+                suppressMarkers: true, // We'll use our own custom markers
+                polylineOptions: {
+                    strokeColor: '#10b981', // Green color
+                    strokeOpacity: 0.9,
+                    strokeWeight: 6,
+                    zIndex: 45
+                }
+            });
+            
+            this.goingDirectionsRenderer.setMap(this.map);
+            this.returnDirectionsRenderer.setMap(this.map);
+            console.log('Google Directions API initialized with dual-color renderers');
         } else {
             console.log('Google Directions API not available yet');
         }
@@ -1950,8 +1966,8 @@ class OrderPickingTool {
             console.log('Routes API response:', routeData);
             
             if (routeData && routeData.routes && routeData.routes.length > 0) {
-                // Display the route using the polyline
-                this.displayRouteFromRoutesAPI(routeData.routes[0]);
+                // Display the route using the polyline with dual colors
+                this.displayRouteFromRoutesAPI(routeData.routes[0], validOrders);
                 
                 // Update markers and results
                 this.updateMarkersWithOptimizedRoute(validOrders);
@@ -2021,28 +2037,46 @@ class OrderPickingTool {
     }
 
     // Display route from Routes API response
-    displayRouteFromRoutesAPI(route) {
+    displayRouteFromRoutesAPI(route, ordersSequence) {
         if (!route.polyline || !route.polyline.encodedPolyline) {
             console.error('No polyline data in route');
             return;
         }
 
-        console.log('Displaying route from Routes API...');
+        console.log('Displaying dual-color route from Routes API...');
 
         // Decode the polyline
         const decodedPath = google.maps.geometry.encoding.decodePath(route.polyline.encodedPolyline);
         
-        // Create and display the polyline
-        this.routePolyline = new google.maps.Polyline({
-            path: decodedPath,
+        // Calculate approximate split point (where we start returning to store)
+        // For simplicity, we'll split at roughly 2/3 of the route (after visiting most orders)
+        const splitIndex = Math.floor(decodedPath.length * 0.67);
+        
+        // Create outbound route (going to deliver orders) - Blue
+        const outboundPath = decodedPath.slice(0, splitIndex);
+        this.goingRoutePolyline = new google.maps.Polyline({
+            path: outboundPath,
             geodesic: true,
-            strokeColor: '#f59e0b',
+            strokeColor: '#3b82f6', // Blue for going
             strokeOpacity: 0.9,
             strokeWeight: 6,
-            zIndex: 50 // Lower than markers
+            zIndex: 50
         });
 
-        this.routePolyline.setMap(this.map);
+        // Create return route (coming back to store) - Green  
+        const returnPath = decodedPath.slice(splitIndex - 1); // Overlap by 1 point for continuity
+        this.returnRoutePolyline = new google.maps.Polyline({
+            path: returnPath,
+            geodesic: true,
+            strokeColor: '#10b981', // Green for return
+            strokeOpacity: 0.9,
+            strokeWeight: 6,
+            zIndex: 45
+        });
+
+        // Add both polylines to map
+        this.goingRoutePolyline.setMap(this.map);
+        this.returnRoutePolyline.setMap(this.map);
         
         // Ensure all order markers are visible and on top
         console.log('Ensuring all markers are visible...');
@@ -2064,7 +2098,7 @@ class OrderPickingTool {
         
         this.map.fitBounds(bounds, { padding: 50 });
 
-        console.log('Route polyline displayed on map with', decodedPath.length, 'points');
+        console.log('Dual-color route displayed on map: Blue (going) + Green (return) with', decodedPath.length, 'total points');
     }
 
     // Update results with Routes API data
@@ -2085,7 +2119,7 @@ class OrderPickingTool {
             if (routeInfo) {
                 routeInfo.innerHTML = `
                     🗺️ <strong>Google Routes API:</strong> ${totalDistanceKm.toFixed(1)}km • ${Math.round(totalDurationMin)} minutes driving time
-                    <br>📍 Start at Store → Follow optimized route → 🏠 Return to Store
+                    <br>📍 Start at Store → <span style="color: #3b82f6; font-weight: bold;">🔵 Outbound Route</span> → <span style="color: #10b981; font-weight: bold;">🟢 Return Route</span> → 🏠 Back to Store
                 `;
             }
         }
@@ -2096,7 +2130,7 @@ class OrderPickingTool {
         });
     }
 
-    // Fallback method using legacy Directions API
+    // Fallback method using legacy Directions API with dual colors
     showRouteWithLegacyAPI(batch, validOrders, waypoints) {
         console.log('Using legacy Directions API as fallback...');
         
@@ -2111,18 +2145,11 @@ class OrderPickingTool {
             this.directionsService = new google.maps.DirectionsService();
         }
 
-        this.directionsRenderer = new google.maps.DirectionsRenderer({
-            suppressMarkers: true,
-            preserveViewport: false,
-            polylineOptions: {
-                strokeColor: '#f59e0b',
-                strokeOpacity: 0.9,
-                strokeWeight: 6
-            }
-        });
-        this.directionsRenderer.setMap(this.map);
-
-        // Convert waypoints for legacy API
+        // We'll create two separate route requests:
+        // 1. Outbound route (store -> all orders) - Blue
+        // 2. Return route (last order -> store) - Green
+        
+        // For the outbound route, we'll go through all waypoints
         const legacyWaypoints = waypoints.map(wp => ({
             location: new google.maps.LatLng(
                 wp.location.latLng.latitude,
@@ -2131,27 +2158,59 @@ class OrderPickingTool {
             stopover: true
         }));
 
-        const directionsRequest = {
+        // Outbound route request (Blue)
+        const outboundRequest = {
             origin: new google.maps.LatLng(this.storeLocation.lat, this.storeLocation.lng),
-            destination: new google.maps.LatLng(this.storeLocation.lat, this.storeLocation.lng),
-            waypoints: legacyWaypoints,
+            destination: legacyWaypoints[legacyWaypoints.length - 1].location, // Last order
+            waypoints: legacyWaypoints.slice(0, -1), // All orders except the last
             optimizeWaypoints: true,
             travelMode: google.maps.TravelMode.DRIVING,
             unitSystem: google.maps.UnitSystem.METRIC
         };
 
-        console.log('Legacy Directions API request:', directionsRequest);
+        console.log('Legacy Directions API outbound request:', outboundRequest);
 
-        this.directionsService.route(directionsRequest, (result, status) => {
-            console.log('Legacy Directions API response status:', status);
+        // Get outbound route first
+        this.directionsService.route(outboundRequest, (outboundResult, outboundStatus) => {
+            console.log('Legacy Directions API outbound status:', outboundStatus);
             
-            if (status === 'OK' || status === google.maps.DirectionsStatus.OK) {
-                console.log('SUCCESS: Legacy directions received!');
-                this.directionsRenderer.setDirections(result);
-                this.updateMarkersWithOptimizedRoute(validOrders);
-                this.updateBatchResultsWithRouteData(result, validOrders);
+            if (outboundStatus === 'OK' || outboundStatus === google.maps.DirectionsStatus.OK) {
+                console.log('SUCCESS: Outbound directions received!');
+                
+                // Display outbound route in blue
+                this.goingDirectionsRenderer.setDirections(outboundResult);
+                
+                // Now get return route (Green)
+                const returnRequest = {
+                    origin: legacyWaypoints[legacyWaypoints.length - 1].location, // Last order
+                    destination: new google.maps.LatLng(this.storeLocation.lat, this.storeLocation.lng), // Back to store
+                    travelMode: google.maps.TravelMode.DRIVING,
+                    unitSystem: google.maps.UnitSystem.METRIC
+                };
+                
+                this.directionsService.route(returnRequest, (returnResult, returnStatus) => {
+                    console.log('Legacy Directions API return status:', returnStatus);
+                    
+                    if (returnStatus === 'OK' || returnStatus === google.maps.DirectionsStatus.OK) {
+                        console.log('SUCCESS: Return directions received!');
+                        
+                        // Display return route in green
+                        this.returnDirectionsRenderer.setDirections(returnResult);
+                        
+                        // Update markers and results
+                        this.updateMarkersWithOptimizedRoute(validOrders);
+                        this.updateBatchResultsWithRouteData(outboundResult, validOrders);
+                        
+                        console.log('Dual-color legacy route displayed successfully');
+                    } else {
+                        console.error('Return route failed, showing outbound only');
+                        this.updateMarkersWithOptimizedRoute(validOrders);
+                        this.updateBatchResultsWithRouteData(outboundResult, validOrders);
+                    }
+                });
+                
             } else {
-                console.error('Legacy Directions API also failed:', status);
+                console.error('Legacy Directions API outbound failed:', outboundStatus);
                 this.showStraightLineRoute(batch);
                 this.showNotification('Unable to calculate driving route. Showing straight-line path.', 'info');
             }
@@ -2162,16 +2221,42 @@ class OrderPickingTool {
     clearExistingRoutes() {
         console.log('Clearing existing routes...');
         
+        // Clear old single renderer (if exists)
         if (this.directionsRenderer) {
             this.directionsRenderer.setMap(null);
             this.directionsRenderer = null;
-            console.log('Directions renderer cleared');
+            console.log('Old single directions renderer cleared');
         }
         
+        // Clear dual renderers
+        if (this.goingDirectionsRenderer) {
+            this.goingDirectionsRenderer.setMap(null);
+            console.log('Going directions renderer cleared');
+        }
+        
+        if (this.returnDirectionsRenderer) {
+            this.returnDirectionsRenderer.setMap(null);
+            console.log('Return directions renderer cleared');
+        }
+        
+        // Clear old single polyline
         if (this.routePolyline) {
             this.routePolyline.setMap(null);
             this.routePolyline = null;
-            console.log('Route polyline cleared');
+            console.log('Old route polyline cleared');
+        }
+        
+        // Clear dual polylines
+        if (this.goingRoutePolyline) {
+            this.goingRoutePolyline.setMap(null);
+            this.goingRoutePolyline = null;
+            console.log('Going route polyline cleared');
+        }
+        
+        if (this.returnRoutePolyline) {
+            this.returnRoutePolyline.setMap(null);
+            this.returnRoutePolyline = null;
+            console.log('Return route polyline cleared');
         }
         
         // Ensure all order markers remain visible
@@ -2186,15 +2271,13 @@ class OrderPickingTool {
 
     // Fallback method for straight line routes if Directions API fails
     showStraightLineRoute(batch) {
-        console.log('Falling back to straight line route');
+        console.log('Falling back to dual-color straight line route');
         
-        // Clear existing route
-        if (this.routePolyline) {
-            this.routePolyline.setMap(null);
-        }
+        // Clear existing routes
+        this.clearExistingRoutes();
 
         // Create route path with proper coordinates
-        const routePath = [
+        const routePoints = [
             this.storeLocation, // Start at store
             ...batch.map(order => {
                 const coords = this.pincodeData.get(order.customerPincode);
@@ -2203,17 +2286,38 @@ class OrderPickingTool {
             this.storeLocation // Return to store
         ];
 
-        // Create polyline
-        this.routePolyline = new google.maps.Polyline({
-            path: routePath,
+        // Split the route into going and return segments
+        const midIndex = Math.ceil(routePoints.length / 2);
+        
+        // Going route (Blue) - Store to midpoint
+        const goingPath = routePoints.slice(0, midIndex);
+        this.goingRoutePolyline = new google.maps.Polyline({
+            path: goingPath,
             geodesic: true,
-            strokeColor: '#dc2626',
+            strokeColor: '#3b82f6', // Blue for going
             strokeOpacity: 0.8,
             strokeWeight: 4,
-            strokePattern: [10, 5] // Dashed line to indicate it's not actual roads
+            strokePattern: [10, 5], // Dashed line to indicate it's not actual roads
+            zIndex: 50
         });
 
-        this.routePolyline.setMap(this.map);
+        // Return route (Green) - Midpoint back to store
+        const returnPath = routePoints.slice(midIndex - 1); // Overlap by 1 point for continuity
+        this.returnRoutePolyline = new google.maps.Polyline({
+            path: returnPath,
+            geodesic: true,
+            strokeColor: '#10b981', // Green for return
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
+            strokePattern: [10, 5], // Dashed line to indicate it's not actual roads
+            zIndex: 45
+        });
+
+        // Add both polylines to map
+        this.goingRoutePolyline.setMap(this.map);
+        this.returnRoutePolyline.setMap(this.map);
+        
+        console.log('Dual-color straight line route displayed: Blue (going) + Green (return)');
         
         // Update markers with sequence
         this.updateMarkersWithOptimizedRoute(batch);
@@ -2310,7 +2414,7 @@ class OrderPickingTool {
             if (routeInfo) {
                 routeInfo.innerHTML = `
                     🗺️ <strong>Optimized Road Route:</strong> ${totalDistanceKm.toFixed(1)}km • ${Math.round(totalDurationMin)} minutes driving time
-                    <br>📍 Start at Store → Follow Google Maps route → 🏠 Return to Store
+                    <br>📍 Start at Store → <span style="color: #3b82f6; font-weight: bold;">🔵 Outbound Route</span> → <span style="color: #10b981; font-weight: bold;">🟢 Return Route</span> → 🏠 Back to Store
                 `;
             }
         }

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Route Color Test</title>
+    <style>
+        .color-demo {
+            padding: 20px;
+            margin: 10px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-weight: bold;
+        }
+        .going-route {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .return-route {
+            background-color: #10b981;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Picker Route Colors</h1>
+    <p>Your route will now display with these two distinct colors:</p>
+    
+    <div class="color-demo going-route">
+        🔵 OUTBOUND ROUTE (Blue #3b82f6) - Going to deliver orders
+    </div>
+    
+    <div class="color-demo return-route">
+        🟢 RETURN ROUTE (Green #10b981) - Coming back to store
+    </div>
+    
+    <p><strong>Changes implemented:</strong></p>
+    <ul>
+        <li>✅ Dual-color route rendering (Blue for going, Green for return)</li>
+        <li>✅ Routes API implementation with color splitting</li>
+        <li>✅ Legacy Directions API fallback with dual routes</li>
+        <li>✅ Straight-line fallback with dual colors</li>
+        <li>✅ Proper route clearing for both renderers</li>
+        <li>✅ Enhanced result display showing color coding</li>
+        <li>✅ All markers remain visible and properly positioned</li>
+    </ul>
+    
+    <p><em>Test your application by adding some orders and using the batch optimization feature!</em></p>
+</body>
+</html>
