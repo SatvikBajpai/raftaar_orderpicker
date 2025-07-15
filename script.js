@@ -1951,79 +1951,233 @@ class OrderPickingTool {
         });
     }
 
-    async showRouteOnMap(batch) {
-        console.log('=== SHOW ROUTE ON MAP DEBUG (Routes API) ===');
-        console.log('Batch:', batch);
-        console.log('Map exists:', !!this.map);
-        
-        if (!this.map || batch.length === 0) {
-            console.log('Cannot show route: no map or empty batch');
+    showRouteOnMap(orders) {
+        if (!this.map || !this.directionsService) {
+            console.log('Map or directions service not ready');
             return;
         }
 
         // Clear existing routes
         this.clearExistingRoutes();
 
-        // Build waypoints
-        const waypoints = [];
-        const validOrders = [];
-
-        console.log('Building waypoints...');
-        for (const order of batch) {
-            console.log(`Processing order ${order.orderId} with pincode ${order.customerPincode}`);
-            const coords = this.pincodeData.get(order.customerPincode);
-            console.log('Coordinates for this order:', coords);
-            
-            if (coords && coords.lat && coords.lng) {
-                waypoints.push({
-                    location: {
-                        latLng: {
-                            latitude: coords.lat,
-                            longitude: coords.lng
-                        }
-                    }
-                });
-                validOrders.push({ ...order, ...coords });
-                console.log(`Added waypoint ${waypoints.length}:`, coords);
-            } else {
-                console.log(`No valid coordinates for order ${order.orderId}`);
-            }
-        }
-
-        console.log('Total waypoints created:', waypoints.length);
-
-        if (waypoints.length === 0) {
-            console.log('No valid waypoints - using fallback');
-            this.showStraightLineRoute(batch);
+        if (orders.length === 0) {
+            console.log('No orders to show route for');
             return;
         }
 
-        try {
-            // Use the new Routes API via REST
-            const routeData = await this.calculateRouteWithRoutesAPI(waypoints);
-            console.log('Routes API response:', routeData);
+        // For single order, show route from store to order location
+        if (orders.length === 1) {
+            const order = orders[0];
+            const coords = this.pincodeData.get(order.customerPincode);
             
-            if (routeData && routeData.routes && routeData.routes.length > 0) {
-                // Display the route using the polyline with dual colors
-                this.displayRouteFromRoutesAPI(routeData.routes[0], validOrders);
-                
-                // Update markers and results
-                this.updateMarkersWithOptimizedRoute(validOrders);
-                this.updateBatchResultsWithRoutesAPIData(routeData.routes[0], validOrders);
-                
-                console.log('Route successfully displayed using Routes API');
-            } else {
-                console.log('No routes returned from Routes API, using fallback');
-                this.showStraightLineRoute(batch);
+            if (!coords) {
+                console.log('No coordinates available for order:', order.orderId);
+                return;
             }
+
+            // Show outbound route (store to order) by default
+            this.showOutboundRoute(order, coords);
             
-        } catch (error) {
-            console.error('Routes API error:', error);
-            
-            // Try fallback with legacy Directions API
-            console.log('Attempting fallback to legacy Directions API...');
-            this.showRouteWithLegacyAPI(batch, validOrders, waypoints);
+            // Add route toggle controls
+            this.addRouteToggleControls(order, coords);
+            return;
         }
+
+        // For multiple orders, create optimized route
+        this.showMultipleOrdersRoute(orders);
+    }
+
+    showOutboundRoute(order, coords) {
+        const request = {
+            origin: this.storeLocation,
+            destination: { lat: coords.lat, lng: coords.lng },
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+        };
+
+        console.log('Calculating outbound route for order:', order.orderId);
+        this.directionsService.route(request, (result, status) => {
+            if (status === 'OK') {
+                this.goingDirectionsRenderer.setDirections(result);
+                
+                // Get route details
+                const route = result.routes[0];
+                const leg = route.legs[0];
+                
+                console.log('Outbound route calculated successfully:');
+                console.log('- Distance:', leg.distance.text);
+                console.log('- Duration:', leg.duration.text);
+                
+                // Show route info popup
+                this.showRouteInfo(order, leg.distance.text, leg.duration.text, 'outbound');
+                
+            } else {
+                console.error('Outbound route calculation failed:', status);
+                this.showNotification(`Could not calculate route to ${order.orderId}: ${status}`, 'error');
+            }
+        });
+    }
+
+    showReturnRoute(order, coords) {
+        const request = {
+            origin: { lat: coords.lat, lng: coords.lng },
+            destination: this.storeLocation,
+            travelMode: google.maps.TravelMode.DRIVING,
+            unitSystem: google.maps.UnitSystem.METRIC,
+            avoidHighways: false,
+            avoidTolls: false
+        };
+
+        console.log('Calculating return route for order:', order.orderId);
+        this.directionsService.route(request, (result, status) => {
+            if (status === 'OK') {
+                this.returnDirectionsRenderer.setDirections(result);
+                
+                // Get route details
+                const route = result.routes[0];
+                const leg = route.legs[0];
+                
+                console.log('Return route calculated successfully:');
+                console.log('- Distance:', leg.distance.text);
+                console.log('- Duration:', leg.duration.text);
+                
+                // Show route info popup
+                this.showRouteInfo(order, leg.distance.text, leg.duration.text, 'return');
+                
+            } else {
+                console.error('Return route calculation failed:', status);
+                this.showNotification(`Could not calculate return route from ${order.orderId}: ${status}`, 'error');
+            }
+        });
+    }
+
+    addRouteToggleControls(order, coords) {
+        // Remove existing controls
+        const existingControls = document.getElementById('routeToggleControls');
+        if (existingControls) {
+            existingControls.remove();
+        }
+
+        // Create toggle controls
+        const controlsDiv = document.createElement('div');
+        controlsDiv.id = 'routeToggleControls';
+        controlsDiv.innerHTML = `
+            <div class="route-controls">
+                <h4>Route Display for Order ${order.orderId}</h4>
+                <div class="route-toggle-buttons">
+                    <button id="showOutboundRoute" class="route-btn active">
+                        🚚 Store → Order
+                    </button>
+                    <button id="showReturnRoute" class="route-btn">
+                        🏪 Order → Store
+                    </button>
+                    <button id="showBothRoutes" class="route-btn">
+                        🔄 Both Routes
+                    </button>
+                    <button id="clearRoutes" class="route-btn clear-btn">
+                        ❌ Clear Routes
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Add styles if not present
+        if (!document.querySelector('.route-controls-styles')) {
+            const style = document.createElement('style');
+            style.className = 'route-controls-styles';
+            style.innerHTML = `
+                .route-controls {
+                    position: absolute;
+                    top: 20px;
+                    left: 20px;
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                    min-width: 300px;
+                }
+                .route-controls h4 {
+                    margin: 0 0 10px 0;
+                    color: #1f2937;
+                    font-size: 14px;
+                }
+                .route-toggle-buttons {
+                    display: flex;
+                    gap: 8px;
+                    flex-wrap: wrap;
+                }
+                .route-btn {
+                    padding: 8px 12px;
+                    border: 2px solid #e5e7eb;
+                    background: white;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                }
+                .route-btn:hover {
+                    border-color: #3b82f6;
+                    background: #eff6ff;
+                }
+                .route-btn.active {
+                    background: #3b82f6;
+                    color: white;
+                    border-color: #3b82f6;
+                }
+                .route-btn.clear-btn {
+                    background: #ef4444;
+                    color: white;
+                    border-color: #ef4444;
+                }
+                .route-btn.clear-btn:hover {
+                    background: #dc2626;
+                    border-color: #dc2626;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add to map container
+        const mapContainer = document.getElementById('map');
+        mapContainer.appendChild(controlsDiv);
+
+        // Add event listeners
+        document.getElementById('showOutboundRoute').addEventListener('click', () => {
+            this.clearExistingRoutes();
+            this.showOutboundRoute(order, coords);
+            this.setActiveRouteButton('showOutboundRoute');
+        });
+
+        document.getElementById('showReturnRoute').addEventListener('click', () => {
+            this.clearExistingRoutes();
+            this.showReturnRoute(order, coords);
+            this.setActiveRouteButton('showReturnRoute');
+        });
+
+        document.getElementById('showBothRoutes').addEventListener('click', () => {
+            this.clearExistingRoutes();
+            this.showOutboundRoute(order, coords);
+            setTimeout(() => {
+                this.showReturnRoute(order, coords);
+            }, 500); // Small delay to show both routes clearly
+            this.setActiveRouteButton('showBothRoutes');
+        });
+
+        document.getElementById('clearRoutes').addEventListener('click', () => {
+            this.clearExistingRoutes();
+            controlsDiv.remove();
+        });
+    }
+
+    setActiveRouteButton(activeButtonId) {
+        document.querySelectorAll('.route-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(activeButtonId)?.classList.add('active');
     }
 
     // New method using Google Routes API (REST)
@@ -2268,12 +2422,12 @@ class OrderPickingTool {
         
         // Clear dual renderers
         if (this.goingDirectionsRenderer) {
-            this.goingDirectionsRenderer.setMap(null);
+            this.goingDirectionsRenderer.setDirections({routes: []});
             console.log('Going directions renderer cleared');
         }
         
         if (this.returnDirectionsRenderer) {
-            this.returnDirectionsRenderer.setMap(null);
+            this.returnDirectionsRenderer.setDirections({routes: []});
             console.log('Return directions renderer cleared');
         }
         
@@ -2296,6 +2450,20 @@ class OrderPickingTool {
             this.returnRoutePolyline = null;
             console.log('Return route polyline cleared');
         }
+
+        // Remove route controls
+        const routeControls = document.getElementById('routeToggleControls');
+        if (routeControls) {
+            routeControls.remove();
+            console.log('Route toggle controls removed');
+        }
+
+        // Remove route info
+        const routeInfo = document.getElementById('routeInfo');
+        if (routeInfo) {
+            routeInfo.remove();
+            console.log('Route info removed');
+        }
         
         // Ensure all order markers remain visible
         this.orderMarkers.forEach((markerData, orderId) => {
@@ -2305,6 +2473,77 @@ class OrderPickingTool {
                 console.log(`Ensured marker ${orderId} is visible`);
             }
         });
+    }
+
+    showRouteInfo(order, distance, duration, routeType) {
+        // Remove existing route info
+        const existingInfo = document.getElementById('routeInfo');
+        if (existingInfo) {
+            existingInfo.remove();
+        }
+
+        // Create route info display
+        const infoDiv = document.createElement('div');
+        infoDiv.id = 'routeInfo';
+        const routeDirection = routeType === 'outbound' ? 'Store → Order' : 'Order → Store';
+        const routeColor = routeType === 'outbound' ? '#3b82f6' : '#10b981';
+        
+        infoDiv.innerHTML = `
+            <div class="route-info">
+                <div class="route-info-header" style="color: ${routeColor};">
+                    ${routeType === 'outbound' ? '🚚' : '🏪'} ${routeDirection}
+                </div>
+                <div class="route-info-details">
+                    <div><strong>Order:</strong> ${order.orderId}</div>
+                    <div><strong>Distance:</strong> ${distance}</div>
+                    <div><strong>Duration:</strong> ${duration}</div>
+                    <div><strong>Pincode:</strong> ${order.customerPincode}</div>
+                </div>
+            </div>
+        `;
+
+        // Add styles if not present
+        if (!document.querySelector('.route-info-styles')) {
+            const style = document.createElement('style');
+            style.className = 'route-info-styles';
+            style.innerHTML = `
+                .route-info {
+                    position: absolute;
+                    top: 20px;
+                    right: 20px;
+                    background: white;
+                    padding: 15px;
+                    border-radius: 8px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                    z-index: 1000;
+                    min-width: 200px;
+                }
+                .route-info-header {
+                    font-weight: bold;
+                    margin-bottom: 10px;
+                    font-size: 14px;
+                }
+                .route-info-details {
+                    font-size: 12px;
+                    line-height: 1.4;
+                }
+                .route-info-details div {
+                    margin-bottom: 4px;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Add to map container
+        const mapContainer = document.getElementById('map');
+        mapContainer.appendChild(infoDiv);
+
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (infoDiv.parentNode) {
+                infoDiv.remove();
+            }
+        }, 10000);
     }
 
     // Fallback method for straight line routes if Directions API fails

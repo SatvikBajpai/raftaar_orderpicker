@@ -148,7 +148,14 @@
 
             <!-- Bottom Row: Full Width Map -->
             <div class="maps-panel-full">
-                <h2><i class="fas fa-map-marked-alt"></i> Orders Map - Live Tracking</h2>
+                <div class="map-header">
+                    <h2><i class="fas fa-map-marked-alt"></i> Orders Map - Live Tracking</h2>
+                    <div class="route-controls">
+                        <button id="toggleRouteDirection" class="btn btn-secondary">
+                            <i class="fas fa-exchange-alt"></i> <span id="routeDirectionText">Store → Order</span>
+                        </button>
+                    </div>
+                </div>
                 <div id="map" class="map-container-full"></div>
             </div>
         </div>
