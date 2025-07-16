@@ -29,25 +29,23 @@ Object.assign(OrderPickingTool.prototype, {
             console.log('Running batch optimization...');
             
             const maxOrdersElement = document.getElementById('max-orders-per-batch');
-            const maxDistanceElement = document.getElementById('max-distance-from-store');
             
             console.log('Max orders element:', maxOrdersElement);
-            console.log('Max distance element:', maxDistanceElement);
             
-            if (!maxOrdersElement || !maxDistanceElement) {
+            if (!maxOrdersElement) {
                 console.error('Batch settings elements not found!');
                 this.displayOptimizationResult('Batch settings not properly configured.');
                 return;
             }
             
             const maxOrders = parseInt(maxOrdersElement.value);
-            const maxDistance = parseInt(maxDistanceElement.value);
             
-            console.log('Batch settings - maxOrders:', maxOrders, 'maxDistance:', maxDistance);
+            console.log('Batch settings - maxOrders:', maxOrders);
             
             try {
-                const batches = this.optimizeBatch(maxOrders, maxDistance, strategy);
-                console.log('Generated batches:', batches);
+                // For zone-based batching, we don't need max distance parameter
+                const batches = this.optimizeBatch(maxOrders, null, strategy);
+                console.log('Generated zone batches:', batches);
                 this.displayBatchResults(batches);
             } catch (batchError) {
                 console.error('Error in batch optimization:', batchError);
@@ -128,10 +126,10 @@ Object.assign(OrderPickingTool.prototype, {
         });
     },
 
-    // Intelligent route-based batch optimization
-    optimizeBatch(maxOrdersPerBatch, maxDistanceFromStore, strategy = 'maximize_orders') {
-        console.log('=== BATCH OPTIMIZATION DEBUG ===');
-        console.log('optimizeBatch called with:', { maxOrdersPerBatch, maxDistanceFromStore, strategy });
+    // Zone-based batch optimization
+    optimizeBatch(maxOrdersPerBatch, maxDistanceFromStore = null, strategy = 'maximize_orders') {
+        console.log('=== ZONE-BASED BATCH OPTIMIZATION ===');
+        console.log('optimizeBatch called with:', { maxOrdersPerBatch, strategy });
         
         try {
             if (this.orders.length === 0) {
@@ -139,140 +137,158 @@ Object.assign(OrderPickingTool.prototype, {
                 return [];
             }
             
+            // Filter pending orders only (ignore distance constraint for zone-based batching)
             const availableOrders = this.orders.filter(order => 
                 order.status === 'pending' && 
-                order.distance && 
-                order.distance <= maxDistanceFromStore
+                order.zone // Must have a zone
             );
             
             console.log('📋 Total orders:', this.orders.length);
             console.log('📋 Pending orders:', this.orders.filter(o => o.status === 'pending').length);
-            console.log('📋 Available orders (with distance & within range):', availableOrders.length);
+            console.log('📋 Available orders (with zone):', availableOrders.length);
             
             if (availableOrders.length === 0) {
-                console.log('No orders available for batching within distance constraint');
+                console.log('No orders available for zone-based batching');
                 return [];
             }
 
-            // Create clusters based on geographical proximity and route efficiency
-            const clusters = this.createRouteClusters(availableOrders, maxOrdersPerBatch, strategy);
-            console.log('📋 Generated clusters:', clusters.length);
+            // Group orders by zone
+            const zoneGroups = this.groupOrdersByZone(availableOrders);
+            console.log('📋 Zone groups:', Object.keys(zoneGroups).map(zone => `Zone ${zone}: ${zoneGroups[zone].length} orders`));
             
-            // Score and rank each cluster
-            const scoredClusters = clusters.map(cluster => {
-                const score = this.calculateClusterScore(cluster, strategy);
-                return { cluster, score };
+            // Create batches from zone groups
+            const batches = this.createZoneBatches(zoneGroups, maxOrdersPerBatch, strategy);
+            console.log('📋 Generated zone batches:', batches.length);
+            
+            // Score and rank each batch
+            const scoredBatches = batches.map(batch => {
+                const score = this.calculateZoneBatchScore(batch, strategy);
+                return { cluster: batch, score };
             });
 
-            // Sort clusters by score (highest first)
-            scoredClusters.sort((a, b) => b.score - a.score);
+            // Sort batches by score (highest first)
+            scoredBatches.sort((a, b) => b.score - a.score);
             
-            console.log('📋 Scored clusters:', scoredClusters.map(sc => ({ 
-                orderCount: sc.cluster.length, 
-                score: sc.score.toFixed(2),
-                orderIds: sc.cluster.map(o => o.orderId)
+            console.log('📋 Scored zone batches:', scoredBatches.map(sb => ({ 
+                zone: sb.cluster[0]?.zone,
+                orderCount: sb.cluster.length, 
+                score: sb.score.toFixed(2),
+                orderIds: sb.cluster.map(o => o.orderId)
             })));
 
-            return scoredClusters.map(sc => sc.cluster);
+            return scoredBatches.map(sb => sb.cluster);
             
         } catch (error) {
-            console.error('Error in optimizeBatch:', error);
+            console.error('Error in zone-based batch optimization:', error);
             throw error;
         }
     },
 
-    // Create clusters based on geographical proximity and route efficiency
-    createRouteClusters(orders, maxBatchSize, strategy) {
-        const clusters = [];
-        const unassigned = [...orders];
+    // Group orders by their delivery zone
+    groupOrdersByZone(orders) {
+        const zoneGroups = {};
         
-        while (unassigned.length > 0) {
-            const cluster = [];
-            
-            // Start with the most urgent order as seed
-            let seedOrder;
-            if (strategy === 'maximize_sla') {
-                seedOrder = unassigned.reduce((most, current) => 
-                    current.priority > most.priority ? current : most
-                );
-            } else {
-                seedOrder = unassigned.reduce((closest, current) => 
-                    current.distance < closest.distance ? current : closest
-                );
+        orders.forEach(order => {
+            const zone = order.zone;
+            if (!zoneGroups[zone]) {
+                zoneGroups[zone] = [];
             }
+            zoneGroups[zone].push(order);
+        });
+        
+        return zoneGroups;
+    },
+
+    // Create batches from zone groups
+    createZoneBatches(zoneGroups, maxBatchSize, strategy) {
+        const batches = [];
+        
+        // Process each zone
+        Object.keys(zoneGroups).forEach(zone => {
+            const zoneOrders = zoneGroups[zone];
             
-            cluster.push(seedOrder);
-            unassigned.splice(unassigned.indexOf(seedOrder), 1);
+            // Sort orders within zone by priority/strategy
+            const sortedOrders = this.sortOrdersInZone(zoneOrders, strategy);
             
-            // Add more orders to this cluster based on proximity and efficiency
-            while (cluster.length < maxBatchSize && unassigned.length > 0) {
-                const bestAddition = this.findBestRouteAddition(cluster, unassigned, strategy);
-                if (bestAddition) {
-                    cluster.push(bestAddition);
-                    unassigned.splice(unassigned.indexOf(bestAddition), 1);
-                } else {
-                    break; // No good additions found
+            // Split zone into batches if there are too many orders
+            for (let i = 0; i < sortedOrders.length; i += maxBatchSize) {
+                const batch = sortedOrders.slice(i, i + maxBatchSize);
+                batches.push(batch);
+            }
+        });
+        
+        return batches;
+    },
+
+    // Sort orders within a zone based on strategy
+    sortOrdersInZone(orders, strategy) {
+        if (strategy === 'maximize_sla') {
+            // Sort by priority (highest first), then by SLA deadline (earliest first)
+            return orders.sort((a, b) => {
+                if (a.priority !== b.priority) {
+                    return b.priority - a.priority; // Higher priority first
                 }
-            }
-            
-            clusters.push(cluster);
+                return a.slaDeadline.getTime() - b.slaDeadline.getTime(); // Earlier deadline first
+            });
+        } else {
+            // For maximize_orders, sort by distance (closest first), then by priority
+            return orders.sort((a, b) => {
+                if (a.distance && b.distance) {
+                    if (Math.abs(a.distance - b.distance) > 1) { // If distance difference > 1km
+                        return a.distance - b.distance; // Closer first
+                    }
+                }
+                return b.priority - a.priority; // Higher priority first if distances are similar
+            });
         }
-        
-        return clusters;
     },
 
-    // Find the best order to add to current cluster based on route efficiency
-    findBestRouteAddition(currentCluster, availableOrders, strategy) {
-        let bestOrder = null;
-        let bestScore = -Infinity;
+    // Calculate score for a zone-based batch
+    calculateZoneBatchScore(batch, strategy) {
+        if (batch.length === 0) return 0;
         
-        for (const order of availableOrders) {
-            const score = this.calculateRouteAdditionScore(currentCluster, order, strategy);
-            if (score > bestScore) {
-                bestScore = score;
-                bestOrder = order;
-            }
-        }
-        
-        return bestOrder;
-    },
-
-    // Calculate how good it would be to add this order to the current route
-    calculateRouteAdditionScore(currentCluster, candidateOrder, strategy) {
-        const currentRoute = [...currentCluster];
-        const testRoute = [...currentCluster, candidateOrder];
-        
-        // Calculate current total distance
-        const currentDistance = this.calculateRouteDistance(currentRoute);
-        const newDistance = this.calculateRouteDistance(testRoute);
-        const additionalDistance = newDistance - currentDistance;
-        
+        const zone = batch[0].zone;
         let score = 0;
         
-        if (strategy === 'maximize_sla') {
-            // Prioritize SLA compliance
-            score += candidateOrder.priority;
-            score -= additionalDistance * 2; // Penalize long detours
-        } else {
-            // Prioritize distance efficiency
-            score -= additionalDistance * 5; // Heavy penalty for distance
-            score += candidateOrder.priority * 0.5; // Small bonus for priority
+        // Base score: number of orders in batch (more is better)
+        score += batch.length * 10;
+        
+        // Zone consistency bonus (all orders in same zone)
+        const allSameZone = batch.every(order => order.zone === zone);
+        if (allSameZone) {
+            score += 50; // Big bonus for zone consistency
         }
         
-        // Bonus for geographical proximity to existing orders
-        const avgProximity = currentCluster.reduce((sum, order) => {
-            const orderCoords = this.pincodeData.get(order.customerPincode);
-            const candidateCoords = this.pincodeData.get(candidateOrder.customerPincode);
-            if (orderCoords && candidateCoords) {
-                return sum + this.calculateDistance(
-                    orderCoords.lat, orderCoords.lng,
-                    candidateCoords.lat, candidateCoords.lng
-                );
+        if (strategy === 'maximize_sla') {
+            // SLA strategy: prioritize urgent orders and deadlines
+            const avgPriority = batch.reduce((sum, order) => sum + order.priority, 0) / batch.length;
+            score += avgPriority * 5;
+            
+            // Bonus for urgent orders that can meet SLA
+            const now = new Date();
+            const urgentOrders = batch.filter(order => {
+                const timeToDeadline = (order.slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+                return timeToDeadline <= 4; // Orders with less than 4 hours to deadline
+            });
+            score += urgentOrders.length * 15;
+            
+        } else {
+            // Maximize orders strategy: efficiency and distance
+            if (batch.length > 0 && batch[0].distance) {
+                const avgDistance = batch.reduce((sum, order) => sum + (order.distance || 0), 0) / batch.length;
+                // Bonus for closer zones (inverse relationship)
+                score += Math.max(0, (20 - avgDistance)) * 2;
             }
-            return sum + 10; // Default penalty if no coordinates
-        }, 0) / currentCluster.length;
+            
+            // Bonus for having more orders (efficiency)
+            if (batch.length >= 3) {
+                score += (batch.length - 2) * 8;
+            }
+        }
         
-        score += Math.max(0, 10 - avgProximity); // Bonus for nearby orders
+        // Priority bonus
+        const highPriorityCount = batch.filter(order => order.priority >= 8).length;
+        score += highPriorityCount * 5;
         
         return score;
     },
@@ -447,37 +463,27 @@ Object.assign(OrderPickingTool.prototype, {
         }
 
         const bestBatch = batches[0]; // First batch is highest scored
+        const batchZone = bestBatch[0]?.zone || 'Unknown';
         const batchDistance = this.calculateRouteDistance(bestBatch);
         const avgPriority = bestBatch.reduce((sum, order) => sum + order.priority, 0) / bestBatch.length;
         
-        // Calculate detailed route breakdown
-        const routeBreakdown = this.calculateDetailedRouteBreakdown(bestBatch);
-
         orderContainer.innerHTML = `
             <div class="batch-result">
-                <h3>🚛 Recommended Batch (${bestBatch.length} orders)</h3>
+                <h3>🚛 Recommended Zone Batch (${bestBatch.length} orders)</h3>
                 <div class="batch-summary">
+                    <div><strong>Zone:</strong> ${batchZone}</div>
                     <div><strong>Total Distance:</strong> ${batchDistance.toFixed(2)} km</div>
                     <div><strong>Average Priority:</strong> ${avgPriority.toFixed(1)}</div>
                     <div><strong>Estimated Time:</strong> ${this.formatDuration(this.calculateDeliveryTime(batchDistance))}</div>
                 </div>
                 
-                <div class="route-breakdown">
-                    <h4>📍 Route Breakdown:</h4>
-                    <div class="route-steps">
-                        ${routeBreakdown.map((step, index) => `
-                            <div class="route-step">
-                                <span class="step-number">${index + 1}</span>
-                                <span class="step-details">
-                                    <strong>${step.from}</strong> → <strong>${step.to}</strong>
-                                    <span class="step-distance">${step.distance.toFixed(2)} km</span>
-                                </span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="route-total">
-                        <strong>Total Route Distance: ${batchDistance.toFixed(2)} km</strong>
-                    </div>
+                <div class="zone-info">
+                    <h4>🎯 Zone ${batchZone} Optimization</h4>
+                    <p class="zone-description">
+                        <i class="fas fa-info-circle"></i>
+                        All orders in this batch are in the same delivery zone for maximum efficiency.
+                        The rider can complete all deliveries in a single zone trip.
+                    </p>
                 </div>
 
                 <div class="batch-orders">
@@ -492,7 +498,7 @@ Object.assign(OrderPickingTool.prototype, {
                 </div>
                 <div class="batch-actions">
                     <button class="btn btn-primary" onclick="orderPickingTool.selectBatch(${JSON.stringify(bestBatch.map(o => o.id))})">
-                        <i class="fas fa-check-double"></i> Select This Batch
+                        <i class="fas fa-check-double"></i> Assign Zone Batch
                     </button>
                     <button class="btn btn-secondary" onclick="orderPickingTool.showBatchRouteById(${JSON.stringify(bestBatch.map(o => o.id))})">
                         <i class="fas fa-route"></i> Show Route

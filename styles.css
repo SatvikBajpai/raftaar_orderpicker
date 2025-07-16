@@ -1618,7 +1618,112 @@ input:focus, select:focus {
     overflow-y: auto;
 }
 
-.modal-body {
-    max-height: calc(90vh - 200px);
-    overflow-y: auto;
+/* Zone-based batch styles */
+.zone-info {
+    background: #e6f7ff;
+    border: 1px solid #91d5ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.zone-info h4 {
+    color: #1890ff;
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+}
+
+.zone-description {
+    color: #434343;
+    margin: 0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zone-description i {
+    color: #1890ff;
+    flex-shrink: 0;
+}
+
+/* Update batch result header for zone batches */
+.batch-result h3 {
+    background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 15px;
+}
+
+/* Zone batch info styles */
+.zone-batch-info {
+    background: #f0f9ff;
+    border: 1px solid #0ea5e9;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 15px;
+}
+
+.zone-batch-info p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #0c4a6e;
+    line-height: 1.4;
+}
+
+.zone-batch-info i {
+    color: #0ea5e9;
+    margin-right: 6px;
+}
+
+/* Update batch toggle for zone batching */
+.batch-toggle .checkbox-option {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: white;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+}
+
+.batch-toggle .checkbox-option:hover {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.batch-toggle .checkbox-option:has(input[type="checkbox"]:checked) {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+}
+
+.checkbox-option input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+}
+
+.checkbox-label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.checkbox-label i {
+    font-size: 16px;
+    margin-bottom: 4px;
+    color: #0ea5e9;
+}
+
+.checkbox-label strong {
+    font-size: 14px;
+    color: #1e293b;
+}
+
+.checkbox-label small {
+    color: #64748b;
+    font-size: 12px;
 }

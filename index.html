@@ -83,16 +83,16 @@
                             <label class="checkbox-option">
                                 <input type="checkbox" id="enableBatching" name="enableBatching">
                                 <span class="checkbox-label">
-                                    <i class="fas fa-route"></i>
-                                    <strong>Enable Batch Optimization</strong>
-                                    <small>Optimize route for multiple orders</small>
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <strong>Enable Zone Batching</strong>
+                                    <small>Group orders by delivery zone</small>
                                 </span>
                             </label>
                         </div>
                         
                         <div class="batch-settings" id="batchSettings" style="display: none;">
                             <div class="form-group">
-                                <label for="max-orders-per-batch">Max Orders per Batch:</label>
+                                <label for="max-orders-per-batch">Max Orders per Zone Batch:</label>
                                 <select id="max-orders-per-batch">
                                     <option value="2">2 Orders</option>
                                     <option value="3" selected>3 Orders</option>
@@ -100,14 +100,8 @@
                                     <option value="5">5 Orders</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label for="max-distance-from-store">Max Distance from Store (km):</label>
-                                <select id="max-distance-from-store">
-                                    <option value="5">5 km</option>
-                                    <option value="10" selected>10 km</option>
-                                    <option value="15">15 km</option>
-                                    <option value="20">20 km</option>
-                                </select>
+                            <div class="zone-batch-info">
+                                <p><i class="fas fa-info-circle"></i> <strong>Zone Batching:</strong> Orders will be grouped by their delivery zone (A-E) for optimal rider efficiency. Distance constraint is not applied for zone-based batching.</p>
                             </div>
                         </div>
                     </div>

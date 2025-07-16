@@ -126,7 +126,7 @@ class OrderPickingTool {
                 
                 if (e.target.checked) {
                     batchSettings.style.display = 'block';
-                    optimizeButtonText.textContent = 'Optimize Batch';
+                    optimizeButtonText.textContent = 'Optimize Zone Batch';
                 } else {
                     batchSettings.style.display = 'none';
                     optimizeButtonText.textContent = 'Get Next Order';
