@@ -1620,40 +1620,43 @@ input:focus, select:focus {
 
 /* Zone-based batch styles */
 .zone-info {
-    background: #e6f7ff;
-    border: 1px solid #91d5ff;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     border-radius: 8px;
     padding: 15px;
     margin: 15px 0;
+    backdrop-filter: blur(10px);
 }
 
 .zone-info h4 {
-    color: #1890ff;
+    color: #1e40af;
     margin: 0 0 10px 0;
     font-size: 1rem;
+    font-weight: 600;
 }
 
 .zone-description {
-    color: #434343;
+    color: #374151;
     margin: 0;
     font-size: 0.9rem;
     display: flex;
     align-items: center;
     gap: 8px;
+    line-height: 1.4;
 }
 
 .zone-description i {
-    color: #1890ff;
+    color: #1e40af;
     flex-shrink: 0;
 }
 
 /* Update batch result header for zone batches */
 .batch-result h3 {
-    background: linear-gradient(135deg, #1890ff 0%, #722ed1 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
     margin-bottom: 15px;
+    font-size: 1.3rem;
+    font-weight: 700;
 }
 
 /* Zone batch info styles */
@@ -1726,4 +1729,31 @@ input:focus, select:focus {
 .checkbox-label small {
     color: #64748b;
     font-size: 12px;
+}
+
+/* Zone batch result specific styles */
+.batch-result .batch-summary {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.batch-result .batch-summary div {
+    color: #ffffff;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.batch-result .batch-summary div:last-child {
+    margin-bottom: 0;
+}
+
+.batch-result .batch-summary strong {
+    color: #f1f5f9;
+    font-weight: 600;
 }
