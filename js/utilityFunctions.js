@@ -109,7 +109,12 @@ Object.assign(OrderPickingTool.prototype, {
         const preparationTime = 0.25; // 15 minutes preparation time
         const deliveryTime = 0.17; // 10 minutes delivery time
         
-        return travelTime + preparationTime + deliveryTime;
+        const baseTime = travelTime + preparationTime + deliveryTime;
+        
+        // Add 15% buffer to the total delivery time
+        const bufferMultiplier = 1.15;
+        
+        return baseTime * bufferMultiplier;
     },
 
     formatTime(date) {

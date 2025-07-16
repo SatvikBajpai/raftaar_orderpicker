@@ -509,9 +509,21 @@ Object.assign(OrderPickingTool.prototype, {
     },
 
     selectBatch(orderIds) {
+        // Mark all orders in batch as selected
         orderIds.forEach(orderId => {
-            this.markOrderAsSelected(orderId);
+            const orderIndex = this.orders.findIndex(order => order.id === parseInt(orderId));
+            if (orderIndex !== -1) {
+                this.orders[orderIndex].status = 'selected';
+                this.orders[orderIndex].selectedAt = new Date();
+                this.updateOrderMarkerStyle(this.orders[orderIndex]);
+            }
         });
+        
+        // Show rider assignment modal for the entire batch
+        this.showBatchRiderAssignmentModal(orderIds);
+        
+        this.saveOrdersToStorage();
+        this.refreshAllDisplays();
         this.hideOptimizationResult();
     },
 

@@ -1451,6 +1451,8 @@ input:focus, select:focus {
 
 .modal-body {
     padding: 24px;
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
 }
 
 .order-info-display {
@@ -1519,18 +1521,104 @@ input:focus, select:focus {
     font-size: 0.9rem;
 }
 
-/* Responsive modal */
-@media (max-width: 768px) {
-    .modal-content {
-        width: 95%;
-        margin: 20px;
-    }
-    
-    .modal-actions {
-        flex-direction: column;
-    }
-    
-    .modal-actions .btn {
-        width: 100%;
-    }
+/* Batch Assignment Modal Styles */
+.batch-summary {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.batch-summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.batch-summary-item:last-child {
+    margin-bottom: 0;
+}
+
+.batch-orders-list {
+    margin: 20px 0;
+}
+
+.batch-orders-list h5 {
+    color: #4a5568;
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.batch-order-summary {
+    display: flex;
+    align-items: flex-start;
+    padding: 12px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.batch-order-summary:last-child {
+    margin-bottom: 0;
+}
+
+.order-sequence {
+    background: #4299e1;
+    color: white;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.order-summary-details {
+    flex: 1;
+}
+
+.order-summary-main {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 4px;
+}
+
+.order-summary-meta {
+    font-size: 12px;
+    color: #718096;
+}
+
+.batch-warning {
+    background: #e3f2fd;
+    border: 1px solid #2196f3;
+    border-radius: 6px;
+    padding: 12px;
+    margin: 15px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.batch-warning i {
+    color: #2196f3;
+}
+
+.batch-warning strong {
+    color: #1976d2;
+}
+
+/* Modal adjustments for batch content */
+.modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-body {
+    max-height: calc(90vh - 200px);
+    overflow-y: auto;
 }

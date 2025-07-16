@@ -162,6 +162,27 @@ Object.assign(OrderPickingTool.prototype, {
             const deliveryDuration = order.deliveryStartedAt ? 
                 this.formatDuration((new Date() - new Date(order.deliveryStartedAt)) / (1000 * 60 * 60)) : 'Unknown';
             
+            // Calculate expected return time display
+            let expectedReturnDisplay = '';
+            if (order.expectedReturnTime) {
+                const now = new Date();
+                const expectedReturn = new Date(order.expectedReturnTime);
+                const timeDiff = expectedReturn.getTime() - now.getTime();
+                
+                if (timeDiff > 0) {
+                    const hours = Math.floor(timeDiff / (1000 * 60 * 60));
+                    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+                    
+                    if (hours > 0) {
+                        expectedReturnDisplay = `Expected back in ${hours}h ${minutes}m`;
+                    } else {
+                        expectedReturnDisplay = `Expected back in ${minutes}m`;
+                    }
+                } else {
+                    expectedReturnDisplay = 'Overdue - should be back soon';
+                }
+            }
+            
             return `
                 <div class="order-card ${priorityLevel} ${statusClass}" data-order-id="${order.id}" onclick="orderPickingTool.showOrderOnMap('${order.id}')" title="Click to show order location and route on map" style="cursor: pointer;">
                     <div class="order-header">
@@ -180,6 +201,7 @@ Object.assign(OrderPickingTool.prototype, {
                         <div><strong>🚚 Delivery Duration:</strong> ${deliveryDuration}</div>
                         <div><strong>⭐ Priority:</strong> ${order.priority}</div>
                         ${order.assignedRider ? `<div><strong>🏍️ Assigned Rider:</strong> ${this.riders[order.assignedRider].name}</div>` : ''}
+                        ${expectedReturnDisplay ? `<div style="color: #059669;"><strong>⏱️ Status:</strong> ${expectedReturnDisplay}</div>` : ''}
                     </div>
                     <div class="order-meta">
                         <span class="distance">

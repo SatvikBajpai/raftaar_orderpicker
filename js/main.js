@@ -32,6 +32,17 @@ class OrderPickingTool {
         this.initializeApp();
         this.bindEvents();
         this.loadStoredData();
+        this.startRiderStatusUpdater();
+    }
+
+    startRiderStatusUpdater() {
+        // Update rider status every minute to keep timers current
+        setInterval(() => {
+            const modal = document.getElementById('riderAssignmentModal');
+            if (modal && modal.style.display !== 'none') {
+                this.updateRiderStatus();
+            }
+        }, 60000); // Update every minute
     }
 
     initializeApp() {
