@@ -44,6 +44,13 @@ class OrderPickingTool {
             this.refreshOrdersDisplay();
         });
 
+        // Tab navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                this.switchTab(e.target.getAttribute('data-tab'));
+            });
+        });
+
         // Add click handler for order cards to show route
         document.addEventListener('click', (e) => {
             const orderCard = e.target.closest('.order-card');
@@ -196,11 +203,12 @@ class OrderPickingTool {
         const formData = {
             orderId: document.getElementById('orderId').value,
             orderTime: new Date(document.getElementById('orderTime').value),
-            customerPincode: document.getElementById('customerPincode').value
+            customerPincode: document.getElementById('customerPincode').value,
+            zone: document.getElementById('orderZone').value
         };
 
         // Validation
-        if (!formData.orderId || !formData.customerPincode) {
+        if (!formData.orderId || !formData.customerPincode || !formData.zone) {
             alert('Please fill in all required fields');
             return;
         }

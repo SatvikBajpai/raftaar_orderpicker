@@ -38,6 +38,17 @@
                                 <label for="customerPincode">Customer Pincode:</label>
                                 <input type="text" id="customerPincode" required placeholder="440001">
                             </div>
+                            <div class="form-group">
+                                <label for="orderZone">Zone:</label>
+                                <select id="orderZone" required>
+                                    <option value="">Select Zone</option>
+                                    <option value="A">Zone A</option>
+                                    <option value="B">Zone B</option>
+                                    <option value="C">Zone C</option>
+                                    <option value="D">Zone D</option>
+                                    <option value="E">Zone E</option>
+                                </select>
+                            </div>
                         </div>
 
                         <button type="submit" class="btn btn-primary">
@@ -105,7 +116,7 @@
                 <!-- Orders Queue Panel -->
                 <div class="orders-panel">
                     <div class="panel-header">
-                        <h2><i class="fas fa-list"></i> Orders Queue</h2>
+                        <h2><i class="fas fa-list"></i> Orders Management</h2>
                         <div class="panel-controls">
                             <button id="refreshOrders" class="btn btn-secondary">
                                 <i class="fas fa-sync-alt"></i> Refresh
@@ -116,25 +127,55 @@
                         </div>
                     </div>
 
-                    <div class="orders-stats">
-                        <div class="stat-card high-priority">
-                            <div class="stat-number" id="highPriorityCount">0</div>
-                            <div class="stat-label">High Priority</div>
+                    <!-- Tab Navigation -->
+                    <div class="tabs-nav">
+                        <button class="tab-btn active" data-tab="queue">
+                            <i class="fas fa-list"></i> Queue
+                        </button>
+                        <button class="tab-btn" data-tab="delivery">
+                            <i class="fas fa-truck"></i> Out for Delivery
+                        </button>
+                    </div>
+
+                    <!-- Queue Tab Content -->
+                    <div class="tab-content active" id="queue-tab">
+                        <div class="orders-stats">
+                            <div class="stat-card high-priority">
+                                <div class="stat-number" id="highPriorityCount">0</div>
+                                <div class="stat-label">High Priority</div>
+                            </div>
+                            <div class="stat-card normal">
+                                <div class="stat-number" id="normalCount">0</div>
+                                <div class="stat-label">Normal Priority</div>
+                            </div>
+                            <div class="stat-card next-day">
+                                <div class="stat-number" id="nextDayCount">0</div>
+                                <div class="stat-label">Next Day</div>
+                            </div>
                         </div>
-                        <div class="stat-card normal">
-                            <div class="stat-number" id="normalCount">0</div>
-                            <div class="stat-label">Normal Priority</div>
-                        </div>
-                        <div class="stat-card next-day">
-                            <div class="stat-number" id="nextDayCount">0</div>
-                            <div class="stat-label">Next Day</div>
+
+                        <div class="orders-list" id="ordersList">
+                            <div class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>No orders in queue. Add an order to get started.</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="orders-list" id="ordersList">
-                        <div class="empty-state">
-                            <i class="fas fa-inbox"></i>
-                            <p>No orders in queue. Add an order to get started.</p>
+                    <!-- Delivery Tab Content -->
+                    <div class="tab-content" id="delivery-tab">
+                        <div class="orders-stats">
+                            <div class="stat-card delivery">
+                                <div class="stat-number" id="deliveryCount">0</div>
+                                <div class="stat-label">Out for Delivery</div>
+                            </div>
+                        </div>
+
+                        <div class="orders-list" id="deliveryList">
+                            <div class="empty-state">
+                                <i class="fas fa-truck"></i>
+                                <p>No orders out for delivery.</p>
+                            </div>
                         </div>
                     </div>
 
@@ -149,6 +190,28 @@
             <!-- Bottom Row: Full Width Map -->
             <div class="maps-panel-full">
                 <h2><i class="fas fa-map-marked-alt"></i> Orders Map - Live Tracking</h2>
+                
+                <!-- Route Toggle Controls -->
+                <div id="route-controls" class="route-controls" style="display: none;">
+                    <div class="route-controls-header">
+                        <h4><i class="fas fa-route"></i> Route Breakdown Controls</h4>
+                        <button class="btn-close-route" onclick="orderPickingTool.hideRouteControls()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="route-segments" id="route-segments">
+                        <!-- Route segments will be populated dynamically -->
+                    </div>
+                    <div class="route-controls-actions">
+                        <button class="btn btn-show-all" onclick="orderPickingTool.showAllRouteSegments()">
+                            <i class="fas fa-eye"></i> Show All
+                        </button>
+                        <button class="btn btn-hide-all" onclick="orderPickingTool.hideAllRouteSegments()">
+                            <i class="fas fa-eye-slash"></i> Hide All
+                        </button>
+                    </div>
+                </div>
+                
                 <div id="map" class="map-container-full"></div>
             </div>
         </div>
@@ -162,8 +225,54 @@
                 <li><strong>After 6:00 PM:</strong> Deliver next day by 12:00 PM</li>
             </ul>
         </div>
+
+        <!-- Rider Assignment Modal -->
+        <div id="riderAssignmentModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-user-cog"></i> Assign Rider</h3>
+                    <button class="modal-close" onclick="orderPickingTool.closeRiderModal()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="order-info-display" id="modalOrderInfo">
+                        <!-- Order details will be populated here -->
+                    </div>
+                    <div class="form-group">
+                        <label for="riderSelect">Select Rider:</label>
+                        <select id="riderSelect" required>
+                            <option value="">Choose a rider...</option>
+                            <option value="A">Rider A</option>
+                            <option value="B">Rider B</option>
+                            <option value="C">Rider C</option>
+                            <option value="D">Rider D</option>
+                            <option value="E">Rider E</option>
+                        </select>
+                    </div>
+                    <div class="rider-status" id="riderStatus">
+                        <!-- Rider availability status will be shown here -->
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn btn-secondary" onclick="orderPickingTool.closeRiderModal()">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="orderPickingTool.confirmRiderAssignment()">
+                        <i class="fas fa-check"></i> Assign & Start Delivery
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Load modules in order -->
+    <script src="js/main.js"></script>
+    <script src="js/utilityFunctions.js"></script>
+    <script src="js/orderManager.js"></script>
+    <script src="js/storageManager.js"></script>
+    <script src="js/uiManager.js"></script>
+    <script src="js/mapManager.js"></script>
+    <script src="js/optimizationEngine.js"></script>
 </body>
 </html>
