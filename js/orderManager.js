@@ -414,10 +414,20 @@ Object.assign(OrderPickingTool.prototype, {
     assignRiderToBatch(batchOrders, riderId) {
         const rider = this.riders[riderId];
         
-        // Calculate total delivery time for the batch
-        const totalDistance = batchOrders.reduce((sum, order) => sum + (order.distance || 0), 0);
-        const totalDeliveryTime = this.calculateDeliveryTime(totalDistance);
-        const expectedReturnTime = new Date(Date.now() + totalDeliveryTime * 60 * 60 * 1000);
+        // Calculate batch time estimation directly
+        const routeDistance = this.calculateRouteDistance(batchOrders);
+        const travelTime = (4.2 * routeDistance) / 60; // hours (4.2 min/km converted to hours)
+        const handoverTime = batchOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
+        const estimatedTimeMinutes = (travelTime + handoverTime) * 60; // convert to minutes
+        const expectedReturnTime = new Date(Date.now() + estimatedTimeMinutes * 60 * 1000); // Convert minutes to milliseconds
+        
+        // Console log breakdown for debugging
+        console.log('🚚 Batch Assignment Time Breakdown:');
+        console.log(`  Total Route Distance: ${routeDistance.toFixed(2)} km (complete round trip route)`);
+        console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${routeDistance.toFixed(2)} km × 4.2 min/km)`);
+        console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${batchOrders.length} stops × 10 min/stop)`);
+        console.log(`  Total Estimated Time: ${estimatedTimeMinutes.toFixed(1)} minutes`);
+        console.log(`  Expected Return Time: ${expectedReturnTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`);
         
         // Update all orders in the batch
         batchOrders.forEach(order => {
@@ -599,10 +609,20 @@ Object.assign(OrderPickingTool.prototype, {
         // Store the batch for assignment
         this.pendingBatchAssignment = batchOrders;
 
-        // Calculate batch totals
-        const totalDistance = batchOrders.reduce((sum, order) => sum + (order.distance || 0), 0);
-        const totalDeliveryTime = this.calculateDeliveryTime(totalDistance);
+        // Calculate batch metrics directly
+        const routeDistance = this.calculateRouteDistance(batchOrders);
+        const travelTime = (4.2 * routeDistance) / 60; // hours (4.2 min/km converted to hours)
+        const handoverTime = batchOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
+        const estimatedTimeMinutes = (travelTime + handoverTime) * 60; // convert to minutes
         const averagePriority = batchOrders.reduce((sum, order) => sum + order.priority, 0) / batchOrders.length;
+        
+        // Console log breakdown for debugging
+        console.log('🚚 Batch Modal Display Time Breakdown:');
+        console.log(`  Total Route Distance: ${routeDistance.toFixed(2)} km (complete round trip route)`);
+        console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${routeDistance.toFixed(2)} km × 4.2 min/km)`);
+        console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${batchOrders.length} stops × 10 min/stop)`);
+        console.log(`  Total Estimated Time: ${estimatedTimeMinutes.toFixed(1)} minutes`);
+        console.log(`  Average Priority: ${averagePriority.toFixed(1)}`);
 
         // Populate modal with batch information
         const modalOrderInfo = document.getElementById('modalOrderInfo');
@@ -612,11 +632,11 @@ Object.assign(OrderPickingTool.prototype, {
                 <div class="batch-summary">
                     <div class="batch-summary-item">
                         <span class="order-info-label">Total Distance:</span>
-                        <span class="order-info-value">${totalDistance.toFixed(2)} km</span>
+                        <span class="order-info-value">${routeDistance.toFixed(2)} km</span>
                     </div>
                     <div class="batch-summary-item">
                         <span class="order-info-label">Estimated Time:</span>
-                        <span class="order-info-value">${this.formatDuration(totalDeliveryTime)}</span>
+                        <span class="order-info-value">${this.formatDuration(estimatedTimeMinutes / 60)}</span>
                     </div>
                     <div class="batch-summary-item">
                         <span class="order-info-label">Average Priority:</span>

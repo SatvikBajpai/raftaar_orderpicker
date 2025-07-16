@@ -467,6 +467,19 @@ Object.assign(OrderPickingTool.prototype, {
         const batchDistance = this.calculateRouteDistance(bestBatch);
         const avgPriority = bestBatch.reduce((sum, order) => sum + order.priority, 0) / bestBatch.length;
         
+        // Calculate batch time estimation
+        const travelTime = (4.2 * batchDistance) / 60; // hours (4.2 min/km converted to hours)
+        const handoverTime = bestBatch.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
+        const estimatedTimeMinutes = (travelTime + handoverTime) * 60; // convert to minutes
+        
+        // Console log breakdown for debugging
+        console.log('🚚 Batch Time Breakdown (optimizationEngine):');
+        console.log(`  Total Route Distance: ${batchDistance.toFixed(2)} km (complete round trip route)`);
+        console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${batchDistance.toFixed(2)} km × 4.2 min/km)`);
+        console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${bestBatch.length} stops × 10 min/stop)`);
+        console.log(`  Total Estimated Time: ${estimatedTimeMinutes.toFixed(1)} minutes`);
+        console.log(`  Breakdown: ${(travelTime * 60).toFixed(1)}min travel + ${(handoverTime * 60).toFixed(1)}min handover = ${estimatedTimeMinutes.toFixed(1)}min total`);
+        
         orderContainer.innerHTML = `
             <div class="batch-result">
                 <h3>🚛 Recommended Zone Batch (${bestBatch.length} orders)</h3>
@@ -474,7 +487,7 @@ Object.assign(OrderPickingTool.prototype, {
                     <div><strong>Zone:</strong> ${batchZone}</div>
                     <div><strong>Total Distance:</strong> ${batchDistance.toFixed(2)} km</div>
                     <div><strong>Average Priority:</strong> ${avgPriority.toFixed(1)}</div>
-                    <div><strong>Estimated Time:</strong> ${this.formatDuration(this.calculateDeliveryTime(batchDistance))}</div>
+                    <div><strong>Estimated Time:</strong> ${this.formatDuration(estimatedTimeMinutes / 60)}</div>
                 </div>
                 
                 <div class="zone-info">

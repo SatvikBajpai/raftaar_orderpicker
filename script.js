@@ -11,7 +11,7 @@ class OrderPickingTool {
         this.storeMarker = null;
         this.orderMarkers = new Map(); // Track order markers
         this.optimizationMode = 'maximize_sla'; // Default mode
-        this.averageSpeed = 25; // km/h average delivery speed
+        this.averageSpeed = 25; // km/h (kept for reference, actual travel time now uses 4.2 min/km)
         this.routePolyline = null; // For storing the route polyline on the map
         this.directionsService = null; // Google Routes Service (newer API)
         this.directionsRenderer = null; // Google Directions Renderer
@@ -618,6 +618,20 @@ class OrderPickingTool {
             try {
                 const batches = this.optimizeBatch(maxOrders, maxDistance, strategy);
                 console.log('Generated batches:', batches);
+                
+                // Log detailed summary of all batches
+                console.log('📊 BATCH OPTIMIZATION SUMMARY:');
+                batches.forEach((batch, batchIndex) => {
+                    const metrics = this.calculateBatchMetrics(batch.orders);
+                    console.log(`\n🔷 Batch ${batchIndex + 1}:`);
+                    console.log(`  Orders: ${batch.orders.length}`);
+                    console.log(`  Total Distance: ${metrics.totalDistance} km`);
+                    console.log(`  Estimated Time: ${metrics.estimatedTime} minutes (${(metrics.estimatedTime / 60).toFixed(1)} hours)`);
+                    console.log(`  SLA Risk: ${metrics.slaRisk}%`);
+                    console.log(`  Route Efficiency: ${metrics.routeEfficiency}%`);
+                    console.log(`  Order IDs: ${batch.orders.map(o => o.id).join(', ')}`);
+                });
+                
                 this.displayBatchResults(batches);
             } catch (batchError) {
                 console.error('Error in batch optimization:', batchError);
@@ -694,12 +708,14 @@ class OrderPickingTool {
     }
 
     calculateDeliveryTime(distance) {
-        // Base delivery time calculation
-        const travelTime = distance / this.averageSpeed; // Travel time in hours
+        // Base delivery time calculation for individual orders - 4.2 minutes per km
+        // For single order delivery, include round trip (store → order → store)
+        const roundTripDistance = distance * 2;
+        const travelTime = (4.2 * roundTripDistance) / 60; // Travel time in hours (4.2 min/km converted to hours)
         const preparationTime = 0.25; // 15 minutes preparation time
-        const deliveryTime = 0.17; // 10 minutes delivery time
+        const handoverTime = 10 / 60; // 10 minutes handover time (converted to hours) - includes delivery
         
-        return travelTime + preparationTime + deliveryTime;
+        return travelTime + preparationTime + handoverTime;
     }
 
     displayOptimizationResult(orderOrMessage, reason) {
@@ -1859,34 +1875,74 @@ class OrderPickingTool {
             const directDistanceSum = validOrders.reduce((sum, order) => sum + (order.distance || 0) * 2, 0); // Round trip to each
             const routeEfficiency = directDistanceSum > 0 ? Math.min(100, (directDistanceSum / totalDistance) * 100) : 0;
             
-            // Estimate time including preparation and delivery time at each stop
-            const travelTime = totalDistance / 25; // hours at 25 km/h
-            const stopTime = validOrders.length * 0.25; // 15 minutes per stop
-            const estimatedTime = (travelTime + stopTime) * 60; // convert to minutes
+            // Estimate time including travel and handover time at each stop
+            const travelTime = (4.2 * totalDistance) / 60; // hours (4.2 min/km converted to hours)
+            const handoverTime = validOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
+            const estimatedTime = (travelTime + handoverTime) * 60; // convert to minutes
+            
+            // Console log breakdown for debugging
+            console.log('🚚 Batch Time Breakdown (Complete Round Trip Route):');
+            console.log(`  Total Route Distance: ${totalDistance.toFixed(2)} km (store → orders → store)`);
+            console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${totalDistance.toFixed(2)} km × 4.2 min/km)`);
+            console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${validOrders.length} stops × 10 min/stop)`);
+            console.log(`  Total Estimated Time: ${estimatedTime.toFixed(1)} minutes`);
+            console.log(`  Breakdown: ${(travelTime * 60).toFixed(1)}min travel + ${(handoverTime * 60).toFixed(1)}min handover = ${estimatedTime.toFixed(1)}min total`);
+            
+            // Show route breakdown for clarity
+            const storeToFirst = validOrders[0].distance;
+            let orderToOrderDistance = 0;
+            for (let i = 0; i < validOrders.length - 1; i++) {
+                orderToOrderDistance += this.calculateDistance(
+                    validOrders[i].lat, validOrders[i].lng,
+                    validOrders[i + 1].lat, validOrders[i + 1].lng
+                );
+            }
+            const lastToStore = this.calculateDistance(
+                validOrders[validOrders.length - 1].lat, validOrders[validOrders.length - 1].lng,
+                this.storeLocation.lat, this.storeLocation.lng
+            );
+            console.log(`  Route Distance Breakdown:`);
+            console.log(`    Store → First Order: ${storeToFirst.toFixed(2)} km`);
+            console.log(`    Between Orders: ${orderToOrderDistance.toFixed(2)} km`);
+            console.log(`    Last Order → Store: ${lastToStore.toFixed(2)} km`);
+            console.log(`    Total: ${(storeToFirst + orderToOrderDistance + lastToStore).toFixed(2)} km`);
             
             // Calculate SLA risk with more sophisticated logic
             const now = new Date();
             let cumulativeTime = 0;
             let ordersAtRisk = 0;
             
+            console.log('⚠️ SLA Risk Analysis (Individual Order Arrival Times):');
+            
             for (let i = 0; i < validOrders.length; i++) {
                 // Estimate when we'll reach this order
                 if (i === 0) {
-                    cumulativeTime = (validOrders[i].distance / 25) * 60; // Minutes to first order
+                    cumulativeTime = 4.2 * validOrders[i].distance; // Minutes to first order (4.2 min/km)
+                    console.log(`  Order ${i + 1}: ${cumulativeTime.toFixed(1)} min travel from store`);
                 } else {
                     const distanceToNext = this.calculateDistance(
                         validOrders[i-1].lat, validOrders[i-1].lng,
                         validOrders[i].lat, validOrders[i].lng
                     );
-                    cumulativeTime += (distanceToNext / 25) * 60; // Travel time
+                    const travelSegment = 4.2 * distanceToNext;
+                    cumulativeTime += travelSegment; // Travel time (4.2 min/km)
+                    console.log(`  Order ${i + 1}: +${travelSegment.toFixed(1)} min travel from previous order`);
                 }
-                cumulativeTime += 15; // 15 minutes delivery time
+                cumulativeTime += 10; // 10 minutes handover time
+                console.log(`  Order ${i + 1}: +10 min handover, total: ${cumulativeTime.toFixed(1)} min`);
                 
                 const estimatedArrival = new Date(now.getTime() + cumulativeTime * 60 * 1000);
                 const slaDeadline = validOrders[i].slaDeadline || this.calculateSLADeadline(validOrders[i].orderTime);
                 
+                const arrivalTime = estimatedArrival.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                const deadlineTime = slaDeadline.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                
                 if (estimatedArrival > slaDeadline) {
                     ordersAtRisk++;
+                    console.log(`  ❌ Order ${i + 1} AT RISK: arrives ${arrivalTime}, deadline ${deadlineTime}`);
+                } else {
+                    const bufferMinutes = (slaDeadline.getTime() - estimatedArrival.getTime()) / (1000 * 60);
+                    console.log(`  ✅ Order ${i + 1} ON TIME: arrives ${arrivalTime}, deadline ${deadlineTime} (+${bufferMinutes.toFixed(0)}min buffer)`);
                 }
             }
             
@@ -2114,20 +2170,32 @@ class OrderPickingTool {
         const now = new Date();
         let cumulativeTime = 0; // in minutes
         
+        console.log(`📍 Individual Order Arrival Time Breakdown for Order ${orderIndex + 1} (One-way to order):`);
+        
         for (let i = 0; i <= orderIndex; i++) {
+            let segmentTime = 0;
+            
             if (i === 0) {
-                // Time to reach first order from store
-                cumulativeTime += (batch[i].distance / 25) * 60;
+                // Time to reach first order from store (4.2 min/km)
+                segmentTime = 4.2 * batch[i].distance;
+                cumulativeTime += segmentTime;
+                console.log(`  Store → Order ${i + 1}: ${segmentTime.toFixed(1)} min (${batch[i].distance.toFixed(2)} km × 4.2 min/km)`);
             } else {
-                // Travel time between orders
+                // Travel time between orders (4.2 min/km)
                 const distanceToNext = this.calculateDistance(
                     batch[i-1].lat, batch[i-1].lng,
                     batch[i].lat, batch[i].lng
                 );
-                cumulativeTime += (distanceToNext / 25) * 60;
+                segmentTime = 4.2 * distanceToNext;
+                cumulativeTime += segmentTime;
+                console.log(`  Order ${i} → Order ${i + 1}: ${segmentTime.toFixed(1)} min (${distanceToNext.toFixed(2)} km × 4.2 min/km)`);
             }
-            cumulativeTime += 15; // 15 minutes delivery time at each stop
+            cumulativeTime += 10; // 10 minutes handover time at each stop
+            console.log(`  Handover time at Order ${i + 1}: 10.0 min`);
+            console.log(`  Cumulative time to Order ${i + 1}: ${cumulativeTime.toFixed(1)} min`);
         }
+        
+        console.log(`  🕐 Total time to reach Order ${orderIndex + 1}: ${cumulativeTime.toFixed(1)} minutes`);
         
         return new Date(now.getTime() + cumulativeTime * 60 * 1000);
     }

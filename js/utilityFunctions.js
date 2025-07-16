@@ -103,18 +103,33 @@ Object.assign(OrderPickingTool.prototype, {
         }
     },
 
-    calculateDeliveryTime(distance) {
-        // Base delivery time calculation
-        const travelTime = distance / this.averageSpeed; // Travel time in hours
+    calculateDeliveryTime(distance, showLogging = true) {
+        // Base delivery time calculation - 4.2 minutes per km
+        // For single order delivery, include round trip (store → order → store)
+        const roundTripDistance = distance * 2;
+        const travelTime = (4.2 * roundTripDistance) / 60; // Travel time in hours (4.2 min/km converted to hours)
         const preparationTime = 0.25; // 15 minutes preparation time
-        const deliveryTime = 0.17; // 10 minutes delivery time
+        const handoverTime = 10 / 60; // 10 minutes handover time (converted to hours) - this includes delivery
         
-        const baseTime = travelTime + preparationTime + deliveryTime;
+        const baseTime = travelTime + preparationTime + handoverTime;
         
         // Add 15% buffer to the total delivery time
         const bufferMultiplier = 1.15;
+        const finalTime = baseTime * bufferMultiplier;
         
-        return baseTime * bufferMultiplier;
+        // Console log breakdown for debugging (only for individual orders)
+        if (showLogging) {
+            console.log('⏱️ Individual Order Delivery Time Breakdown (Round Trip):');
+            console.log(`  One-way Distance: ${distance.toFixed(2)} km`);
+            console.log(`  Round Trip Distance: ${roundTripDistance.toFixed(2)} km`);
+            console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${roundTripDistance.toFixed(2)} km × 4.2 min/km)`);
+            console.log(`  Preparation Time: ${(preparationTime * 60).toFixed(1)} minutes`);
+            console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (includes delivery)`);
+            console.log(`  Base Total: ${(baseTime * 60).toFixed(1)} minutes`);
+            console.log(`  With 15% Buffer: ${(finalTime * 60).toFixed(1)} minutes`);
+        }
+        
+        return finalTime;
     },
 
     formatTime(date) {

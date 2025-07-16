@@ -11,7 +11,7 @@ class OrderPickingTool {
         this.storeMarker = null;
         this.orderMarkers = new Map(); // Track order markers
         this.optimizationMode = 'maximize_sla'; // Default mode
-        this.averageSpeed = 25; // km/h average delivery speed
+        this.averageSpeed = 25; // km/h (kept for reference, actual travel time now uses 4.2 min/km)
         this.routePolyline = null; // For storing the route polyline on the map
         this.directionsService = null; // Google Routes Service (newer API)
         this.directionsRenderer = null; // Google Directions Renderer
