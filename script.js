@@ -1509,6 +1509,7 @@ class OrderPickingTool {
         if (orders.length === 0) return [];
         const clusters = [];
         const unassigned = [...orders];
+        const MAX_INTERORDER_DISTANCE = 4; // km cap between consecutive batched orders
         while (unassigned.length > 0) {
             const cluster = [];
             // Start with the best seed order based on strategy
@@ -1528,10 +1529,20 @@ class OrderPickingTool {
             }
             cluster.push(seedOrder);
             unassigned.splice(unassigned.indexOf(seedOrder), 1);
-            // Build cluster by finding nearby orders that create efficient routes
+            // Build cluster by finding nearby orders that create efficient routes and are within cap
             while (cluster.length < maxBatchSize && unassigned.length > 0) {
                 // For all orders after the seed, always use 'maximize_orders' (route only)
-                const nextOrder = this.findBestRouteAddition(cluster, unassigned, 'maximize_orders');
+                // Only consider orders within MAX_INTERORDER_DISTANCE km from last order in cluster
+                const lastOrder = cluster[cluster.length - 1];
+                // Filter unassigned orders to those within cap from last order
+                const candidates = unassigned.filter(order => {
+                    const dist = this.calculateDistance(lastOrder.lat, lastOrder.lng, order.lat, order.lng);
+                    return dist <= MAX_INTERORDER_DISTANCE;
+                });
+                if (candidates.length === 0) {
+                    break; // No more suitable orders within cap
+                }
+                const nextOrder = this.findBestRouteAddition(cluster, candidates, 'maximize_orders');
                 if (nextOrder) {
                     cluster.push(nextOrder);
                     unassigned.splice(unassigned.indexOf(nextOrder), 1);
