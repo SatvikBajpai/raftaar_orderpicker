@@ -1530,7 +1530,8 @@ class OrderPickingTool {
             unassigned.splice(unassigned.indexOf(seedOrder), 1);
             // Build cluster by finding nearby orders that create efficient routes
             while (cluster.length < maxBatchSize && unassigned.length > 0) {
-                const nextOrder = this.findBestRouteAddition(cluster, unassigned, strategy);
+                // For all orders after the seed, always use 'maximize_orders' (route only)
+                const nextOrder = this.findBestRouteAddition(cluster, unassigned, 'maximize_orders');
                 if (nextOrder) {
                     cluster.push(nextOrder);
                     unassigned.splice(unassigned.indexOf(nextOrder), 1);
@@ -1932,12 +1933,27 @@ class OrderPickingTool {
 
         const bestMetrics = this.calculateBatchMetrics(bestBatch);
 
+        // Calculate direct distance sum for individual trips (store->order->store for each order)
+        let directDistanceSum = 0;
+        if (bestBatch.length > 0) {
+            directDistanceSum = bestBatch.reduce((sum, order) => sum + (order.distance || 0) * 2, 0);
+        }
+        // Route efficiency: percent of directDistanceSum covered by optimized route
+        // Savings: percent of distance saved compared to individual trips
+        let routeEfficiency = 0;
+        let savingsPercent = 0;
+        if (bestMetrics.totalDistance > 0 && directDistanceSum > 0) {
+            routeEfficiency = Math.min(100, (directDistanceSum / bestMetrics.totalDistance) * 100);
+            savingsPercent = Math.max(0, 100 - (bestMetrics.totalDistance / directDistanceSum) * 100);
+        }
+
         // Build enhanced result HTML
         let resultHTML = `
             <div class="batch-header">
                 <h3><i class="fas fa-route"></i> Optimized Route Batch</h3>
-                <div class="route-efficiency-badge" style="background: ${bestMetrics.routeEfficiency > 70 ? '#10b981' : bestMetrics.routeEfficiency > 50 ? '#f59e0b' : '#ef4444'}">
-                    ${bestMetrics.routeEfficiency}% Route Efficiency
+                <!-- Route efficiency badge removed -->
+                <div class="route-savings-badge" style="background: linear-gradient(90deg, #f59e0b 0%, #10b981 100%); color: #1e293b; margin-top: 6px; border-radius: 8px; padding: 6px 14px; display: inline-block; font-size: 15px; font-weight: 700; box-shadow: 0 2px 8px rgba(16,185,129,0.15); border: 2px solid #fff;">
+                    💸 ${savingsPercent.toFixed(1)}% Distance Saved vs Individual Trips
                 </div>
             </div>
             
@@ -1965,7 +1981,7 @@ class OrderPickingTool {
                     📊 <strong>Avg Distance per Order:</strong> ${bestMetrics.averageOrderDistance}km
                 </div>
                 <div class="insight-item">
-                    🎯 <strong>Route Optimization:</strong> ${bestMetrics.routeEfficiency > 70 ? 'Excellent' : bestMetrics.routeEfficiency > 50 ? 'Good' : 'Fair'} - ${(100 - bestMetrics.routeEfficiency).toFixed(0)}% distance saved vs individual trips
+                    🎯 <strong>Distance Saved:</strong> ${savingsPercent.toFixed(1)}% vs individual trips
                 </div>
             </div>
             
@@ -2008,7 +2024,7 @@ class OrderPickingTool {
                             <span class="distance-info">
                                 <i class="fas fa-route"></i> ${legDistance.toFixed(1)}km ${index === 0 ? 'from store' : 'from prev'}
                             </span>
-                            <span class="sla-info">
+                            <span class="sla-info" style="background: linear-gradient(90deg, #f87171 0%, #fbbf24 100%); color: #1e293b; border-radius: 6px; padding: 2px 10px; margin-left: 8px; font-weight: 600; display: inline-block; box-shadow: 0 1px 4px rgba(251,191,36,0.12); border: 1.5px solid #fff;">
                                 <i class="fas fa-clock"></i> SLA: ${slaMinutesLeft}min left ${slaStatus}
                             </span>
                             <span class="eta-info">
