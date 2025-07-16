@@ -1878,15 +1878,20 @@ class OrderPickingTool {
             // Estimate time including travel and handover time at each stop
             const travelTime = (4.2 * totalDistance) / 60; // hours (4.2 min/km converted to hours)
             const handoverTime = validOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
-            const estimatedTime = (travelTime + handoverTime) * 60; // convert to minutes
+            const baseTime = (travelTime + handoverTime) * 60; // convert to minutes
+            
+            // Add 15% buffer to the total delivery time (same as individual orders)
+            const bufferMultiplier = 1.15;
+            const estimatedTime = baseTime * bufferMultiplier;
             
             // Console log breakdown for debugging
             console.log('🚚 Batch Time Breakdown (Complete Round Trip Route):');
             console.log(`  Total Route Distance: ${totalDistance.toFixed(2)} km (store → orders → store)`);
             console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${totalDistance.toFixed(2)} km × 4.2 min/km)`);
             console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${validOrders.length} stops × 10 min/stop)`);
-            console.log(`  Total Estimated Time: ${estimatedTime.toFixed(1)} minutes`);
-            console.log(`  Breakdown: ${(travelTime * 60).toFixed(1)}min travel + ${(handoverTime * 60).toFixed(1)}min handover = ${estimatedTime.toFixed(1)}min total`);
+            console.log(`  Base Total: ${baseTime.toFixed(1)} minutes`);
+            console.log(`  With 15% Buffer: ${estimatedTime.toFixed(1)} minutes`);
+            console.log(`  Breakdown: ${(travelTime * 60).toFixed(1)}min travel + ${(handoverTime * 60).toFixed(1)}min handover = ${baseTime.toFixed(1)}min base × 1.15 = ${estimatedTime.toFixed(1)}min total`);
             
             // Show route breakdown for clarity
             const storeToFirst = validOrders[0].distance;
