@@ -38,11 +38,54 @@ class OrderPickingTool {
     startRiderStatusUpdater() {
         // Update rider status every minute to keep timers current
         setInterval(() => {
+            // Check all riders for 15-minute availability rule
+            this.checkRiderAvailability();
+            
             const modal = document.getElementById('riderAssignmentModal');
             if (modal && modal.style.display !== 'none') {
                 this.updateRiderStatus();
             }
         }, 60000); // Update every minute
+    }
+
+    checkRiderAvailability() {
+        const now = new Date();
+        let updateNeeded = false;
+        
+        Object.keys(this.riders).forEach(riderId => {
+            const rider = this.riders[riderId];
+            
+            // Check if busy rider should be made available (less than 15 minutes remaining)
+            if (rider.status === 'busy' && rider.expectedFreeTime) {
+                const timeDiff = rider.expectedFreeTime.getTime() - now.getTime();
+                const minutesRemaining = Math.floor(timeDiff / (1000 * 60));
+                
+                // If less than 15 minutes remaining, make rider available
+                if (minutesRemaining < 15) {
+                    rider.status = 'available';
+                    rider.currentOrder = null;
+                    rider.expectedFreeTime = null;
+                    updateNeeded = true;
+                    
+                    // Also update any orders assigned to this rider to mark them as delivered
+                    this.orders.forEach(order => {
+                        if (order.assignedRider === riderId && order.status === 'out_for_delivery') {
+                            order.status = 'delivered';
+                            order.deliveredAt = new Date();
+                            delete order.expectedReturnTime;
+                            this.updateOrderMarkerStyle(order);
+                        }
+                    });
+                    
+                    console.log(`Rider ${riderId} automatically made available (less than 15 minutes remaining)`);
+                }
+            }
+        });
+        
+        if (updateNeeded) {
+            this.saveOrdersToStorage();
+            this.refreshAllDisplays();
+        }
     }
 
     initializeApp() {

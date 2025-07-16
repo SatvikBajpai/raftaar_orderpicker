@@ -272,6 +272,34 @@ Object.assign(OrderPickingTool.prototype, {
         }
 
         const rider = this.riders[selectedRider];
+        
+        // Check if busy rider should be made available (less than 15 minutes remaining)
+        if (rider.status === 'busy' && rider.expectedFreeTime) {
+            const now = new Date();
+            const timeDiff = rider.expectedFreeTime.getTime() - now.getTime();
+            const minutesRemaining = Math.floor(timeDiff / (1000 * 60));
+            
+            // If less than 15 minutes remaining, make rider available
+            if (minutesRemaining < 15) {
+                rider.status = 'available';
+                rider.currentOrder = null;
+                rider.expectedFreeTime = null;
+                
+                // Also update any orders assigned to this rider to mark them as delivered
+                this.orders.forEach(order => {
+                    if (order.assignedRider === selectedRider && order.status === 'out_for_delivery') {
+                        order.status = 'delivered';
+                        order.deliveredAt = new Date();
+                        delete order.expectedReturnTime;
+                        this.updateOrderMarkerStyle(order);
+                    }
+                });
+                
+                this.saveOrdersToStorage();
+                this.refreshAllDisplays();
+            }
+        }
+        
         if (rider.status === 'available') {
             riderStatus.innerHTML = `
                 <div><i class="fas fa-check-circle"></i> ${rider.name} is available and ready for delivery.</div>
@@ -294,6 +322,11 @@ Object.assign(OrderPickingTool.prototype, {
                         timeMessage = `Expected free in ${hours}h ${minutes}m`;
                     } else {
                         timeMessage = `Expected free in ${minutes}m`;
+                    }
+                    
+                    // Add auto-availability indicator if less than 15 minutes
+                    if (minutes < 15 && hours === 0) {
+                        timeMessage += ` 🟢 (Auto-available soon)`;
                     }
                     
                     timeMessage += ` (${this.formatTime(expectedFreeTime)})`;
