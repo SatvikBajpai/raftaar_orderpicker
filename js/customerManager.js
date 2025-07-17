@@ -24,7 +24,7 @@ Object.assign(OrderPickingTool.prototype, {
     // Google Sheets configuration
     getGoogleSheetsConfig() {
         return {
-            spreadsheetId: '1NNF4Pybiq-jmM_bkFWYTGxwBHqWbCPPgpl1Brmlk_IA',
+            spreadsheetId: '1SI1WdjT7L77aGVmRKShVKR8ZtFKv6sv_jXXx5YFgD_4',
             range: 'Sheet1!A:E', // Customer Name, Customer Number, Latitude, Longitude, Zone
             apiKey: 'AIzaSyDr-DYch4S-JeL-sTlbixPKSjgOJiHLe8A' // Using the existing Maps API key
         };
