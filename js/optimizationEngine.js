@@ -372,22 +372,20 @@ Object.assign(OrderPickingTool.prototype, {
         let totalDistance = orders[0].distance; // Store to first order
         
         for (let i = 0; i < orders.length - 1; i++) {
-            const fromCoords = this.pincodeData.get(orders[i].customerPincode);
-            const toCoords = this.pincodeData.get(orders[i + 1].customerPincode);
-            
-            if (fromCoords && toCoords) {
+            // Use direct coordinates from customer data instead of pincode lookup
+            if (orders[i].lat && orders[i].lng && orders[i + 1].lat && orders[i + 1].lng) {
                 totalDistance += this.calculateDistance(
-                    fromCoords.lat, fromCoords.lng,
-                    toCoords.lat, toCoords.lng
+                    orders[i].lat, orders[i].lng,
+                    orders[i + 1].lat, orders[i + 1].lng
                 );
             }
         }
         
         // Add distance from last order back to store
-        const lastOrderCoords = this.pincodeData.get(orders[orders.length - 1].customerPincode);
-        if (lastOrderCoords) {
+        const lastOrder = orders[orders.length - 1];
+        if (lastOrder.lat && lastOrder.lng) {
             totalDistance += this.calculateDistance(
-                lastOrderCoords.lat, lastOrderCoords.lng,
+                lastOrder.lat, lastOrder.lng,
                 this.storeLocation.lat, this.storeLocation.lng
             );
         }
@@ -668,14 +666,12 @@ Object.assign(OrderPickingTool.prototype, {
             const fromOrder = orders[i];
             const toOrder = orders[i + 1];
             
-            const fromCoords = this.pincodeData.get(fromOrder.customerPincode);
-            const toCoords = this.pincodeData.get(toOrder.customerPincode);
-            
             let distance = 0;
-            if (fromCoords && toCoords) {
+            // Use direct coordinates from customer data instead of pincode lookup
+            if (fromOrder.lat && fromOrder.lng && toOrder.lat && toOrder.lng) {
                 distance = this.calculateDistance(
-                    fromCoords.lat, fromCoords.lng,
-                    toCoords.lat, toCoords.lng
+                    fromOrder.lat, fromOrder.lng,
+                    toOrder.lat, toOrder.lng
                 );
             }
             
@@ -688,12 +684,11 @@ Object.assign(OrderPickingTool.prototype, {
         
         // Last order back to store
         const lastOrder = orders[orders.length - 1];
-        const lastOrderCoords = this.pincodeData.get(lastOrder.customerPincode);
         let returnDistance = 0;
         
-        if (lastOrderCoords) {
+        if (lastOrder.lat && lastOrder.lng) {
             returnDistance = this.calculateDistance(
-                lastOrderCoords.lat, lastOrderCoords.lng,
+                lastOrder.lat, lastOrder.lng,
                 this.storeLocation.lat, this.storeLocation.lng
             );
         }
