@@ -166,15 +166,28 @@ Object.assign(OrderPickingTool.prototype, {
                 return [];
             }
             
-            // Filter pending orders only (ignore distance constraint for zone-based batching)
+            // Filter pending orders only and exclude unmapped zones
             const availableOrders = this.orders.filter(order => 
                 order.status === 'pending' && 
-                order.zone // Must have a zone
+                this.isValidZone(order.zone) // Only include orders with valid mapped zones
             );
             
             console.log('📋 Total orders:', this.orders.length);
             console.log('📋 Pending orders:', this.orders.filter(o => o.status === 'pending').length);
-            console.log('📋 Available orders (with zone):', availableOrders.length);
+            console.log('📋 Available orders (with valid zones):', availableOrders.length);
+            
+            // Log unmapped orders for debugging
+            const unmappedOrders = this.orders.filter(order => 
+                order.status === 'pending' && 
+                !this.isValidZone(order.zone)
+            );
+            if (unmappedOrders.length > 0) {
+                console.log('⚠️ Excluded unmapped orders from batching:', unmappedOrders.map(o => ({
+                    orderId: o.orderId,
+                    zone: o.zone,
+                    customerName: o.customerName
+                })));
+            }
             
             if (availableOrders.length === 0) {
                 console.log('No orders available for zone-based batching');
@@ -211,6 +224,20 @@ Object.assign(OrderPickingTool.prototype, {
             console.error('Error in zone-based batch optimization:', error);
             throw error;
         }
+    },
+
+    // Check if a zone is valid and mapped
+    isValidZone(zone) {
+        // Valid zones are A, B, C, D, E (case insensitive)
+        // Exclude empty, null, undefined, or other invalid values
+        if (!zone || typeof zone !== 'string') {
+            return false;
+        }
+        
+        const normalizedZone = zone.toString().trim().toUpperCase();
+        const validZones = ['A', 'B', 'C', 'D', 'E'];
+        
+        return validZones.includes(normalizedZone);
     },
 
     // Group orders by their delivery zone
@@ -462,7 +489,9 @@ Object.assign(OrderPickingTool.prototype, {
 
                         <div class="order-info">
                             <div><strong>Order ID:</strong> ${order.orderId}</div>
-                            <div><strong>Pincode:</strong> ${order.customerPincode}</div>
+                            <div><strong>Customer:</strong> ${order.customerName}</div>
+                            <div><strong>Address:</strong> ${order.customerAddress}</div>
+                            <div><strong>Phone:</strong> ${order.customerPhone}</div>
                             <div><strong>Zone:</strong> ${order.zone}</div>
                             <div><strong>Distance:</strong> ${order.distance} km</div>
                             <div><strong>Priority:</strong> ${order.priority}</div>
@@ -564,7 +593,7 @@ Object.assign(OrderPickingTool.prototype, {
                     ${bestBatch.map((order, index) => `
                         <div class="batch-order-item">
                             <span class="order-sequence">${index + 1}</span>
-                            <span class="order-details">${order.orderId} - ${order.customerPincode} (Zone ${order.zone})</span>
+                            <span class="order-details">${order.orderId} - ${order.customerName} (Zone ${order.zone})</span>
                             <span class="order-priority">Priority: ${order.priority}</span>
                         </div>
                     `).join('')}
@@ -630,7 +659,7 @@ Object.assign(OrderPickingTool.prototype, {
         const firstOrder = orders[0];
         breakdown.push({
             from: 'Store (Raftaar)',
-            to: `${firstOrder.orderId} (${firstOrder.customerPincode})`,
+            to: `${firstOrder.orderId} (${firstOrder.customerName})`,
             distance: firstOrder.distance
         });
         
@@ -651,8 +680,8 @@ Object.assign(OrderPickingTool.prototype, {
             }
             
             breakdown.push({
-                from: `${fromOrder.orderId} (${fromOrder.customerPincode})`,
-                to: `${toOrder.orderId} (${toOrder.customerPincode})`,
+                from: `${fromOrder.orderId} (${fromOrder.customerName})`,
+                to: `${toOrder.orderId} (${toOrder.customerName})`,
                 distance: distance
             });
         }
@@ -670,7 +699,7 @@ Object.assign(OrderPickingTool.prototype, {
         }
         
         breakdown.push({
-            from: `${lastOrder.orderId} (${lastOrder.customerPincode})`,
+            from: `${lastOrder.orderId} (${lastOrder.customerName})`,
             to: 'Store (Raftaar)',
             distance: returnDistance
         });

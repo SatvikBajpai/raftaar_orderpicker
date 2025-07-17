@@ -121,9 +121,10 @@ Object.assign(OrderPickingTool.prototype, {
             return;
         }
 
-        const coords = this.pincodeData.get(order.customerPincode);
-        if (!coords) {
-            console.log('No coordinates found for pincode:', order.customerPincode);
+        // Use coordinates directly from customer data instead of pincode lookup
+        const coords = { lat: order.lat, lng: order.lng };
+        if (!coords.lat || !coords.lng) {
+            console.log('No coordinates found for order:', order.orderId);
             return;
         }
 
@@ -173,7 +174,9 @@ Object.assign(OrderPickingTool.prototype, {
             <div class="info-window">
                 <div class="info-window-header">📦 Order ${order.orderId}</div>
                 <div class="info-window-details">
-                    <div><strong>📍 Pincode:</strong> ${order.customerPincode}</div>
+                    <div><strong>� Customer:</strong> ${order.customerName}</div>
+                    <div><strong>📍 Address:</strong> ${order.customerAddress}</div>
+                    <div><strong>📞 Phone:</strong> ${order.customerPhone}</div>
                     <div><strong>🏢 Zone:</strong> ${order.zone}</div>
                     <div><strong>📏 Distance:</strong> ${order.distance ? `${order.distance} km` : 'Calculating...'}</div>
                     <div><strong>⭐ Priority Score:</strong> ${order.priority}</div>
@@ -294,14 +297,14 @@ Object.assign(OrderPickingTool.prototype, {
         if (orders.length === 1) {
             // Single order: Store → Order → Store
             const order = orders[0];
-            const coords = this.pincodeData.get(order.customerPincode);
+            const coords = { lat: order.lat, lng: order.lng };
             
-            if (coords) {
+            if (coords.lat && coords.lng) {
                 this.currentRouteSegments = [
                     {
                         id: 'store-to-order',
                         from: 'Store (Raftaar)',
-                        to: `${order.orderId} (${order.customerPincode})`,
+                        to: `${order.orderId} (${order.customerName})`,
                         fromCoords: this.storeLocation,
                         toCoords: coords,
                         distance: order.distance,
@@ -310,7 +313,7 @@ Object.assign(OrderPickingTool.prototype, {
                     },
                     {
                         id: 'order-to-store',
-                        from: `${order.orderId} (${order.customerPincode})`,
+                        from: `${order.orderId} (${order.customerName})`,
                         to: 'Store (Raftaar)',
                         fromCoords: coords,
                         toCoords: this.storeLocation,
@@ -326,12 +329,12 @@ Object.assign(OrderPickingTool.prototype, {
             
             // Store to first order
             const firstOrder = orders[0];
-            const firstCoords = this.pincodeData.get(firstOrder.customerPincode);
-            if (firstCoords) {
+            const firstCoords = { lat: firstOrder.lat, lng: firstOrder.lng };
+            if (firstCoords.lat && firstCoords.lng) {
                 this.currentRouteSegments.push({
                     id: 'store-to-first',
                     from: 'Store (Raftaar)',
-                    to: `${firstOrder.orderId} (${firstOrder.customerPincode})`,
+                    to: `${firstOrder.orderId} (${firstOrder.customerName})`,
                     fromCoords: this.storeLocation,
                     toCoords: firstCoords,
                     distance: firstOrder.distance,
@@ -344,10 +347,10 @@ Object.assign(OrderPickingTool.prototype, {
             for (let i = 0; i < orders.length - 1; i++) {
                 const fromOrder = orders[i];
                 const toOrder = orders[i + 1];
-                const fromCoords = this.pincodeData.get(fromOrder.customerPincode);
-                const toCoords = this.pincodeData.get(toOrder.customerPincode);
+                const fromCoords = { lat: fromOrder.lat, lng: fromOrder.lng };
+                const toCoords = { lat: toOrder.lat, lng: toOrder.lng };
                 
-                if (fromCoords && toCoords) {
+                if (fromCoords.lat && fromCoords.lng && toCoords.lat && toCoords.lng) {
                     const distance = this.calculateDistance(
                         fromCoords.lat, fromCoords.lng,
                         toCoords.lat, toCoords.lng
@@ -355,8 +358,8 @@ Object.assign(OrderPickingTool.prototype, {
                     
                     this.currentRouteSegments.push({
                         id: `order-${i}-to-${i + 1}`,
-                        from: `${fromOrder.orderId} (${fromOrder.customerPincode})`,
-                        to: `${toOrder.orderId} (${toOrder.customerPincode})`,
+                        from: `${fromOrder.orderId} (${fromOrder.customerName})`,
+                        to: `${toOrder.orderId} (${toOrder.customerName})`,
                         fromCoords: fromCoords,
                         toCoords: toCoords,
                         distance: distance,
@@ -369,8 +372,8 @@ Object.assign(OrderPickingTool.prototype, {
             
             // Last order back to store
             const lastOrder = orders[orders.length - 1];
-            const lastCoords = this.pincodeData.get(lastOrder.customerPincode);
-            if (lastCoords) {
+            const lastCoords = { lat: lastOrder.lat, lng: lastOrder.lng };
+            if (lastCoords.lat && lastCoords.lng) {
                 const returnDistance = this.calculateDistance(
                     lastCoords.lat, lastCoords.lng,
                     this.storeLocation.lat, this.storeLocation.lng
@@ -378,7 +381,7 @@ Object.assign(OrderPickingTool.prototype, {
                 
                 this.currentRouteSegments.push({
                     id: 'last-to-store',
-                    from: `${lastOrder.orderId} (${lastOrder.customerPincode})`,
+                    from: `${lastOrder.orderId} (${lastOrder.customerName})`,
                     to: 'Store (Raftaar)',
                     fromCoords: lastCoords,
                     toCoords: this.storeLocation,

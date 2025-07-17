@@ -161,6 +161,12 @@ input:focus, select:focus {
     border-color: #cbd5e0;
 }
 
+.btn-small {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
 /* Panel Header */
 .panel-header {
     display: flex;
@@ -1872,4 +1878,85 @@ input:focus, select:focus {
     color: #f1f5f9;
     font-style: italic;
     margin: 15px 0;
+}
+
+/* Customer Management Styles */
+.customer-input-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.customer-input-container select {
+    flex: 1;
+}
+
+.btn-small {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.customer-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.form-group textarea {
+    min-height: 80px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Customer Modal specific adjustments */
+#customerModal .modal-content {
+    max-width: 600px;
+}
+
+#customerModal .form-row {
+    margin-bottom: 20px;
+}
+
+#customerModal .form-group {
+    margin-bottom: 15px;
+}
+
+#customerModal .form-group label {
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 5px;
+}
+
+#customerModal input[type="number"] {
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+}
+
+/* Customer selection styling */
+.customer-option {
+    padding: 8px 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.customer-option:hover {
+    background-color: #f7fafc;
+}
+
+.customer-info {
+    font-size: 0.9rem;
+    color: #718096;
+    margin-top: 2px;
+}
+
+/* Auto-filled zone indicator */
+#orderZone:disabled {
+    background-color: #f7fafc;
+    color: #4a5568;
+    font-style: italic;
+}
+
+.zone-auto-filled {
+    color: #38a169;
+    font-weight: 600;
 }

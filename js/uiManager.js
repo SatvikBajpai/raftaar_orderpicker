@@ -107,7 +107,9 @@ Object.assign(OrderPickingTool.prototype, {
                         </div>
                     </div>
                     <div class="order-details">
-                        <div><strong>📍 Pincode:</strong> ${order.customerPincode}</div>
+                        <div><strong>� Customer:</strong> ${order.customerName}</div>
+                        <div><strong>📍 Address:</strong> ${order.customerAddress}</div>
+                        <div><strong>📞 Phone:</strong> ${order.customerPhone}</div>
                         <div><strong>🏢 Zone:</strong> ${order.zone}</div>
                         <div><strong>🕐 Order Time:</strong> ${this.formatTime(order.orderTime)}</div>
                         <div><strong>⏰ SLA Deadline:</strong> ${this.formatTime(order.slaDeadline)}</div>
@@ -194,7 +196,9 @@ Object.assign(OrderPickingTool.prototype, {
                         </div>
                     </div>
                     <div class="order-details">
-                        <div><strong>📍 Pincode:</strong> ${order.customerPincode}</div>
+                        <div><strong>� Customer:</strong> ${order.customerName}</div>
+                        <div><strong>📍 Address:</strong> ${order.customerAddress}</div>
+                        <div><strong>📞 Phone:</strong> ${order.customerPhone}</div>
                         <div><strong>🏢 Zone:</strong> ${order.zone}</div>
                         <div><strong>🕐 Order Time:</strong> ${this.formatTime(order.orderTime)}</div>
                         <div><strong>⏰ SLA Deadline:</strong> ${this.formatTime(order.slaDeadline)}</div>

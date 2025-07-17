@@ -108,68 +108,60 @@ Object.assign(OrderPickingTool.prototype, {
     },
 
     addNewOrder() {
-        const formData = {
-            orderId: document.getElementById('orderId').value,
-            orderTime: new Date(document.getElementById('orderTime').value),
-            customerPincode: document.getElementById('customerPincode').value,
-            zone: document.getElementById('orderZone').value
-        };
+        try {
+            // Use the new customer-based form data method
+            const formData = this.getOrderFormData();
+            
+            // Check if order ID already exists
+            if (this.orders.find(order => order.orderId === formData.orderId)) {
+                alert('Order ID already exists');
+                return;
+            }
 
-        // Validation
-        if (!formData.orderId || !formData.customerPincode || !formData.zone) {
-            alert('Please fill in all required fields');
-            return;
-        }
+            // Calculate SLA deadline
+            const slaDeadline = this.calculateSLADeadline(formData.orderTime);
 
-        // Check if order ID already exists
-        if (this.orders.find(order => order.orderId === formData.orderId)) {
-            alert('Order ID already exists');
-            return;
-        }
+            // Distance and priority will be automatically calculated from customer coordinates
+            let distance = null;
+            let priority = 50; // Default priority
+            
+            // Use customer's lat/lng directly instead of pincode lookup
+            if (formData.lat && formData.lng) {
+                distance = this.calculateDistance(
+                    this.storeLocation.lat, this.storeLocation.lng,
+                    formData.lat, formData.lng
+                );
+                priority = this.calculatePriority(formData.orderTime, slaDeadline, distance);
+                console.log(`New order ${formData.orderId} calculated distance from customer data: ${distance}km`);
+            }
 
-        // Calculate SLA deadline
-        const slaDeadline = this.calculateSLADeadline(formData.orderTime);
+            // Create order object
+            const order = {
+                ...formData,
+                id: Date.now(), // Unique ID
+                distance: distance,
+                slaDeadline: slaDeadline,
+                status: 'pending',
+                addedAt: new Date(),
+                priority: priority
+            };
 
-        // Check if we have cached coordinates for this pincode
-        let distance = null;
-        let priority = 50; // Default priority
-        
-        if (this.pincodeData.has(formData.customerPincode)) {
-            console.log(`Using cached coordinates for new order with pincode ${formData.customerPincode}`);
-            const coords = this.pincodeData.get(formData.customerPincode);
-            distance = this.calculateDistance(
-                this.storeLocation.lat, this.storeLocation.lng,
-                coords.lat, coords.lng
-            );
-            priority = this.calculatePriority(formData.orderTime, slaDeadline, distance);
-            console.log(`New order ${formData.orderId} calculated distance from cache: ${distance}km`);
-        }
-
-        // Create order object
-        const order = {
-            ...formData,
-            id: Date.now(), // Unique ID
-            distance: distance, // Will be distance if cached, null otherwise
-            slaDeadline: slaDeadline,
-            status: 'pending',
-            addedAt: new Date(),
-            priority: priority // Will be calculated if distance available, default otherwise
-        };
-
-        // Add order immediately to show in list
-        this.orders.push(order);
-        this.saveOrdersToStorage();
-        this.refreshOrdersDisplay();
-        this.clearOrderForm();
-        
-        // If we already had cached coordinates, add to map immediately
-        if (distance) {
-            this.addOrderToMap(order);
-            this.showNotification(`Order ${order.orderId} added with distance ${distance}km!`, 'success');
-        } else {
-            // Start geocoding in background for new pincode
-            this.autoFillCoordinates(formData.customerPincode);
-            this.showNotification(`Order ${order.orderId} added! Fetching location data...`, 'success');
+            // Add order immediately to show in list
+            this.orders.push(order);
+            this.saveOrdersToStorage();
+            this.refreshOrdersDisplay();
+            this.clearOrderForm();
+            
+            // Add to map if we have coordinates
+            if (distance) {
+                this.addOrderToMap(order);
+                this.showNotification(`Order ${order.orderId} added with distance ${distance.toFixed(2)}km!`, 'success');
+            } else {
+                this.showNotification(`Order ${order.orderId} added! Location data may be incomplete.`, 'warning');
+            }
+        } catch (error) {
+            console.error('Error adding new order:', error);
+            alert(error.message || 'Error adding order. Please try again.');
         }
     },
 
@@ -219,8 +211,16 @@ Object.assign(OrderPickingTool.prototype, {
                     <span class="order-info-value">${order.orderId}</span>
                 </div>
                 <div class="order-info-item">
-                    <span class="order-info-label">Pincode:</span>
-                    <span class="order-info-value">${order.customerPincode}</span>
+                    <span class="order-info-label">Customer:</span>
+                    <span class="order-info-value">${order.customerName}</span>
+                </div>
+                <div class="order-info-item">
+                    <span class="order-info-label">Address:</span>
+                    <span class="order-info-value">${order.customerAddress}</span>
+                </div>
+                <div class="order-info-item">
+                    <span class="order-info-label">Phone:</span>
+                    <span class="order-info-value">${order.customerPhone}</span>
                 </div>
                 <div class="order-info-item">
                     <span class="order-info-label">Zone:</span>
@@ -661,7 +661,7 @@ Object.assign(OrderPickingTool.prototype, {
                             <span class="order-sequence">${index + 1}.</span>
                             <div class="order-summary-details">
                                 <div class="order-summary-main">
-                                    <strong>${order.orderId}</strong> - ${order.customerPincode} (Zone ${order.zone})
+                                    <strong>${order.orderId}</strong> - ${order.customerName} (Zone ${order.zone})
                                 </div>
                                 <div class="order-summary-meta">
                                     ${order.distance?.toFixed(2) || 'N/A'} km • Priority: ${order.priority} • SLA: ${this.formatTime(order.slaDeadline)}

@@ -33,6 +33,9 @@ class OrderPickingTool {
         this.bindEvents();
         this.loadStoredData();
         this.startRiderStatusUpdater();
+        
+        // Initialize customer management after everything else is set up
+        this.initCustomerManagement();
     }
 
     startRiderStatusUpdater() {
