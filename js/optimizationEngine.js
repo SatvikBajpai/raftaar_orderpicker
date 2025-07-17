@@ -97,6 +97,8 @@ Object.assign(OrderPickingTool.prototype, {
             const estimatedDelivery = new Date(now.getTime() + deliveryTime * 60 * 60 * 1000);
             const willMeetSLA = estimatedDelivery <= order.slaDeadline;
             const timeToDeadline = (order.slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+            const hoursOverdue = timeToDeadline < 0 ? Math.abs(timeToDeadline) : 0;
+            const isCritical = hoursOverdue > 4; // Critical if overdue by more than 4 hours
             
             return {
                 ...order,
@@ -104,26 +106,53 @@ Object.assign(OrderPickingTool.prototype, {
                 estimatedDelivery,
                 willMeetSLA,
                 timeToDeadline,
+                hoursOverdue,
+                isCritical,
                 slaBuffer: timeToDeadline - deliveryTime // How much buffer time after delivery
             };
         });
 
-        // Filter orders that can meet SLA
+        // PRIORITY 1: Critical orders (overdue by more than 4 hours) - pick the most overdue
+        const criticalOrders = ordersWithEstimates.filter(order => order.isCritical);
+        if (criticalOrders.length > 0) {
+            console.log(`🚨 Found ${criticalOrders.length} CRITICAL orders (overdue >4h):`, 
+                criticalOrders.map(o => `${o.orderId} (${o.hoursOverdue.toFixed(1)}h overdue)`));
+            
+            // Among critical orders, pick the most overdue one
+            return criticalOrders.reduce((best, current) => {
+                return current.hoursOverdue > best.hoursOverdue ? current : best;
+            });
+        }
+
+        // PRIORITY 2: Orders that can still meet SLA
         const meetableSLAOrders = ordersWithEstimates.filter(order => order.willMeetSLA);
+        if (meetableSLAOrders.length > 0) {
+            console.log(`✅ Found ${meetableSLAOrders.length} orders that can still meet SLA`);
+            
+            // Among meetable orders, pick the one with least SLA buffer (most urgent but still meetable)
+            return meetableSLAOrders.reduce((best, current) => {
+                return current.slaBuffer < best.slaBuffer ? current : best;
+            });
+        }
+
+        // PRIORITY 3: Recently overdue orders (less than 4 hours) - damage control
+        const recentlyOverdueOrders = ordersWithEstimates.filter(order => 
+            !order.willMeetSLA && !order.isCritical
+        );
         
-        if (meetableSLAOrders.length === 0) {
-            // If no orders can meet SLA, pick the one with least time overrun
-            return ordersWithEstimates.reduce((best, current) => {
+        if (recentlyOverdueOrders.length > 0) {
+            console.log(`⚠️ Found ${recentlyOverdueOrders.length} recently overdue orders (<4h)`);
+            
+            // Pick the one with least time overrun to minimize damage
+            return recentlyOverdueOrders.reduce((best, current) => {
                 const bestOverrun = best.deliveryTime - best.timeToDeadline;
                 const currentOverrun = current.deliveryTime - current.timeToDeadline;
                 return currentOverrun < bestOverrun ? current : best;
             });
         }
 
-        // Among meetable orders, pick the one with least SLA buffer (most urgent but still meetable)
-        return meetableSLAOrders.reduce((best, current) => {
-            return current.slaBuffer < best.slaBuffer ? current : best;
-        });
+        // Fallback: return any order (shouldn't reach here normally)
+        return ordersWithEstimates[0];
     },
 
     // Zone-based batch optimization
@@ -248,7 +277,22 @@ Object.assign(OrderPickingTool.prototype, {
         if (batch.length === 0) return 0;
         
         const zone = batch[0].zone;
+        const now = new Date();
         let score = 0;
+        
+        // Check for critical orders in this batch
+        const criticalOrders = batch.filter(order => {
+            const timeToDeadline = (order.slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+            const hoursOverdue = timeToDeadline < 0 ? Math.abs(timeToDeadline) : 0;
+            return hoursOverdue > 4; // Critical if overdue by more than 4 hours
+        });
+        
+        // CRITICAL BONUS: Massive bonus for batches containing critical orders
+        if (criticalOrders.length > 0) {
+            score += 1000; // Huge bonus to ensure critical orders get prioritized
+            score += criticalOrders.length * 200; // Extra bonus for more critical orders
+            console.log(`🚨 Batch in Zone ${zone} contains ${criticalOrders.length} CRITICAL orders - adding ${1000 + criticalOrders.length * 200} bonus points`);
+        }
         
         // Base score: number of orders in batch (more is better)
         score += batch.length * 10;
@@ -264,11 +308,11 @@ Object.assign(OrderPickingTool.prototype, {
             const avgPriority = batch.reduce((sum, order) => sum + order.priority, 0) / batch.length;
             score += avgPriority * 5;
             
-            // Bonus for urgent orders that can meet SLA
-            const now = new Date();
+            // Bonus for urgent orders that can meet SLA (non-critical urgent orders)
             const urgentOrders = batch.filter(order => {
                 const timeToDeadline = (order.slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
-                return timeToDeadline <= 4; // Orders with less than 4 hours to deadline
+                const hoursOverdue = timeToDeadline < 0 ? Math.abs(timeToDeadline) : 0;
+                return timeToDeadline <= 4 && hoursOverdue <= 4; // Urgent but not critical
             });
             score += urgentOrders.length * 15;
             
@@ -377,13 +421,26 @@ Object.assign(OrderPickingTool.prototype, {
                 const now = new Date();
                 const estimatedDelivery = new Date(now.getTime() + deliveryTime * 60 * 60 * 1000);
                 const willMeetSLA = estimatedDelivery <= order.slaDeadline;
+                const timeToDeadline = (order.slaDeadline.getTime() - now.getTime()) / (1000 * 60 * 60);
+                const hoursOverdue = timeToDeadline < 0 ? Math.abs(timeToDeadline) : 0;
+                const isCritical = hoursOverdue > 4;
+                
+                // Determine SLA status with critical detection
+                let slaStatusHtml = '';
+                if (isCritical) {
+                    slaStatusHtml = `<span style="color: #dc2626; font-weight: bold;">🚨 CRITICAL - ${hoursOverdue.toFixed(1)}h OVERDUE</span>`;
+                } else if (!willMeetSLA) {
+                    slaStatusHtml = `<span style="color: #f59e0b;">⚠️ Recently Overdue - ${hoursOverdue.toFixed(1)}h</span>`;
+                } else {
+                    slaStatusHtml = '<span style="color: #10b981;">✅ Will Meet SLA</span>';
+                }
                 
                 // Calculate route breakdown for single order
                 const routeBreakdown = this.calculateDetailedRouteBreakdown([order]);
                 
                 orderContainer.innerHTML = `
                     <div class="single-order-result">
-                        <h3>📦 Recommended Order: ${order.orderId}</h3>
+                        <h3>📦 Recommended Order: ${order.orderId} ${isCritical ? '🚨' : ''}</h3>
                         
                         <div class="route-breakdown">
                             <h4>📍 Route Details:</h4>
@@ -411,14 +468,12 @@ Object.assign(OrderPickingTool.prototype, {
                             <div><strong>Priority:</strong> ${order.priority}</div>
                             <div><strong>SLA Deadline:</strong> ${this.formatTime(order.slaDeadline)}</div>
                             <div><strong>Current Time:</strong> ${this.formatTime(now)}</div>
+                            ${isCritical ? '<div style="color: #dc2626; font-weight: bold;"><strong>⚠️ CRITICAL STATUS:</strong> Order is severely overdue!</div>' : ''}
                         </div>
                         <div class="delivery-estimate">
                             🚛 Estimated Delivery: ${this.formatTime(estimatedDelivery)}<br>
                             ⏱️ Total Time: ${this.formatDuration(deliveryTime)}<br>
-                            ${willMeetSLA ? 
-                                '<span style="color: #10b981;">✅ Will Meet SLA</span>' : 
-                                '<span style="color: #ef4444;">⚠️ May Miss SLA</span>'
-                            }
+                            ${slaStatusHtml}
                         </div>
                         <div class="optimization-reason">
                             💡 ${reason}
