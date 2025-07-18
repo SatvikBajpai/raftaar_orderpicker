@@ -113,8 +113,8 @@ Object.assign(OrderPickingTool.prototype, {
         
         const baseTime = travelTime + preparationTime + handoverTime;
         
-        // Add 15% buffer to the total delivery time
-        const bufferMultiplier = 1.15;
+        // Add 5% buffer to the total delivery time
+        const bufferMultiplier = 1.05;
         const finalTime = baseTime * bufferMultiplier;
         
         // Console log breakdown for debugging (only for individual orders)
@@ -126,7 +126,7 @@ Object.assign(OrderPickingTool.prototype, {
             console.log(`  Preparation Time: ${(preparationTime * 60).toFixed(1)} minutes`);
             console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (includes delivery)`);
             console.log(`  Base Total: ${(baseTime * 60).toFixed(1)} minutes`);
-            console.log(`  With 15% Buffer: ${(finalTime * 60).toFixed(1)} minutes`);
+            console.log(`  With 5% Buffer: ${(finalTime * 60).toFixed(1)} minutes`);
         }
         
         return finalTime;

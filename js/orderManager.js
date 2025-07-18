@@ -420,8 +420,8 @@ Object.assign(OrderPickingTool.prototype, {
         const handoverTime = batchOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
         const baseTimeMinutes = (travelTime + handoverTime) * 60; // convert to minutes
         
-        // Add 15% buffer to the total delivery time (same as individual orders)
-        const bufferMultiplier = 1.15;
+        // Add 5% buffer to the total delivery time (same as individual orders)
+        const bufferMultiplier = 1.05;
         const estimatedTimeMinutes = baseTimeMinutes * bufferMultiplier;
         const expectedReturnTime = new Date(Date.now() + estimatedTimeMinutes * 60 * 1000); // Convert minutes to milliseconds
         
@@ -431,7 +431,7 @@ Object.assign(OrderPickingTool.prototype, {
         console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${routeDistance.toFixed(2)} km × 4.2 min/km)`);
         console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${batchOrders.length} stops × 10 min/stop)`);
         console.log(`  Base Total: ${baseTimeMinutes.toFixed(1)} minutes`);
-        console.log(`  With 15% Buffer: ${estimatedTimeMinutes.toFixed(1)} minutes`);
+        console.log(`  With 5% Buffer: ${estimatedTimeMinutes.toFixed(1)} minutes`);
         console.log(`  Expected Return Time: ${expectedReturnTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`);
         
         // Update all orders in the batch
@@ -620,8 +620,8 @@ Object.assign(OrderPickingTool.prototype, {
         const handoverTime = batchOrders.length * (10 / 60); // 10 minutes handover per stop (converted to hours)
         const baseTimeMinutes = (travelTime + handoverTime) * 60; // convert to minutes
         
-        // Add 15% buffer to the total delivery time (same as individual orders)
-        const bufferMultiplier = 1.15;
+        // Add 5% buffer to the total delivery time (same as individual orders)
+        const bufferMultiplier = 1.05;
         const estimatedTimeMinutes = baseTimeMinutes * bufferMultiplier;
         const averagePriority = batchOrders.reduce((sum, order) => sum + order.priority, 0) / batchOrders.length;
         
@@ -631,7 +631,7 @@ Object.assign(OrderPickingTool.prototype, {
         console.log(`  Travel Time: ${(travelTime * 60).toFixed(1)} minutes (${routeDistance.toFixed(2)} km × 4.2 min/km)`);
         console.log(`  Handover Time: ${(handoverTime * 60).toFixed(1)} minutes (${batchOrders.length} stops × 10 min/stop)`);
         console.log(`  Base Total: ${baseTimeMinutes.toFixed(1)} minutes`);
-        console.log(`  With 15% Buffer: ${estimatedTimeMinutes.toFixed(1)} minutes`);
+        console.log(`  With 5% Buffer: ${estimatedTimeMinutes.toFixed(1)} minutes`);
         console.log(`  Average Priority: ${averagePriority.toFixed(1)}`);
 
         // Populate modal with batch information
