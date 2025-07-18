@@ -15,10 +15,11 @@ Object.assign(OrderPickingTool.prototype, {
         this.renderDeliveryList();
     },
 
-    // Comprehensive refresh for both tabs and all UI elements
+        // Comprehensive refresh for both tabs and all UI elements
     refreshAllDisplays() {
         this.refreshOrdersDisplay();
         this.refreshDeliveryDisplay();
+        this.refreshBikersDisplay();
         this.updateMapMarkers();
     },
 

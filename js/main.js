@@ -25,7 +25,12 @@ class OrderPickingTool {
             'B': { name: 'Rider B', status: 'available', currentOrder: null },
             'C': { name: 'Rider C', status: 'available', currentOrder: null },
             'D': { name: 'Rider D', status: 'available', currentOrder: null },
-            'E': { name: 'Rider E', status: 'available', currentOrder: null }
+            'E': { name: 'Rider E', status: 'available', currentOrder: null },
+            'F': { name: 'Rider F', status: 'available', currentOrder: null },
+            'G': { name: 'Rider G', status: 'available', currentOrder: null },
+            'H': { name: 'Rider H', status: 'available', currentOrder: null },
+            'I': { name: 'Rider I', status: 'available', currentOrder: null },
+            'J': { name: 'Rider J', status: 'available', currentOrder: null }
         };
         this.pendingRiderAssignment = null; // For modal workflow
         
@@ -65,7 +70,12 @@ class OrderPickingTool {
                 
                 // If less than 15 minutes remaining, make rider available
                 if (minutesRemaining < 15) {
-                    rider.status = 'available';
+                    // Check if rider has a manual status set
+                    if (rider.manualStatus) {
+                        rider.status = rider.manualStatus;
+                    } else {
+                        rider.status = 'available';
+                    }
                     rider.currentOrder = null;
                     rider.expectedFreeTime = null;
                     updateNeeded = true;
@@ -220,6 +230,8 @@ class OrderPickingTool {
             this.refreshOrdersDisplay();
         } else if (tabName === 'delivery') {
             this.refreshDeliveryDisplay();
+        } else if (tabName === 'bikers') {
+            this.refreshBikersDisplay();
         }
     }
 
@@ -240,6 +252,130 @@ class OrderPickingTool {
                 this.showNotification(`Showing route to ${order.orderId}`, 'info');
             }
         }
+    }
+
+    // Bikers tab functionality
+    refreshBikersDisplay() {
+        const ridersList = document.getElementById('ridersList');
+        const availableCount = document.getElementById('availableRidersCount');
+        const busyCount = document.getElementById('busyRidersCount');
+        const earlyCount = document.getElementById('earlyRidersCount');
+        const lateCount = document.getElementById('lateRidersCount');
+
+        if (!ridersList) return;
+
+        let availableCountNum = 0;
+        let busyCountNum = 0;
+        let unavailableCountNum = 0;
+        let totalRiders = 0;
+
+        // Generate rider cards
+        const ridersHTML = Object.keys(this.riders).map(riderId => {
+            const rider = this.riders[riderId];
+            totalRiders++;
+            
+            // Count riders by status
+            if (rider.status === 'available') availableCountNum++;
+            else if (rider.status === 'busy') busyCountNum++;
+            else if (rider.status === 'unavailable') unavailableCountNum++;
+
+            // Get status display info
+            const statusInfo = this.getRiderStatusInfo(rider);
+            
+            return `
+                <div class="rider-card ${rider.status}" data-rider-id="${riderId}">
+                    <div class="rider-info">
+                        <div class="rider-name">
+                            <i class="fas fa-motorcycle"></i>
+                            ${rider.name}
+                        </div>
+                        <div class="rider-status">
+                            <i class="fas ${statusInfo.icon}"></i>
+                            ${statusInfo.text}
+                        </div>
+                    </div>
+                    <div class="rider-actions">
+                        <button class="btn-rider-status available" onclick="orderPickingTool.setRiderStatus('${riderId}', 'available')">
+                            <i class="fas fa-check"></i> Available
+                        </button>
+                        <button class="btn-rider-status unavailable" onclick="orderPickingTool.setRiderStatus('${riderId}', 'unavailable')">
+                            <i class="fas fa-times"></i> Unavailable
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        ridersList.innerHTML = ridersHTML || `
+            <div class="empty-state">
+                <i class="fas fa-motorcycle"></i>
+                <p>No riders available.</p>
+            </div>
+        `;
+
+        // Update stat counts
+        if (availableCount) availableCount.textContent = availableCountNum;
+        if (busyCount) busyCount.textContent = busyCountNum;
+        if (earlyCount) earlyCount.textContent = unavailableCountNum;
+        if (lateCount) lateCount.textContent = totalRiders;
+    }
+
+    getRiderStatusInfo(rider) {
+        switch (rider.status) {
+            case 'available':
+                return { icon: 'fa-check-circle', text: 'Available for orders' };
+            case 'busy':
+                const timeLeft = rider.expectedFreeTime ? 
+                    Math.max(0, Math.ceil((rider.expectedFreeTime.getTime() - new Date().getTime()) / 60000)) : 0;
+                return { icon: 'fa-truck', text: `Busy - ${timeLeft} min remaining` };
+            case 'unavailable':
+                return { icon: 'fa-times-circle', text: 'Unavailable' };
+            default:
+                return { icon: 'fa-question', text: 'Unknown status' };
+        }
+    }
+
+    setRiderStatus(riderId, status) {
+        if (!this.riders[riderId]) {
+            console.error('Rider not found:', riderId);
+            return;
+        }
+
+        const rider = this.riders[riderId];
+        const oldStatus = rider.status;
+        
+        // Don't change status if rider is currently busy with an order
+        if (rider.status === 'busy' && rider.currentOrder && status !== 'available') {
+            this.showNotification(`${rider.name} is currently busy with an order. Cannot change status.`, 'warning');
+            return;
+        }
+
+        // Update rider status
+        rider.status = status;
+        
+        // If setting to available, clear any manual status flags
+        if (status === 'available') {
+            rider.manualStatus = null;
+        } else {
+            rider.manualStatus = status;
+        }
+
+        // Show notification
+        const statusMessages = {
+            'available': 'marked as available',
+            'unavailable': 'marked as unavailable'
+        };
+
+        this.showNotification(
+            `${rider.name} ${statusMessages[status]}`, 
+            status === 'unavailable' ? 'warning' : 'success'
+        );
+
+        // Save to storage and refresh display
+        this.saveOrdersToStorage();
+        this.refreshBikersDisplay();
+        
+        console.log(`Rider ${riderId} status changed from ${oldStatus} to ${status}`);
     }
 }
 

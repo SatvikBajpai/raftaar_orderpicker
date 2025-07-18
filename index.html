@@ -129,6 +129,9 @@
                         <button class="tab-btn" data-tab="delivery">
                             <i class="fas fa-truck"></i> Out for Delivery
                         </button>
+                        <button class="tab-btn" data-tab="bikers">
+                            <i class="fas fa-motorcycle"></i> Bikers
+                        </button>
                     </div>
 
                     <!-- Queue Tab Content -->
@@ -169,6 +172,35 @@
                             <div class="empty-state">
                                 <i class="fas fa-truck"></i>
                                 <p>No orders out for delivery.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bikers Tab Content -->
+                    <div class="tab-content" id="bikers-tab">
+                        <div class="orders-stats">
+                            <div class="stat-card available">
+                                <div class="stat-number" id="availableRidersCount">0</div>
+                                <div class="stat-label">Available</div>
+                            </div>
+                            <div class="stat-card busy">
+                                <div class="stat-number" id="busyRidersCount">0</div>
+                                <div class="stat-label">Busy</div>
+                            </div>
+                            <div class="stat-card unavailable">
+                                <div class="stat-number" id="earlyRidersCount">0</div>
+                                <div class="stat-label">Unavailable</div>
+                            </div>
+                            <div class="stat-card total">
+                                <div class="stat-number" id="lateRidersCount">0</div>
+                                <div class="stat-label">Total</div>
+                            </div>
+                        </div>
+
+                        <div class="riders-list" id="ridersList">
+                            <div class="empty-state">
+                                <i class="fas fa-motorcycle"></i>
+                                <p>Loading riders...</p>
                             </div>
                         </div>
                     </div>

@@ -7,6 +7,9 @@ Object.assign(OrderPickingTool.prototype, {
     saveOrdersToStorage() {
         localStorage.setItem('orders', JSON.stringify(this.orders));
         
+        // Also save rider data
+        localStorage.setItem('riders', JSON.stringify(this.riders));
+        
         // Also save pincode coordinates cache
         const pincodeDataArray = Array.from(this.pincodeData.entries());
         localStorage.setItem('pincodeData', JSON.stringify(pincodeDataArray));
@@ -35,6 +38,25 @@ Object.assign(OrderPickingTool.prototype, {
                 
                 // Recalculate distances for orders that might not have them
                 this.recalculateMissingDistances();
+            }
+            
+            // Load rider data
+            const storedRiders = localStorage.getItem('riders');
+            if (storedRiders) {
+                const loadedRiders = JSON.parse(storedRiders);
+                // Merge with existing riders, preserving any new riders that might have been added
+                Object.keys(loadedRiders).forEach(riderId => {
+                    if (this.riders[riderId]) {
+                        // Preserve the rider structure but load saved status
+                        this.riders[riderId] = {
+                            ...this.riders[riderId],
+                            ...loadedRiders[riderId],
+                            expectedFreeTime: loadedRiders[riderId].expectedFreeTime ? 
+                                new Date(loadedRiders[riderId].expectedFreeTime) : null
+                        };
+                    }
+                });
+                console.log('Loaded rider data for', Object.keys(loadedRiders).length, 'riders');
             }
             
             this.refreshOrdersDisplay();
