@@ -116,12 +116,17 @@ Update your store coordinates within the application:
    Row 3: Jane Smith    | +91-9876543211| 21.140000 | 79.092000 | B
    ```
 
-3. **Make Sheet Public**
+3. **Sample Google Sheet Template**
+   - Use this template as reference: [Sample Customer Data Sheet](https://docs.google.com/spreadsheets/d/1SI1WdjT7L77aGVmRKShVKR8ZtFKv6sv_jXXx5YFgD_4/edit?usp=sharing)
+   - Copy the structure and format for your own data
+   - Replace with your actual customer information
+
+4. **Make Sheet Public**
    - Click "Share" button
    - Change to "Anyone with the link can view"
    - Copy the sheet ID from URL
 
-4. **Update Configuration**
+5. **Update Configuration**
    - Within the application, go to Settings
    - Navigate to Customer Data Integration
    - Enter your Google Sheet ID

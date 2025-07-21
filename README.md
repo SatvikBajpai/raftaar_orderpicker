@@ -251,7 +251,7 @@ For developers who want to contribute:
 1. **Fork the Repository**
 2. **Clone Locally**
    ```bash
-   git clone https://github.com/yourusername/raftaar_orderpicker.git
+   git clone https://github.com/SatvikBajpai/raftaar_orderpicker.git
    cd raftaar_orderpicker
    ```
 3. **Set up Local Development**
@@ -267,10 +267,6 @@ For developers who want to contribute:
 - Implement comprehensive error handling
 - Add detailed code comments
 - Test across multiple browsers
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
