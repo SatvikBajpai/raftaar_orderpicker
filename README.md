@@ -21,6 +21,7 @@ Raftaar Order Picker is a web-based delivery management system designed to optim
 - **Rider Management**: Complete delivery rider assignment and tracking system
 - **Customer Database**: Integrated customer management with Google Sheets sync
 - **Zone-based Batching**: Intelligent grouping of orders by delivery zones
+- **Configurable Settings**: Customizable travel time calculations for accurate delivery estimates
 - **Performance Analytics**: Detailed metrics and route efficiency analysis
 
 ## Technology Stack
@@ -33,6 +34,7 @@ Raftaar Order Picker is a web-based delivery management system designed to optim
 
 ## Project Structure
 
+```
 ```
 raftaar_orderpicker/
 ├── index.html                 # Main application interface
@@ -47,7 +49,9 @@ raftaar_orderpicker/
 │   ├── customerManager.js     # Customer data management
 │   ├── uiManager.js           # User interface management
 │   ├── storageManager.js      # Data persistence
+│   ├── settingsManager.js     # Configuration and settings management
 │   └── utilityFunctions.js    # Helper functions and calculations
+```
 ├── README.md                  # Project overview and documentation
 ├── SETUP.md                   # Configuration and setup guide
 ├── USER_GUIDE.md              # Complete user manual
@@ -103,6 +107,13 @@ raftaar_orderpicker/
 - **Address Geocoding**: Automatic coordinate resolution for new addresses
 - **Zone Assignment**: Smart zone allocation based on customer location
 - **Customer Database**: Persistent customer information storage
+
+### Advanced Settings
+- **Configurable Travel Time**: Customize average delivery time per kilometer (default: 4.2 minutes/km)
+- **Real-time Updates**: Settings changes instantly update all delivery calculations
+- **Persistent Storage**: Settings are saved locally and restored on application restart
+- **Dynamic Optimization**: Route calculations and SLA predictions adapt to custom travel times
+- **Professional Interface**: Hidden settings panel accessible via gear icon for advanced users
 
 ## User Guide
 

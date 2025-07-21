@@ -384,6 +384,11 @@ document.addEventListener('DOMContentLoaded', () => {
     window.orderPickingTool = new OrderPickingTool();
 });
 
+// Global utility functions
+window.getAvgDeliveryTime = function() {
+    return window.settingsManager ? window.settingsManager.getAvgDeliveryTime() : 4.2;
+};
+
 // Google Maps callback
 window.initMap = function() {
     console.log('Google Maps API loaded');
