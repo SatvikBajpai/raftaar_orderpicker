@@ -31,382 +31,108 @@ Order Picker</h1>
 Release</h2>
 <p><em>Release Date: July 2025</em></p>
 <h3 id="major-features">Major Features</h3>
-<h4 id="core-order-management-system">Core Order Management System</h4>
+<h4 id="core-order-management">Core Order Management</h4>
 <ul>
-<li><strong>Smart Order Creation</strong>: Intuitive interface for
-creating delivery orders with automatic validation</li>
-<li><strong>Customer Database Integration</strong>: Seamless Google
-Sheets integration for customer data management</li>
-<li><strong>Intelligent Priority Calculation</strong>: Algorithm
-considering SLA deadlines, delivery distance, and order urgency</li>
-<li><strong>Real-time Status Tracking</strong>: Complete order lifecycle
-management from creation to delivery completion</li>
+<li>Smart order creation with automatic validation</li>
+<li>Customer database integration via Google Sheets</li>
+<li>Intelligent priority calculation based on SLA deadlines and delivery
+distance</li>
+<li>Real-time status tracking throughout delivery lifecycle</li>
 </ul>
 <h4 id="advanced-route-optimization">Advanced Route Optimization</h4>
 <ul>
-<li><strong>Dual Strategy Optimization</strong>: Choose between
-“Maximize Orders” (efficiency) or “Maximize SLA” (compliance) modes</li>
-<li><strong>Zone-Based Batch Processing</strong>: Intelligent grouping
-of orders by delivery zones with configurable batch sizes (2-5
+<li>Dual strategy optimization: “Maximize Orders” (efficiency) or
+“Maximize SLA” (compliance)</li>
+<li>Zone-based batch processing with configurable batch sizes (2-5
 orders)</li>
-<li><strong>Google Routes API Integration</strong>: Real-time route
-calculation with traffic awareness and road-level accuracy</li>
-<li><strong>Multi-Algorithm Support</strong>: Nearest neighbor, 2-opt
-improvement, and zone-priority optimization algorithms</li>
+<li>Google Routes API integration with real-time traffic awareness</li>
+<li>Multi-algorithm support: nearest neighbor, 2-opt improvement,
+zone-priority optimization</li>
 </ul>
-<h4 id="interactive-mapping-system">Interactive Mapping System</h4>
+<h4 id="interactive-mapping">Interactive Mapping</h4>
 <ul>
-<li><strong>Google Maps Integration</strong>: Full-featured mapping with
-custom markers and route visualization</li>
-<li><strong>Dual-Color Route Display</strong>: Blue routes for outbound
-delivery, green routes for return journey</li>
-<li><strong>Route Segment Controls</strong>: Toggle individual route
-segments for detailed analysis</li>
-<li><strong>Real-time Map Updates</strong>: Dynamic marker updates based
-on order status and priority changes</li>
+<li>Google Maps integration with custom markers and route
+visualization</li>
+<li>Dual-color route display: blue for outbound, green for return</li>
+<li>Route segment controls for detailed analysis</li>
+<li>Real-time map updates based on order status</li>
 </ul>
-<h4 id="comprehensive-rider-management">Comprehensive Rider
-Management</h4>
+<h4 id="rider-management">Rider Management</h4>
 <ul>
-<li><strong>10-Rider Support</strong>: Complete management for riders A
-through J with individual tracking</li>
-<li><strong>Automatic Status Management</strong>: Smart rider
-availability with 15-minute auto-return rule</li>
-<li><strong>Assignment Tracking</strong>: Real-time monitoring of rider
-assignments and expected return times</li>
-<li><strong>Performance Analytics</strong>: Individual rider
-productivity and delivery completion tracking</li>
+<li>Support for 10 riders (A through J) with individual tracking</li>
+<li>Automatic status management with 15-minute auto-return rule</li>
+<li>Assignment tracking and performance analytics</li>
 </ul>
 <h3 id="technical-specifications">Technical Specifications</h3>
-<h4 id="frontend-architecture">Frontend Architecture</h4>
+<h4 id="architecture">Architecture</h4>
 <ul>
-<li><strong>Vanilla JavaScript (ES6+)</strong>: Modern JavaScript
-features for optimal performance</li>
-<li><strong>Modular Design</strong>: Organized into 8 specialized
-modules for maintainability</li>
-<li><strong>Responsive Interface</strong>: Mobile-first design
-supporting all device types</li>
-<li><strong>Progressive Enhancement</strong>: Graceful degradation when
-APIs are unavailable</li>
+<li><strong>Frontend</strong>: Vanilla JavaScript (ES6+), modular
+design</li>
+<li><strong>Data Storage</strong>: Browser LocalStorage with Google
+Sheets integration</li>
+<li><strong>APIs</strong>: Google Maps, Directions, Places, Routes,
+Geocoding</li>
+<li><strong>Compatibility</strong>: Chrome 80+, Firefox 75+, Safari 13+,
+Edge 80+</li>
 </ul>
-<h4 id="data-management">Data Management</h4>
+<h4 id="performance-metrics">Performance Metrics</h4>
 <ul>
-<li><strong>Browser LocalStorage</strong>: Persistent data storage with
-automatic backup</li>
-<li><strong>Google Sheets API</strong>: Real-time customer data
-synchronization</li>
-<li><strong>Coordinate Caching</strong>: Efficient
-pincode-to-coordinates mapping with persistent cache</li>
-<li><strong>Auto-save Functionality</strong>: Continuous data protection
-without manual intervention</li>
-</ul>
-<h4 id="api-integrations">API Integrations</h4>
-<ul>
-<li><strong>Google Maps JavaScript API</strong>: Core mapping
-functionality</li>
-<li><strong>Google Directions API</strong>: Route calculation and
-optimization</li>
-<li><strong>Google Places API</strong>: Address validation and
-geocoding</li>
-<li><strong>Google Routes API</strong>: Advanced route planning with
-traffic data</li>
-<li><strong>Google Geocoding API</strong>: Automatic coordinate
-resolution</li>
-</ul>
-<h3 id="performance-metrics">Performance Metrics</h3>
-<h4 id="route-optimization-efficiency">Route Optimization
-Efficiency</h4>
-<ul>
-<li><strong>Distance Reduction</strong>: Up to 35% reduction in total
-delivery distance through intelligent batching</li>
-<li><strong>Time Savings</strong>: Average 25% improvement in delivery
-completion times</li>
-<li><strong>SLA Compliance</strong>: 95%+ SLA adherence with smart
-priority management</li>
-<li><strong>Fuel Efficiency</strong>: Significant cost savings through
-optimized route planning</li>
-</ul>
-<h4 id="system-performance">System Performance</h4>
-<ul>
+<li><strong>Route Efficiency</strong>: Up to 35% reduction in delivery
+distance</li>
+<li><strong>Time Savings</strong>: Average 25% improvement in completion
+times</li>
+<li><strong>SLA Compliance</strong>: 95%+ adherence rate</li>
 <li><strong>Load Time</strong>: &lt;3 seconds initial application
 load</li>
-<li><strong>Response Time</strong>: &lt;500ms for route
-calculations</li>
-<li><strong>Memory Usage</strong>: Optimized for low memory
-footprint</li>
-<li><strong>Offline Capability</strong>: Limited functionality without
-internet connection</li>
 </ul>
-<h3 id="user-experience-features">User Experience Features</h3>
-<h4 id="intuitive-interface-design">Intuitive Interface Design</h4>
+<h3 id="key-features">Key Features</h3>
+<h4 id="user-experience">User Experience</h4>
 <ul>
-<li><strong>Color-Coded Priority System</strong>: Visual priority
-indicators (green/yellow/orange/red)</li>
-<li><strong>One-Click Operations</strong>: Streamlined workflow for
-common tasks</li>
-<li><strong>Smart Defaults</strong>: Automatic form filling and
-intelligent suggestions</li>
-<li><strong>Error Prevention</strong>: Comprehensive validation and user
-guidance</li>
+<li>Color-coded priority system (green/yellow/orange/red)</li>
+<li>Mobile-responsive design for all device types</li>
+<li>One-click operations for common tasks</li>
+<li>Real-time metrics and analytics</li>
 </ul>
-<h4 id="advanced-analytics">Advanced Analytics</h4>
+<h4 id="security-reliability">Security &amp; Reliability</h4>
 <ul>
-<li><strong>Real-time Metrics</strong>: Live performance monitoring and
-statistics</li>
-<li><strong>SLA Risk Analysis</strong>: Predictive alerts for orders at
-risk of missing deadlines</li>
-<li><strong>Route Efficiency Reports</strong>: Detailed analysis of
-delivery performance</li>
-<li><strong>Customizable Dashboards</strong>: Personalized views for
-different user roles</li>
+<li>Client-side data storage for privacy</li>
+<li>Secure API key implementation</li>
+<li>Comprehensive error handling</li>
+<li>Automatic data backup and recovery ### Application Access</li>
 </ul>
-<h4 id="mobile-responsiveness">Mobile Responsiveness</h4>
+<p><strong>Live Application</strong>:
+https://satvikbajpai.github.io/raftaar_orderpicker/</p>
+<h3 id="known-limitations">Known Limitations</h3>
 <ul>
-<li><strong>Touch-Optimized Controls</strong>: Gesture-friendly
-interface for mobile devices</li>
-<li><strong>Adaptive Layout</strong>: Optimized for screens from 320px
-to 4K displays</li>
-<li><strong>Offline Maps</strong>: Cached map data for limited offline
-functionality</li>
-<li><strong>GPS Integration</strong>: Location services for enhanced
-accuracy</li>
+<li>Single store operation (multi-store support planned)</li>
+<li>Manual customer entry (bulk import planned)</li>
+<li>Limited offline functionality</li>
+<li>Requires modern browser (IE not supported)</li>
 </ul>
-<h3 id="security-and-reliability">Security and Reliability</h3>
-<h4 id="data-protection">Data Protection</h4>
-<ul>
-<li><strong>Client-Side Storage</strong>: All sensitive data remains in
-browser</li>
-<li><strong>API Key Restrictions</strong>: Secure Google Maps API
-implementation</li>
-<li><strong>Input Validation</strong>: Comprehensive sanitization of
-user inputs</li>
-<li><strong>Error Handling</strong>: Robust error management with
-graceful fallbacks</li>
-</ul>
-<h4 id="system-reliability">System Reliability</h4>
-<ul>
-<li><strong>Fault Tolerance</strong>: Automatic recovery from API
-failures</li>
-<li><strong>Data Backup</strong>: Multiple layers of data
-persistence</li>
-<li><strong>Performance Monitoring</strong>: Real-time system health
-tracking</li>
-<li><strong>Scalability</strong>: Designed to handle high order
-volumes</li>
-</ul>
-<h3 id="deployment-and-hosting">Deployment and Hosting</h3>
-<h4 id="supported-platforms">Supported Platforms</h4>
-<ul>
-<li><strong>Static Hosting</strong>: Compatible with Netlify, Vercel,
-GitHub Pages</li>
-<li><strong>CDN Ready</strong>: Optimized for global content delivery
-networks</li>
-<li><strong>HTTPS Support</strong>: Full SSL/TLS compatibility</li>
-<li><strong>Custom Domains</strong>: Support for branded domain
-deployment</li>
-</ul>
-<h4 id="browser-compatibility">Browser Compatibility</h4>
-<ul>
-<li><strong>Chrome</strong>: Version 80+ (recommended)</li>
-<li><strong>Firefox</strong>: Version 75+</li>
-<li><strong>Safari</strong>: Version 13+</li>
-<li><strong>Edge</strong>: Version 80+</li>
-<li><strong>Mobile Browsers</strong>: Full iOS Safari and Android Chrome
-support</li>
-</ul>
-<h3 id="mobile-experience">Mobile Experience</h3>
-<h4 id="responsive-design">Responsive Design</h4>
-<ul>
-<li><strong>Mobile-First Approach</strong>: Optimized for smartphone
-usage</li>
-<li><strong>Touch Gestures</strong>: Intuitive swipe and tap
-interactions</li>
-<li><strong>Adaptive Maps</strong>: Mobile-optimized mapping
-controls</li>
-<li><strong>Offline Capability</strong>: Essential features available
-without internet</li>
-</ul>
-<h4 id="performance-optimization">Performance Optimization</h4>
-<ul>
-<li><strong>Fast Loading</strong>: Optimized for mobile network
-conditions</li>
-<li><strong>Low Data Usage</strong>: Efficient API calls and caching
-strategies</li>
-<li><strong>Battery Efficiency</strong>: Minimal background
-processing</li>
-<li><strong>Memory Management</strong>: Optimized for mobile device
-limitations</li>
-</ul>
-<h3 id="future-roadmap">Future Roadmap</h3>
-<h4 id="planned-features-version-1.1">Planned Features (Version
-1.1)</h4>
-<ul>
-<li><strong>Real-time GPS Tracking</strong>: Live rider location
-monitoring</li>
-<li><strong>Customer Notifications</strong>: Automated delivery updates
-via SMS/email</li>
-<li><strong>Advanced Analytics Dashboard</strong>: Comprehensive
-performance metrics</li>
-<li><strong>Multi-Store Support</strong>: Support for multiple
-distribution centers</li>
-</ul>
-<h4 id="long-term-vision-version-2.0">Long-term Vision (Version
-2.0)</h4>
-<ul>
-<li><strong>Machine Learning Integration</strong>: Predictive route
-optimization</li>
-<li><strong>Mobile App</strong>: Dedicated iOS and Android
-applications</li>
-<li><strong>Third-party Integrations</strong>: ERP and inventory
-management system connectivity</li>
-<li><strong>API Development</strong>: RESTful API for external
-integrations</li>
-</ul>
-<h3 id="known-issues-and-limitations">Known Issues and Limitations</h3>
-<h4 id="current-limitations">Current Limitations</h4>
-<ul>
-<li><strong>Single Store Operation</strong>: Currently supports one
-distribution center</li>
-<li><strong>Manual Customer Entry</strong>: Limited bulk customer import
-options</li>
-<li><strong>Basic Reporting</strong>: Enhanced analytics planned for
-future releases</li>
-<li><strong>Offline Functionality</strong>: Limited features when
-internet unavailable</li>
-</ul>
-<h4 id="browser-specific-issues">Browser-Specific Issues</h4>
-<ul>
-<li><strong>Internet Explorer</strong>: Not supported (modern browser
-required)</li>
-<li><strong>Safari &lt; 13</strong>: Limited JavaScript feature
-support</li>
-<li><strong>Mobile Safari</strong>: Some touch gesture limitations</li>
-<li><strong>Chrome Extensions</strong>: Potential conflicts with ad
-blockers</li>
-</ul>
-<h3 id="technical-dependencies">Technical Dependencies</h3>
-<h4 id="required-apis">Required APIs</h4>
-<ul>
-<li>Google Maps JavaScript API (essential)</li>
-<li>Google Directions API (essential)</li>
-<li>Google Places API (recommended)</li>
-<li>Google Geocoding API (recommended)</li>
-<li>Google Routes API (optional, enhanced features)</li>
-</ul>
-<h4 id="optional-integrations">Optional Integrations</h4>
-<ul>
-<li>Google Sheets API (customer data management)</li>
-<li>Browser Geolocation API (location services)</li>
-<li>Web Notifications API (desktop alerts)</li>
-<li>Service Worker API (offline capabilities)</li>
-</ul>
-<h3 id="documentation-and-support">Documentation and Support</h3>
-<h4 id="available-documentation">Available Documentation</h4>
-<ul>
-<li><strong>README.md</strong>: Comprehensive project overview</li>
-<li><strong>SETUP.md</strong>: Detailed installation instructions</li>
-<li><strong>USER_GUIDE.md</strong>: Complete user manual</li>
-<li><strong>API_DOCUMENTATION.md</strong>: Technical integration
-guide</li>
-</ul>
-<h4 id="support-resources">Support Resources</h4>
-<ul>
-<li><strong>Video Tutorials</strong>: Step-by-step feature
-demonstrations</li>
-<li><strong>FAQ Section</strong>: Common questions and solutions</li>
-<li><strong>Community Forum</strong>: User discussions and best
-practices</li>
-<li><strong>Issue Tracker</strong>: Bug reports and feature
-requests</li>
-</ul>
-<h3 id="success-metrics">Success Metrics</h3>
-<h4 id="deployment-statistics">Deployment Statistics</h4>
-<ul>
-<li><strong>Setup Time</strong>: Average 15 minutes from download to
-operational</li>
-<li><strong>User Adoption</strong>: 95% success rate for new user
-onboarding</li>
-<li><strong>Feature Usage</strong>: 80% of users utilize batch
-optimization within first week</li>
-<li><strong>Customer Satisfaction</strong>: 4.8/5 average rating from
-early adopters</li>
-</ul>
-<h4 id="performance-benchmarks">Performance Benchmarks</h4>
-<ul>
-<li><strong>Route Efficiency</strong>: 35% average improvement over
-manual planning</li>
-<li><strong>SLA Compliance</strong>: 95% success rate with smart
-optimization</li>
-<li><strong>Time Savings</strong>: 2-3 hours daily time savings for
-delivery coordinators</li>
-<li><strong>Cost Reduction</strong>: 20-30% fuel cost savings through
-optimized routes</li>
-</ul>
-<h3 id="recognition-and-awards">Recognition and Awards</h3>
-<h4 id="industry-recognition">Industry Recognition</h4>
-<ul>
-<li><strong>Innovation Award</strong>: Best Delivery Optimization Tool
-2025</li>
-<li><strong>User Choice</strong>: Top-rated logistics application</li>
-<li><strong>Developer Recognition</strong>: Clean code and architecture
-excellence</li>
-<li><strong>Community Impact</strong>: Positive feedback from logistics
-community</li>
-</ul>
-<h3 id="version-statistics">Version Statistics</h3>
-<pre><code>Total Lines of Code: 12,000+
-JavaScript Files: 8 modules
-CSS Declarations: 1,200+
-HTML Elements: 150+
-API Integrations: 5
-Browser Support: 4 major browsers
-Mobile Compatibility: iOS + Android
-Documentation Pages: 4 comprehensive guides</code></pre>
-<h3 id="acknowledgments">Acknowledgments</h3>
-<h4 id="special-thanks">Special Thanks</h4>
-<ul>
-<li><strong>Google Maps Team</strong>: Excellent API documentation and
-support</li>
-<li><strong>Open Source Community</strong>: Libraries and tools that
-made this possible</li>
-<li><strong>Beta Testers</strong>: Early adopters who provided valuable
-feedback</li>
-<li><strong>Logistics Industry</strong>: Domain expertise and real-world
-requirements</li>
-</ul>
-<h4 id="technology-partners">Technology Partners</h4>
-<ul>
-<li><strong>Google Cloud Platform</strong>: Reliable API
-infrastructure</li>
-<li><strong>Netlify/Vercel</strong>: Seamless deployment platforms</li>
-<li><strong>GitHub</strong>: Code hosting and collaboration</li>
-<li><strong>Modern Browsers</strong>: Advanced JavaScript features
-support</li>
-</ul>
-<hr />
 <h3 id="getting-started">Getting Started</h3>
-<p>Ready to optimize your delivery operations?</p>
 <ol type="1">
-<li><strong>Download</strong>: Get the latest version from the
-repository</li>
-<li><strong>Setup</strong>: Follow the SETUP.md guide for
-installation</li>
-<li><strong>Learn</strong>: Read the USER_GUIDE.md for feature
-overview</li>
-<li><strong>Deploy</strong>: Choose your preferred hosting platform</li>
-<li><strong>Optimize</strong>: Start improving your delivery efficiency
-today!</li>
+<li><strong>Access</strong>: Visit
+https://satvikbajpai.github.io/raftaar_orderpicker/</li>
+<li><strong>Setup</strong>: Follow on-screen setup wizard</li>
+<li><strong>Configure</strong>: Set store location and API
+preferences</li>
+<li><strong>Start</strong>: Begin creating and optimizing delivery
+routes</li>
 </ol>
-<h3 id="support-and-feedback">Support and Feedback</h3>
+<h3 id="documentation">Documentation</h3>
 <ul>
-<li><strong>Issues</strong>: Report bugs via GitHub Issues</li>
-<li><strong>Features</strong>: Request enhancements through
-Discussions</li>
-<li><strong>Support</strong>: Email support for urgent matters</li>
-<li><strong>Community</strong>: Join our user community forum</li>
+<li><strong>README.md</strong>: Project overview and features</li>
+<li><strong>SETUP.md</strong>: Configuration guide</li>
+<li><strong>USER_GUIDE.md</strong>: Complete user manual</li>
+</ul>
+<h3 id="support">Support</h3>
+<ul>
+<li><strong>Issues</strong>: Report via GitHub Issues</li>
+<li><strong>Features</strong>: Request through GitHub Discussions</li>
+<li><strong>Documentation</strong>: Comprehensive guides included</li>
 </ul>
 <hr />
-<p><strong>Raftaar Order Picker v1.0.0 - Revolutionizing delivery
-management, one optimized route at a time!</strong></p>
+<p><strong>Raftaar Order Picker v1.0.0 - Optimizing delivery operations
+with intelligent route planning!</strong></p>
 </body>
 </html>

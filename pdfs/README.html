@@ -95,8 +95,10 @@
 delivery management with SLA compliance tracking.</p>
 <p><img src="https://img.shields.io/badge/Version-1.0.0-blue"
 alt="Raftaar Order Picker" /> <img
-src="https://img.shields.io/badge/Status-Active-green"
-alt="Status" /></p>
+src="https://img.shields.io/badge/Status-Live-green" alt="Status" /></p>
+<h2 id="live-application">Live Application</h2>
+<p><strong>Access the application directly at:</strong>
+https://satvikbajpai.github.io/raftaar_orderpicker/</p>
 <h2 id="overview">Overview</h2>
 <p>Raftaar Order Picker is a web-based delivery management system
 designed to optimize order picking and delivery routes for maximum
@@ -155,51 +157,33 @@ Vercel, GitHub Pages)</li>
 ├── Zones (pattas).kml         # Delivery zone mapping
 ├── bell.wav                   # Notification sound
 └── documentation/             # Project documentation</code></pre>
-<h2 id="quick-start">Quick Start</h2>
+<h2 id="getting-started">Getting Started</h2>
 <h3 id="prerequisites">Prerequisites</h3>
-<ol type="1">
-<li><strong>Google Maps API Key</strong>: Required for mapping and
-routing functionality</li>
-<li><strong>Web Server</strong>: For proper CORS handling (local file://
-protocol has limitations)</li>
-<li><strong>Modern Browser</strong>: Chrome, Firefox, Safari, or Edge
-with ES6+ support</li>
-</ol>
-<h3 id="installation">Installation</h3>
-<ol type="1">
-<li><p><strong>Clone or Download the Repository</strong></p>
-<div class="sourceCode" id="cb2"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> raftaar_orderpicker</span></code></pre></div></li>
-<li><p><strong>Configure Google Maps API</strong></p>
 <ul>
-<li>Open <code>index.html</code> and locate the Google Maps script
-tag</li>
-<li>Replace <code>YOUR_API_KEY</code> with your actual Google Maps API
-key:</li>
+<li>Modern Web Browser (Chrome 80+, Firefox 75+, Safari 13+, Edge
+80+)</li>
+<li>Internet connection</li>
+<li>Google Maps API Key (optional, for enhanced performance)</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre
-class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> async defer src</span><span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY</span><span class="er">&amp;</span><span class="st">libraries=routes,geometry,places</span><span class="er">&amp;</span><span class="st">callback=initMap&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div></li>
-<li><p><strong>Serve the Application</strong></p>
-<p>Choose one of these methods:</p>
-<p><strong>Option A: Python HTTP Server</strong></p>
-<div class="sourceCode" id="cb4"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> http.server 8000</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visit http://localhost:8000</span></span></code></pre></div>
-<p><strong>Option B: Node.js HTTP Server</strong></p>
-<div class="sourceCode" id="cb5"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> http-server <span class="at">-p</span> 8000</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visit http://localhost:8000</span></span></code></pre></div>
-<p><strong>Option C: VS Code Live Server</strong></p>
+<h3 id="quick-start">Quick Start</h3>
+<ol type="1">
+<li><strong>Access the Application</strong>
 <ul>
-<li>Install Live Server extension</li>
-<li>Right-click <code>index.html</code> → “Open with Live Server”</li>
+<li>Visit: https://satvikbajpai.github.io/raftaar_orderpicker/</li>
+<li>The application loads automatically with default settings</li>
 </ul></li>
-<li><p><strong>Access the Application</strong></p>
+<li><strong>Optional: Configure Your Own API Key</strong>
 <ul>
-<li>Open your web browser</li>
-<li>Navigate to the local server URL</li>
-<li>The application will automatically load and initialize</li>
+<li>For optimal performance, set up your own Google Maps API key</li>
+<li>Follow the setup guide in the application settings</li>
+<li>Required APIs: Maps JavaScript, Directions, Places, Geocoding,
+Routes</li>
+</ul></li>
+<li><strong>Start Using</strong>
+<ul>
+<li>The application is ready to use immediately</li>
+<li>Follow the on-screen tutorial for first-time setup</li>
+<li>Configure your store location and preferences</li>
 </ul></li>
 </ol>
 <h2 id="core-functionality">Core Functionality</h2>
@@ -248,15 +232,15 @@ customer location</li>
 storage</li>
 </ul>
 <h2 id="user-guide">User Guide</h2>
-<h3 id="getting-started">Getting Started</h3>
+<h3 id="getting-started-1">Getting Started</h3>
 <ol type="1">
-<li><strong>Initial Setup</strong>
+<li><strong>Access the Application</strong>
 <ul>
-<li>Launch the application in your web browser</li>
-<li>The Google Maps interface will load showing the Raftaar store
+<li>Visit https://satvikbajpai.github.io/raftaar_orderpicker/</li>
+<li>The Google Maps interface loads showing the default store
 location</li>
-<li>Customer data will automatically sync from Google Sheets (if
-configured)</li>
+<li>Customer data syncs automatically if Google Sheets is
+configured</li>
 </ul></li>
 <li><strong>Adding Your First Order</strong>
 <ul>
@@ -332,119 +316,65 @@ functionality</li>
 tabs</li>
 </ul>
 <h2 id="configuration">Configuration</h2>
-<h3 id="google-maps-api-setup">Google Maps API Setup</h3>
+<p>All configuration can be done within the application interface. For
+detailed setup instructions, see <a href="SETUP.md">SETUP.md</a>.</p>
+<h3 id="google-maps-api-setup-optional">Google Maps API Setup
+(Optional)</h3>
+<p>For enhanced performance and security:</p>
 <ol type="1">
-<li><strong>Create a Google Cloud Project</strong>
+<li><strong>Create Google Cloud Project</strong>
 <ul>
 <li>Visit <a href="https://console.cloud.google.com/">Google Cloud
 Console</a></li>
-<li>Create a new project or select existing</li>
+<li>Enable required APIs: Maps JavaScript, Directions, Places,
+Geocoding, Routes</li>
 </ul></li>
-<li><strong>Enable Required APIs</strong>
+<li><strong>Configure in Application</strong>
 <ul>
-<li>Maps JavaScript API</li>
-<li>Directions API</li>
-<li>Places API</li>
-<li>Geocoding API</li>
-<li>Routes API</li>
-</ul></li>
-<li><strong>Create API Key</strong>
-<ul>
-<li>Generate a new API key</li>
-<li>Apply appropriate restrictions for security</li>
-<li>Update the key in <code>index.html</code></li>
+<li>Access Settings within the application</li>
+<li>Enter your API key for improved performance</li>
+<li>Set up domain restrictions for security</li>
 </ul></li>
 </ol>
-<h3 id="google-sheets-integration">Google Sheets Integration</h3>
+<h3 id="google-sheets-integration-optional">Google Sheets Integration
+(Optional)</h3>
 <ol type="1">
-<li><strong>Create Customer Sheet</strong>
+<li><strong>Create Customer Database</strong>
 <ul>
-<li>Column A: Customer Name</li>
-<li>Column B: Customer Phone</li>
-<li>Column C: Latitude</li>
-<li>Column D: Longitude</li>
-<li>Column E: Zone</li>
-</ul></li>
-<li><strong>Make Sheet Public</strong>
-<ul>
-<li>File → Share → “Anyone with the link can view”</li>
-<li>Copy the sheet ID from the URL</li>
-</ul></li>
-<li><strong>Update Configuration</strong>
-<ul>
-<li>Modify <code>spreadsheetId</code> in
-<code>js/customerManager.js</code></li>
-<li>Ensure API key has Sheets API access</li>
+<li>Set up Google Sheets with customer data</li>
+<li>Make sheet publicly accessible</li>
+<li>Configure sheet ID in application settings</li>
 </ul></li>
 </ol>
 <h3 id="store-location">Store Location</h3>
-<p>Update the store coordinates in <code>js/main.js</code>:</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">this</span><span class="op">.</span><span class="at">storeLocation</span> <span class="op">=</span> {</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lat</span><span class="op">:</span> YOUR_LATITUDE<span class="op">,</span>    <span class="co">// Replace with actual coordinates</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lng</span><span class="op">:</span> YOUR_LONGITUDE</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
-<h2 id="deployment">Deployment</h2>
-<h3 id="netlify-deployment">Netlify Deployment</h3>
-<ol type="1">
-<li><strong>Connect Repository</strong>
 <ul>
-<li>Link your GitHub repository to Netlify</li>
-<li>Configure build settings (static site)</li>
-</ul></li>
-<li><strong>Environment Variables</strong>
+<li>Update store coordinates within the application settings</li>
+<li>Default location: Nagpur, Maharashtra</li>
+<li>Use Google Maps to find your exact coordinates</li>
+</ul>
+<h2 id="documentation">Documentation</h2>
+<p>For detailed information:</p>
 <ul>
-<li>Set <code>GOOGLE_MAPS_API_KEY</code> in site settings</li>
-<li>Configure any additional environment variables</li>
-</ul></li>
-<li><strong>Deploy</strong>
-<ul>
-<li>Automatic deployment on git push</li>
-<li>Custom domain configuration available</li>
-</ul></li>
-</ol>
-<h3 id="vercel-deployment">Vercel Deployment</h3>
-<ol type="1">
-<li><strong>Import Project</strong>
-<ul>
-<li>Connect repository to Vercel</li>
-<li>Configure as static site</li>
-</ul></li>
-<li><strong>Environment Setup</strong>
-<ul>
-<li>Add Google Maps API key to environment variables</li>
-<li>Configure domain settings</li>
-</ul></li>
-<li><strong>Production Deploy</strong>
-<ul>
-<li>Automatic deployments from main branch</li>
-<li>Instant global CDN distribution</li>
-</ul></li>
-</ol>
-<h3 id="github-pages">GitHub Pages</h3>
-<ol type="1">
-<li><strong>Repository Settings</strong>
-<ul>
-<li>Enable GitHub Pages in repository settings</li>
-<li>Select source branch (usually main)</li>
-</ul></li>
-<li><strong>Configuration</strong>
-<ul>
-<li>Ensure API keys are properly configured</li>
-<li>Update any absolute paths for GitHub Pages URL structure</li>
-</ul></li>
-</ol>
+<li><strong><a href="SETUP.md">SETUP.md</a></strong>: Complete
+configuration guide</li>
+<li><strong><a href="USER_GUIDE.md">USER_GUIDE.md</a></strong>:
+Comprehensive user manual</li>
+<li><strong><a href="RELEASE_NOTES.md">RELEASE_NOTES.md</a></strong>:
+Version 1.0.0 release information</li>
+</ul>
 <h2 id="troubleshooting">Troubleshooting</h2>
 <h3 id="common-issues">Common Issues</h3>
-<p><strong>Map Not Loading</strong> - Verify Google Maps API key is
-valid and has required permissions - Check browser console for error
-messages - Ensure APIs are enabled in Google Cloud Console</p>
+<p><strong>Map Not Loading</strong> - The application works with a
+default API key initially - For better performance, set up your own
+Google Maps API key - Check browser console for any error messages -
+Ensure required APIs are enabled in Google Cloud Console</p>
 <p><strong>Customer Data Not Loading</strong> - Verify Google Sheets is
-publicly accessible - Check spreadsheet ID in configuration - Ensure
-correct column format in Google Sheets</p>
-<p><strong>Routes Not Displaying</strong> - Confirm Directions API is
-enabled - Check API quota limits in Google Cloud Console - Verify
-network connectivity and CORS settings</p>
+publicly accessible - Check spreadsheet ID in application settings -
+Ensure correct column format in Google Sheets</p>
+<p><strong>Routes Not Displaying</strong> - Confirm internet connection
+is stable - The application uses cached route data when possible - Check
+API quota limits if using your own API key - Try refreshing the
+application</p>
 <p><strong>Orders Not Saving</strong> - Check browser localStorage
 availability - Clear browser cache if experiencing issues - Verify no
 browser extensions are blocking storage</p>
@@ -475,13 +405,19 @@ analysis</li>
 </ul>
 <h2 id="contributing">Contributing</h2>
 <h3 id="development-setup">Development Setup</h3>
+<p>For developers who want to contribute:</p>
 <ol type="1">
 <li><p><strong>Fork the Repository</strong></p></li>
-<li><p><strong>Create Feature Branch</strong></p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> feature/your-feature-name</span></code></pre></div></li>
-<li><p><strong>Make Changes</strong></p></li>
-<li><p><strong>Test Thoroughly</strong></p></li>
+<li><p><strong>Clone Locally</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://github.com/yourusername/raftaar_orderpicker.git</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> raftaar_orderpicker</span></code></pre></div></li>
+<li><p><strong>Set up Local Development</strong></p>
+<ul>
+<li>Use any local web server (Python, Node.js, VS Code Live Server)</li>
+<li>Configure your own Google Maps API key</li>
+</ul></li>
+<li><p><strong>Make Changes and Test</strong></p></li>
 <li><p><strong>Submit Pull Request</strong></p></li>
 </ol>
 <h3 id="code-standards">Code Standards</h3>
@@ -498,28 +434,25 @@ href="LICENSE">LICENSE</a> file for details.</p>
 <h2 id="support">Support</h2>
 <p>For support and questions:</p>
 <ul>
+<li><strong>Live Application</strong>:
+https://satvikbajpai.github.io/raftaar_orderpicker/</li>
 <li><strong>Issues</strong>: Use GitHub Issues for bug reports</li>
 <li><strong>Discussions</strong>: GitHub Discussions for feature
 requests</li>
-<li><strong>Documentation</strong>: Refer to inline code comments</li>
-<li><strong>Community</strong>: Join project discussions</li>
+<li><strong>Documentation</strong>: Comprehensive guides included in
+this repository</li>
 </ul>
-<h2 id="roadmap">Roadmap</h2>
-<h3 id="upcoming-features">Upcoming Features</h3>
+<h2 id="quick-links">Quick Links</h2>
 <ul>
-<li><strong>Mobile App</strong>: React Native companion app</li>
-<li><strong>Advanced Analytics</strong>: Detailed performance
-dashboards</li>
-<li><strong>Machine Learning</strong>: Predictive route
-optimization</li>
-<li><strong>Real-time Tracking</strong>: Live GPS tracking
-integration</li>
-<li><strong>Multi-store Support</strong>: Support for multiple
-distribution centers</li>
-<li><strong>API Integration</strong>: RESTful API for third-party
-integrations</li>
+<li><strong>Application</strong>:
+https://satvikbajpai.github.io/raftaar_orderpicker/</li>
+<li><strong>Setup Guide</strong>: <a href="SETUP.md">SETUP.md</a></li>
+<li><strong>User Manual</strong>: <a
+href="USER_GUIDE.md">USER_GUIDE.md</a></li>
+<li><strong>Release Notes</strong>: <a
+href="RELEASE_NOTES.md">RELEASE_NOTES.md</a></li>
 </ul>
 <hr />
-<p><strong>Made with care for efficient delivery management</strong></p>
+<p><strong>Start optimizing your delivery operations today!</strong></p>
 </body>
 </html>

@@ -68,8 +68,6 @@ location</li>
 <ul>
 <li><strong>Existing Customers</strong>: Select from the dropdown list
 (auto-loaded from Google Sheets)</li>
-<li><strong>New Customers</strong>: If customer not found, you can add
-pincode manually</li>
 <li><strong>Auto-Geocoding</strong>: System automatically finds
 coordinates for new addresses</li>
 </ul></li>
@@ -88,7 +86,6 @@ assignment</li>
 <li><strong>Out for Delivery</strong>: Assigned to rider, currently
 being delivered</li>
 <li><strong>Delivered</strong>: Successfully completed delivery</li>
-<li><strong>Cancelled</strong>: Order cancelled or returned</li>
 </ul>
 <h2 id="smart-optimization">Smart Optimization</h2>
 <h3 id="single-order-mode">Single Order Mode</h3>
@@ -104,7 +101,7 @@ deadline management</li>
 <ul>
 <li>Click “Get Next Order” button</li>
 <li>System analyzes all pending orders</li>
-<li>Provides intelligent recommendation with reasoning</li>
+<li>Provides intelligent recommendation</li>
 </ul></li>
 <li><p><strong>Order Selection Logic</strong></p>
 <p><strong>For Maximize SLA Strategy:</strong></p>
@@ -129,7 +126,7 @@ Optimization)</h3>
 <li><strong>Enable Batch Processing</strong>
 <ul>
 <li>Toggle “Zone Batch Optimization” checkbox</li>
-<li>Configure batch settings (2-8 orders per batch)</li>
+<li>Configure batch settings (2-5 orders per batch)</li>
 </ul></li>
 <li><strong>Zone-Based Clustering</strong>
 <ul>
@@ -194,9 +191,7 @@ segments</li>
 <h3 id="route-information-display">Route Information Display</h3>
 <p>Each route shows: - <strong>Distance</strong>: Total kilometers for
 the route - <strong>Duration</strong>: Estimated driving time -
-<strong>Route Type</strong>: Outbound, return, or segment -
-<strong>Traffic Consideration</strong>: Real-time traffic adjustments
-(when available)</p>
+<strong>Route Type</strong>: Outbound, return, or segment</p>
 <h2 id="rider-management">Rider Management</h2>
 <h3 id="available-riders">Available Riders</h3>
 <p>The system supports 10 active riders (A through J): - <strong>Rider
@@ -231,8 +226,6 @@ time)</li>
 </ol>
 <h3 id="automatic-rider-management">Automatic Rider Management</h3>
 <ul>
-<li><strong>15-Minute Rule</strong>: Riders automatically become
-available when &lt;15 minutes remaining</li>
 <li><strong>Delivery Completion</strong>: Orders marked as delivered
 when rider returns</li>
 <li><strong>Status Synchronization</strong>: Real-time updates across
@@ -258,12 +251,6 @@ delivery</li>
 </ol>
 <h3 id="adding-new-customers">Adding New Customers</h3>
 <ol type="1">
-<li><strong>Manual Entry</strong>
-<ul>
-<li>Use pincode for new customers</li>
-<li>System automatically geocodes coordinates</li>
-<li>Validates address information</li>
-</ul></li>
 <li><strong>Bulk Import</strong>
 <ul>
 <li>Update Google Sheets with new customer data</li>
@@ -271,89 +258,6 @@ delivery</li>
 <li>Automatic coordinate resolution</li>
 </ul></li>
 </ol>
-<h2 id="performance-analytics">Performance Analytics</h2>
-<h3 id="order-metrics">Order Metrics</h3>
-<ul>
-<li><strong>SLA Compliance Rate</strong>: Percentage of orders meeting
-deadlines</li>
-<li><strong>Average Delivery Time</strong>: Mean time from order to
-delivery</li>
-<li><strong>Route Efficiency</strong>: Distance optimization
-statistics</li>
-<li><strong>Order Volume</strong>: Daily/weekly processing counts</li>
-</ul>
-<h3 id="route-analytics">Route Analytics</h3>
-<ul>
-<li><strong>Distance Savings</strong>: Optimization improvements over
-direct routes</li>
-<li><strong>Time Efficiency</strong>: Batch vs. individual delivery
-comparisons</li>
-<li><strong>Zone Performance</strong>: Delivery success rates by
-zone</li>
-<li><strong>Rider Productivity</strong>: Individual rider performance
-metrics</li>
-</ul>
-<h3 id="real-time-monitoring">Real-Time Monitoring</h3>
-<ul>
-<li><strong>Live Order Tracking</strong>: Current status of all
-orders</li>
-<li><strong>SLA Risk Alerts</strong>: Visual warnings for at-risk
-orders</li>
-<li><strong>Route Progress</strong>: Real-time delivery tracking</li>
-<li><strong>System Performance</strong>: Application health
-monitoring</li>
-</ul>
-<h2 id="advanced-features">Advanced Features</h2>
-<h3 id="batch-optimization-settings">Batch Optimization Settings</h3>
-<ol type="1">
-<li><strong>Batch Size Configuration</strong>
-<ul>
-<li>Minimum: 2 orders per batch</li>
-<li>Maximum: 8 orders per batch</li>
-<li>Optimal: 4-6 orders for best efficiency</li>
-</ul></li>
-<li><strong>Zone Grouping</strong>
-<ul>
-<li>Automatic zone-based clustering</li>
-<li>Cross-zone batching (when beneficial)</li>
-<li>Distance-based grouping fallback</li>
-</ul></li>
-</ol>
-<h3 id="route-optimization-algorithms">Route Optimization
-Algorithms</h3>
-<ol type="1">
-<li><strong>Nearest Neighbor</strong>: Quick optimization for small
-batches</li>
-<li><strong>2-Opt Improvement</strong>: Advanced optimization for larger
-batches</li>
-<li><strong>Zone Priority</strong>: Strategic starting point
-selection</li>
-<li><strong>SLA Consideration</strong>: Deadline-aware route
-planning</li>
-</ol>
-<h3 id="emergency-mode">Emergency Mode</h3>
-<p>For critical situations: 1. <strong>Override Normal
-Priority</strong>: Handle emergency orders first 2. <strong>Express
-Delivery</strong>: Skip batch optimization for urgent orders 3.
-<strong>Rider Redistribution</strong>: Reassign riders for critical
-deliveries 4. <strong>Real-Time Alerts</strong>: Immediate notifications
-for overdue orders</p>
-<h2 id="troubleshooting-common-issues">Troubleshooting Common
-Issues</h2>
-<h3 id="order-creation-problems">Order Creation Problems</h3>
-<p><strong>Issue: Customer not found in dropdown</strong> - Solution:
-Add customer manually using pincode, or update Google Sheets</p>
-<p><strong>Issue: Zone not auto-filling</strong> - Solution: Verify
-customer coordinates are correct</p>
-<p><strong>Issue: Duplicate Order ID error</strong> - Solution: Use
-unique Order IDs (check existing orders first)</p>
-<h3 id="map-and-route-issues">Map and Route Issues</h3>
-<p><strong>Issue: Map not displaying routes</strong> - Solution: Check
-internet connection and Google Maps API status</p>
-<p><strong>Issue: Inaccurate route calculations</strong> - Solution:
-Verify customer addresses and coordinates</p>
-<p><strong>Issue: Route controls not responding</strong> - Solution:
-Refresh page and try again</p>
 <h3 id="performance-issues">Performance Issues</h3>
 <p><strong>Issue: Slow order loading</strong> - Solution: Clear browser
 cache and refresh</p>
@@ -379,16 +283,6 @@ delivery</li>
 <li><strong>Flexibility</strong>: Be ready to adjust plans based on
 real-time conditions</li>
 </ol>
-<h3 id="customer-service">Customer Service</h3>
-<ol type="1">
-<li><strong>Accurate Data</strong>: Maintain up-to-date customer
-information</li>
-<li><strong>Communication</strong>: Keep customers informed of delivery
-status</li>
-<li><strong>Feedback Loop</strong>: Use delivery outcomes to improve
-processes</li>
-<li><strong>Quality Control</strong>: Verify successful deliveries</li>
-</ol>
 <h2 id="productivity-tips">Productivity Tips</h2>
 <h3 id="daily-workflow">Daily Workflow</h3>
 <ol type="1">
@@ -411,13 +305,6 @@ processes</li>
 <li>Plan next day operations</li>
 </ul></li>
 </ol>
-<h3 id="keyboard-shortcuts">Keyboard Shortcuts</h3>
-<ul>
-<li><strong>Ctrl + N</strong>: Focus on new order form</li>
-<li><strong>Ctrl + O</strong>: Open optimization panel</li>
-<li><strong>Ctrl + M</strong>: Center map on store</li>
-<li><strong>Ctrl + R</strong>: Refresh order display</li>
-</ul>
 <h2 id="support-and-resources">Support and Resources</h2>
 <h3 id="getting-help">Getting Help</h3>
 <ol type="1">
@@ -426,21 +313,8 @@ messages</li>
 <li><strong>Feature Questions</strong>: Refer to this user guide</li>
 <li><strong>Performance Problems</strong>: Verify internet connection
 and system resources</li>
-<li><strong>Data Issues</strong>: Check Google Sheets configuration</li>
+<li><h2 id="data-issues-check-google-sheets-configuration"><strong>Data
+Issues</strong>: Check Google Sheets configuration</h2></li>
 </ol>
-<h3 id="additional-resources">Additional Resources</h3>
-<ul>
-<li><strong>Video Tutorials</strong>: Available for complex
-features</li>
-<li><strong>Best Practices Guide</strong>: Industry-specific
-recommendations</li>
-<li><strong>API Documentation</strong>: For advanced integrations</li>
-<li><strong>Community Forum</strong>: User discussions and tips</li>
-</ul>
-<hr />
-<p><strong>Master these features to maximize your delivery efficiency
-and customer satisfaction!</strong></p>
-<p><strong>Need more help? Check the troubleshooting section or contact
-support.</strong></p>
 </body>
 </html>
