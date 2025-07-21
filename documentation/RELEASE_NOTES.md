@@ -36,12 +36,6 @@
 - **APIs**: Google Maps, Directions, Places, Routes, Geocoding
 - **Compatibility**: Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
 
-#### Performance Metrics
-- **Route Efficiency**: Up to 35% reduction in delivery distance
-- **Time Savings**: Average 25% improvement in completion times
-- **SLA Compliance**: 95%+ adherence rate
-- **Load Time**: <3 seconds initial application load
-
 ### Key Features
 
 #### User Experience
