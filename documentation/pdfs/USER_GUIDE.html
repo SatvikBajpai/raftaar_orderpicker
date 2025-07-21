@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>USER_GUIDE</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+</head>
+<body>
+<h1 id="raftaar-order-picker---user-guide">Raftaar Order Picker - User
+Guide</h1>
+<h2 id="getting-started">Getting Started</h2>
+<p>Welcome to Raftaar Order Picker! This comprehensive guide will help
+you master the application and optimize your delivery operations.</p>
+<h3 id="first-time-setup">First Time Setup</h3>
+<ol type="1">
+<li><strong>Launch the Application</strong>
+<ul>
+<li>Open your web browser</li>
+<li>Navigate to the application URL</li>
+<li>Wait for the Google Maps interface to load</li>
+<li>You’ll see the Raftaar store location marked on the map</li>
+</ul></li>
+<li><strong>Interface Overview</strong> The main interface consists of
+four key sections:
+<ul>
+<li><strong>Add New Order</strong>: Create new delivery orders</li>
+<li><strong>Orders Queue</strong>: View and manage pending orders</li>
+<li><strong>Optimization Panel</strong>: Smart order selection and route
+planning</li>
+<li><strong>Interactive Map</strong>: Visual representation of orders
+and routes</li>
+</ul></li>
+</ol>
+<h2 id="order-management">Order Management</h2>
+<h3 id="creating-new-orders">Creating New Orders</h3>
+<ol type="1">
+<li><strong>Basic Order Creation</strong>
+<ul>
+<li><strong>Order ID</strong>: Enter a unique identifier (e.g., ORD-001,
+DEL-2024-001)</li>
+<li><strong>Order Time</strong>: Select when the order was placed
+(defaults to current time)</li>
+<li><strong>Customer</strong>: Choose from existing customers or add new
+customer data</li>
+<li><strong>Zone</strong>: Automatically filled based on customer
+location</li>
+</ul></li>
+<li><strong>Customer Selection</strong>
+<ul>
+<li><strong>Existing Customers</strong>: Select from the dropdown list
+(auto-loaded from Google Sheets)</li>
+<li><strong>Auto-Geocoding</strong>: System automatically finds
+coordinates for new addresses</li>
+</ul></li>
+<li><strong>Order Validation</strong>
+<ul>
+<li>System prevents duplicate Order IDs</li>
+<li>Validates required fields before creation</li>
+<li>Automatically calculates delivery distance and priority</li>
+</ul></li>
+</ol>
+<h3 id="order-status-tracking">Order Status Tracking</h3>
+<ul>
+<li><strong>Pending</strong>: Order created, awaiting assignment</li>
+<li><strong>Selected</strong>: Order chosen for delivery, awaiting rider
+assignment</li>
+<li><strong>Out for Delivery</strong>: Assigned to rider, currently
+being delivered</li>
+<li><strong>Delivered</strong>: Successfully completed delivery</li>
+</ul>
+<h2 id="smart-optimization">Smart Optimization</h2>
+<h3 id="single-order-mode">Single Order Mode</h3>
+<ol type="1">
+<li><p><strong>Select Optimization Strategy</strong></p>
+<ul>
+<li><strong>Maximize Orders</strong>: Prioritizes closest orders for
+maximum delivery count</li>
+<li><strong>Maximize SLA</strong>: Focuses on SLA compliance and
+deadline management</li>
+</ul></li>
+<li><p><strong>Get Recommendation</strong></p>
+<ul>
+<li>Click “Get Next Order” button</li>
+<li>System analyzes all pending orders</li>
+<li>Provides intelligent recommendation</li>
+</ul></li>
+<li><p><strong>Order Selection Logic</strong></p>
+<p><strong>For Maximize SLA Strategy:</strong></p>
+<ul>
+<li><strong>Critical Orders</strong>: Overdue by &gt;4 hours (highest
+priority)</li>
+<li><strong>Meetable SLA</strong>: Orders that can still meet
+deadlines</li>
+<li><strong>Recently Overdue</strong>: &lt;4 hours overdue (damage
+control)</li>
+</ul>
+<p><strong>For Maximize Orders Strategy:</strong></p>
+<ul>
+<li><strong>Closest First</strong>: Shortest distance from store</li>
+<li><strong>Quick Turnaround</strong>: Fastest delivery completion</li>
+<li><strong>High Volume</strong>: Maximum orders per time period</li>
+</ul></li>
+</ol>
+<h3 id="batch-mode-zone-optimization">Batch Mode (Zone
+Optimization)</h3>
+<ol type="1">
+<li><strong>Enable Batch Processing</strong>
+<ul>
+<li>Toggle “Zone Batch Optimization” checkbox</li>
+<li>Configure batch settings (2-5 orders per batch)</li>
+</ul></li>
+<li><strong>Zone-Based Clustering</strong>
+<ul>
+<li>System automatically groups orders by delivery zones</li>
+<li>Creates efficient multi-stop routes</li>
+<li>Considers zone proximity and route optimization</li>
+</ul></li>
+<li><strong>Batch Analysis</strong>
+<ul>
+<li><strong>Route Efficiency</strong>: Optimized order sequence</li>
+<li><strong>SLA Risk Assessment</strong>: Identifies orders at risk</li>
+<li><strong>Time Estimates</strong>: Total delivery time
+calculations</li>
+<li><strong>Distance Optimization</strong>: Minimized total route
+distance</li>
+</ul></li>
+</ol>
+<h2 id="map-features-and-route-visualization">Map Features and Route
+Visualization</h2>
+<h3 id="interactive-map-controls">Interactive Map Controls</h3>
+<ol type="1">
+<li><strong>Zoom and Pan</strong>
+<ul>
+<li>Use mouse wheel or zoom controls</li>
+<li>Drag to pan around the map</li>
+<li>Double-click to zoom to specific location</li>
+</ul></li>
+<li><strong>Marker Information</strong>
+<ul>
+<li><strong>Store Marker</strong>: Blue building icon (distribution
+center)</li>
+<li><strong>Order Markers</strong>: Color-coded circles with priority
+numbers</li>
+<li><strong>Click Markers</strong>: View detailed order information</li>
+</ul></li>
+</ol>
+<h3 id="route-visualization">Route Visualization</h3>
+<p>The application uses dual-color route system:</p>
+<ul>
+<li><strong>Blue Routes</strong>: Outbound journey (store →
+customers)</li>
+<li><strong>Green Routes</strong>: Return journey (customers →
+store)</li>
+</ul>
+<h3 id="route-controls">Route Controls</h3>
+<ol type="1">
+<li><strong>Single Order Routes</strong>
+<ul>
+<li><strong>Store → Order</strong>: View outbound route</li>
+<li><strong>Order → Store</strong>: View return route</li>
+<li><strong>Toggle Views</strong>: Switch between route types</li>
+</ul></li>
+<li><strong>Batch Routes</strong>
+<ul>
+<li><strong>Full Route</strong>: Complete multi-stop journey</li>
+<li><strong>Store → First</strong>: Route to first delivery</li>
+<li><strong>Segment Routes</strong>: Individual order-to-order
+segments</li>
+<li><strong>Return Route</strong>: Final delivery back to store</li>
+</ul></li>
+</ol>
+<h3 id="route-information-display">Route Information Display</h3>
+<p>Each route shows: - <strong>Distance</strong>: Total kilometers for
+the route - <strong>Duration</strong>: Estimated driving time -
+<strong>Route Type</strong>: Outbound, return, or segment</p>
+<h2 id="rider-management">Rider Management</h2>
+<h3 id="available-riders">Available Riders</h3>
+<p>The system supports 10 active riders (A through J): - <strong>Rider
+A</strong> through <strong>Rider J</strong> - Each rider has independent
+status tracking - Automatic availability management</p>
+<h3 id="rider-status-types">Rider Status Types</h3>
+<ul>
+<li><strong>Available</strong>: Ready for new assignments</li>
+<li><strong>Busy</strong>: Currently on delivery (with expected return
+time)</li>
+<li><strong>Unavailable</strong>: Manually set as unavailable</li>
+</ul>
+<h3 id="order-assignment-process">Order Assignment Process</h3>
+<ol type="1">
+<li><strong>Select Orders</strong>
+<ul>
+<li>Use optimization to identify orders for delivery</li>
+<li>Single orders or complete batches</li>
+</ul></li>
+<li><strong>Choose Rider</strong>
+<ul>
+<li>Click “Select for Delivery” button</li>
+<li>Choose from available riders</li>
+<li>System calculates expected return time</li>
+</ul></li>
+<li><strong>Track Progress</strong>
+<ul>
+<li>Monitor rider status in real-time</li>
+<li>View expected return times</li>
+<li>Automatic status updates</li>
+</ul></li>
+</ol>
+<h3 id="automatic-rider-management">Automatic Rider Management</h3>
+<ul>
+<li><strong>Delivery Completion</strong>: Orders marked as delivered
+when rider returns</li>
+<li><strong>Status Synchronization</strong>: Real-time updates across
+all interface elements</li>
+</ul>
+<h2 id="customer-database-management">Customer Database Management</h2>
+<h3 id="google-sheets-integration">Google Sheets Integration</h3>
+<ol type="1">
+<li><strong>Automatic Data Loading</strong>
+<ul>
+<li>Customer data loads automatically from Google Sheets</li>
+<li>Includes name, phone, coordinates, and zone information</li>
+<li>Real-time synchronization capabilities</li>
+</ul></li>
+<li><strong>Customer Information</strong>
+<ul>
+<li><strong>Name</strong>: Full customer name</li>
+<li><strong>Phone</strong>: Contact number</li>
+<li><strong>Coordinates</strong>: Latitude and longitude for precise
+delivery</li>
+<li><strong>Zone</strong>: Delivery zone assignment</li>
+</ul></li>
+</ol>
+<h3 id="adding-new-customers">Adding New Customers</h3>
+<ol type="1">
+<li><strong>Bulk Import</strong>
+<ul>
+<li>Update Google Sheets with new customer data</li>
+<li>Refresh application to load new customers</li>
+<li>Automatic coordinate resolution</li>
+</ul></li>
+</ol>
+<h3 id="performance-issues">Performance Issues</h3>
+<p><strong>Issue: Slow order loading</strong> - Solution: Clear browser
+cache and refresh</p>
+<p><strong>Issue: Optimization taking too long</strong> - Solution:
+Reduce batch size or check system resources</p>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="order-management-1">Order Management</h3>
+<ol type="1">
+<li><strong>Consistent Naming</strong>: Use standardized Order ID
+formats</li>
+<li><strong>Timely Entry</strong>: Add orders as soon as they’re
+received</li>
+<li><strong>Regular Monitoring</strong>: Check SLA status
+frequently</li>
+<li><strong>Batch Planning</strong>: Group orders efficiently for
+delivery</li>
+</ol>
+<h3 id="route-optimization">Route Optimization</h3>
+<ol type="1">
+<li><strong>Zone Awareness</strong>: Consider geographic clustering</li>
+<li><strong>Time Windows</strong>: Account for traffic patterns</li>
+<li><strong>Capacity Planning</strong>: Don’t overload riders</li>
+<li><strong>Flexibility</strong>: Be ready to adjust plans based on
+real-time conditions</li>
+</ol>
+<h2 id="productivity-tips">Productivity Tips</h2>
+<h3 id="daily-workflow">Daily Workflow</h3>
+<ol type="1">
+<li><strong>Morning Setup</strong>
+<ul>
+<li>Review overnight orders</li>
+<li>Check rider availability</li>
+<li>Plan initial batch routes</li>
+</ul></li>
+<li><strong>Continuous Monitoring</strong>
+<ul>
+<li>Use real-time optimization</li>
+<li>Monitor SLA compliance</li>
+<li>Adjust routes as needed</li>
+</ul></li>
+<li><strong>End-of-Day Review</strong>
+<ul>
+<li>Analyze delivery performance</li>
+<li>Update customer database</li>
+<li>Plan next day operations</li>
+</ul></li>
+</ol>
+<h2 id="support-and-resources">Support and Resources</h2>
+<h3 id="getting-help">Getting Help</h3>
+<ol type="1">
+<li><strong>Application Issues</strong>: Check browser console for error
+messages</li>
+<li><strong>Feature Questions</strong>: Refer to this user guide</li>
+<li><strong>Performance Problems</strong>: Verify internet connection
+and system resources</li>
+<li><h2 id="data-issues-check-google-sheets-configuration"><strong>Data
+Issues</strong>: Check Google Sheets configuration</h2></li>
+</ol>
+</body>
+</html>
