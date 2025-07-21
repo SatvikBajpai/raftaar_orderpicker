@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SETUP</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+</head>
+<body>
+<h1 id="setup-and-installation-guide">Setup and Installation Guide</h1>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Before setting up Raftaar Order Picker, ensure you have:</p>
+<h3 id="required">Required</h3>
+<ul>
+<li>Modern Web Browser (Chrome 80+, Firefox 75+, Safari 13+, Edge
+80+)</li>
+<li>Google Maps API Key with required permissions</li>
+<li>Web Server (for local development or production hosting)</li>
+</ul>
+<h3 id="optional">Optional</h3>
+<ul>
+<li>Google Sheets (for customer data management)</li>
+<li>Custom Domain (for production deploy- Domain restrictions are set
+for API key</li>
+</ul>
+<h2 id="supportt">Supportt)</h2>
+<h2 id="quick-installation">Quick Installation</h2>
+<h3 id="method-1-download-and-setup-recommended">Method 1: Download and
+Setup (Recommended)</h3>
+<ol type="1">
+<li><p><strong>Download the Application</strong></p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Option A: Clone from repository</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> raftaar_orderpicker</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Option B: Download ZIP file</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract to your desired location</span></span></code></pre></div></li>
+<li><p><strong>Get Google Maps API Key</strong></p>
+<ul>
+<li>Go to <a href="https://console.cloud.google.com/">Google Cloud
+Console</a></li>
+<li>Create a new project or select existing one</li>
+<li>Enable the following APIs:
+<ul>
+<li>Maps JavaScript API</li>
+<li>Directions API</li>
+<li>Places API</li>
+<li>Geocoding API</li>
+<li>Routes API (recommended)</li>
+</ul></li>
+<li>Create an API key</li>
+<li>Add API key restrictions for security</li>
+</ul></li>
+<li><p><strong>Configure API Key</strong></p>
+<ul>
+<li>Open <code>index.html</code></li>
+<li>Find line 9 (Google Maps script tag)</li>
+<li>Replace <code>AIzaSyDr-DYch4S-JeL-sTlbixPKSjgOJiHLe8A</code> with
+your API key:</li>
+</ul>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> async defer src</span><span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY_HERE</span><span class="er">&amp;</span><span class="st">libraries=routes,geometry,places</span><span class="er">&amp;</span><span class="st">callback=initMap&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div></li>
+<li><p><strong>Start Web Server</strong></p>
+<p><strong>Option A: Python (if installed)</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Python 3</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> http.server 8000</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Python 2 (legacy)</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> SimpleHTTPServer 8000</span></code></pre></div>
+<p><strong>Option B: Node.js (if installed)</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install http-server globally</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> http-server</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Start server</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="ex">http-server</span> <span class="at">-p</span> 8000</span></code></pre></div>
+<p><strong>Option C: PHP (if installed)</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">php</span> <span class="at">-S</span> localhost:8000</span></code></pre></div></li>
+<li><p><strong>Access Application</strong></p>
+<ul>
+<li>Open browser and go to <code>http://localhost:8000</code></li>
+<li>Application will load and initialize automatically</li>
+</ul></li>
+</ol>
+<h3 id="method-2-online-deployment">Method 2: Online Deployment</h3>
+<h4 id="deploy-to-netlify">Deploy to Netlify</h4>
+<ol type="1">
+<li><strong>Prepare Repository</strong>
+<ul>
+<li>Upload code to GitHub, GitLab, or Bitbucket</li>
+<li>Ensure <code>netlify.toml</code> is in root directory</li>
+</ul></li>
+<li><strong>Deploy to Netlify</strong>
+<ul>
+<li>Go to <a href="https://netlify.com">Netlify</a></li>
+<li>Click “New site from Git”</li>
+<li>Connect your repository</li>
+<li>Configure build settings:
+<ul>
+<li>Build command: (leave empty for static site)</li>
+<li>Publish directory: <code>/</code> (root)</li>
+</ul></li>
+</ul></li>
+<li><strong>Configure Environment</strong>
+<ul>
+<li>Go to Site Settings → Environment Variables</li>
+<li>Add <code>GOOGLE_MAPS_API_KEY</code> with your API key</li>
+<li>Deploy site</li>
+</ul></li>
+</ol>
+<h4 id="deploy-to-vercel">Deploy to Vercel</h4>
+<ol type="1">
+<li><strong>Prepare Repository</strong>
+<ul>
+<li>Upload code to GitHub</li>
+<li>Ensure <code>vercel.json</code> is in root directory</li>
+</ul></li>
+<li><strong>Deploy to Vercel</strong>
+<ul>
+<li>Go to <a href="https://vercel.com">Vercel</a></li>
+<li>Import your GitHub repository</li>
+<li>Configure as static site</li>
+<li>Deploy automatically</li>
+</ul></li>
+</ol>
+<h4 id="deploy-to-github-pages">Deploy to GitHub Pages</h4>
+<ol type="1">
+<li><strong>Upload to GitHub</strong>
+<ul>
+<li>Create new repository</li>
+<li>Upload all files to repository</li>
+</ul></li>
+<li><strong>Enable GitHub Pages</strong>
+<ul>
+<li>Go to repository Settings</li>
+<li>Scroll to Pages section</li>
+<li>Select source branch (usually <code>main</code>)</li>
+<li>Save settings</li>
+</ul></li>
+<li><strong>Access Site</strong>
+<ul>
+<li>Site will be available at
+<code>https://yourusername.github.io/raftaar_orderpicker</code></li>
+</ul></li>
+</ol>
+<h2 id="detailed-configuration">Detailed Configuration</h2>
+<h3 id="google-maps-api-setup">Google Maps API Setup</h3>
+<ol type="1">
+<li><p><strong>Create Google Cloud Project</strong></p>
+<pre><code>1. Visit https://console.cloud.google.com/
+2. Click &quot;Select a project&quot; → &quot;New Project&quot;
+3. Enter project name: &quot;Raftaar Order Picker&quot;
+4. Click &quot;Create&quot;</code></pre></li>
+<li><p><strong>Enable Required APIs</strong></p>
+<pre><code>1. Go to &quot;APIs &amp; Services&quot; → &quot;Library&quot;
+2. Search and enable each API:
+   - Maps JavaScript API
+   - Directions API
+   - Places API
+   - Geocoding API
+   - Routes API (for advanced routing)</code></pre></li>
+<li><p><strong>Create and Secure API Key</strong></p>
+<pre><code>1. Go to &quot;APIs &amp; Services&quot; → &quot;Credentials&quot;
+2. Click &quot;Create Credentials&quot; → &quot;API Key&quot;
+3. Copy the generated key
+4. Click &quot;Restrict Key&quot; for security:
+   - Application restrictions: HTTP referrers
+   - Add your website domains
+   - API restrictions: Select only enabled APIs</code></pre></li>
+</ol>
+<h3 id="store-location-configuration">Store Location Configuration</h3>
+<p>Update your store coordinates in <code>js/main.js</code> (line
+6-9):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">this</span><span class="op">.</span><span class="at">storeLocation</span> <span class="op">=</span> {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lat</span><span class="op">:</span> <span class="fl">21.142639</span><span class="op">,</span>  <span class="co">// Replace with your store latitude</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lng</span><span class="op">:</span> <span class="fl">79.090385</span>   <span class="co">// Replace with your store longitude</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<p>To find your coordinates: 1. Open <a
+href="https://maps.google.com">Google Maps</a> 2. Right-click on your
+store location 3. Click on the coordinates to copy them</p>
+<h3 id="customer-data-integration-optional">Customer Data Integration
+(Optional)</h3>
+<h4 id="google-sheets-setup">Google Sheets Setup</h4>
+<ol type="1">
+<li><p><strong>Create Customer Database</strong></p>
+<ul>
+<li>Create new Google Sheets document</li>
+<li>Set up columns (A-E):
+<ul>
+<li>A: Customer Name</li>
+<li>B: Customer Phone</li>
+<li>C: Latitude</li>
+<li>D: Longitude</li>
+<li>E: Zone</li>
+</ul></li>
+</ul></li>
+<li><p><strong>Sample Data Format</strong></p>
+<pre><code>Row 1: Customer Name | Customer Phone | Latitude  | Longitude | Zone
+Row 2: John Doe      | +91-9876543210| 21.145000 | 79.088000 | A
+Row 3: Jane Smith    | +91-9876543211| 21.140000 | 79.092000 | B</code></pre></li>
+<li><p><strong>Make Sheet Public</strong></p>
+<ul>
+<li>Click “Share” button</li>
+<li>Change to “Anyone with the link can view”</li>
+<li>Copy the sheet ID from URL</li>
+</ul></li>
+<li><p><strong>Update Configuration</strong></p>
+<ul>
+<li>Open <code>js/customerManager.js</code></li>
+<li>Find line 16 and update <code>spreadsheetId</code>:</li>
+</ul>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spreadsheetId<span class="op">:</span> <span class="st">&#39;YOUR_GOOGLE_SHEET_ID_HERE&#39;</span></span></code></pre></div></li>
+</ol>
+<h2 id="development-environment-setup">Development Environment
+Setup</h2>
+<h3 id="for-developers">For Developers</h3>
+<ol type="1">
+<li><p><strong>Install Development Tools</strong></p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install Node.js (optional but recommended)</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Download from https://nodejs.org/</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Install live-reload server</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> live-server</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Or use browser-sync for advanced features</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="ex">npm</span> install <span class="at">-g</span> browser-sync</span></code></pre></div></li>
+<li><p><strong>Development Server</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using live-server (auto-reload)</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="ex">live-server</span> <span class="at">--port</span><span class="op">=</span>8000</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Using browser-sync (cross-device testing)</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="ex">browser-sync</span> start <span class="at">--server</span> <span class="at">--files</span> <span class="st">&quot;*.html, *.css, js/*.js&quot;</span></span></code></pre></div></li>
+<li><p><strong>Code Editor Setup</strong></p>
+<ul>
+<li><strong>VS Code</strong> (recommended): Install Live Server
+extension</li>
+<li><strong>WebStorm</strong>: Built-in development server</li>
+<li><strong>Sublime Text</strong>: Use Package Control for live
+reload</li>
+</ul></li>
+</ol>
+<h3 id="file-structure-verification">File Structure Verification</h3>
+<p>Ensure your directory looks like this:</p>
+<pre><code>raftaar_orderpicker/
+├── index.html              # Main application file
+├── styles.css              # Styling
+├── script.js               # Legacy main script
+├── netlify.toml            # Netlify config
+├── vercel.json             # Vercel config
+├── js/                     # JavaScript modules
+│   ├── main.js
+│   ├── orderManager.js
+│   ├── optimizationEngine.js
+│   ├── mapManager.js
+│   ├── customerManager.js
+│   ├── uiManager.js
+│   ├── storageManager.js
+│   └── utilityFunctions.js
+├── customer_data.xlsx      # Sample data
+├── Zones (pattas).kml      # Zone mapping
+└── bell.wav                # Notification sound</code></pre>
+<h2 id="browser-compatibility">Browser Compatibility</h2>
+<h3 id="supported-browsers">Supported Browsers</h3>
+<ul>
+<li><strong>Chrome</strong>: Version 80+ (recommended)</li>
+<li><strong>Firefox</strong>: Version 75+</li>
+<li><strong>Safari</strong>: Version 13+</li>
+<li><strong>Edge</strong>: Version 80+</li>
+</ul>
+<h3 id="required-browser-features">Required Browser Features</h3>
+<ul>
+<li>ES6+ JavaScript support</li>
+<li>Local Storage API</li>
+<li>Geolocation API (optional)</li>
+<li>WebGL (for advanced map features)</li>
+</ul>
+<h3 id="browser-settings">Browser Settings</h3>
+<ul>
+<li><strong>JavaScript</strong>: Must be enabled</li>
+<li><strong>Cookies</strong>: Required for session management</li>
+<li><strong>Local Storage</strong>: Required for data persistence</li>
+<li><strong>Location Services</strong>: Optional (for auto-location
+features)</li>
+</ul>
+<h2 id="security-configuration">Security Configuration</h2>
+<h3 id="api-key-security">API Key Security</h3>
+<ol type="1">
+<li><p><strong>Restrict by Domain</strong></p>
+<pre><code>In Google Cloud Console:
+1. Go to Credentials → Edit API Key
+2. Application restrictions → HTTP referrers
+3. Add: yourdomain.com/* and www.yourdomain.com/*</code></pre></li>
+<li><p><strong>Restrict by API</strong></p>
+<pre><code>API restrictions:
+Maps JavaScript API
+Directions API
+Places API
+Geocoding API
+Routes API
+(Uncheck all others)</code></pre></li>
+</ol>
+<h3 id="https-requirements">HTTPS Requirements</h3>
+<ul>
+<li><strong>Local Development</strong>: HTTP is fine</li>
+<li><strong>Production</strong>: HTTPS required for geolocation
+features</li>
+<li><strong>Google Maps</strong>: Works on both HTTP (localhost) and
+HTTPS</li>
+</ul>
+<h2 id="mobile-responsiveness">📱 Mobile Responsiveness</h2>
+<p>The application is fully responsive and works on: -
+<strong>Smartphones</strong>: iOS Safari, Android Chrome -
+<strong>Tablets</strong>: iPad Safari, Android tablets -
+<strong>Desktops</strong>: All major browsers</p>
+<h3 id="mobile-specific-features">Mobile-Specific Features</h3>
+<ul>
+<li>Touch-friendly interface</li>
+<li>Responsive map controls</li>
+<li>Mobile-optimized forms</li>
+<li>Swipe gestures for maps</li>
+</ul>
+<h2 id="troubleshooting-installation">Troubleshooting Installation</h2>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>Issue: Map not loading</strong></p>
+<pre><code>Solution:
+1. Check API key is valid
+2. Verify APIs are enabled in Google Cloud
+3. Check browser console for errors
+4. Ensure correct domain restrictions</code></pre>
+<p><strong>Issue: “This page can’t load Google Maps
+correctly”</strong></p>
+<pre><code>Solution:
+1. Check API key restrictions
+2. Verify billing is enabled (Google requires billing account)
+3. Check API quotas aren&#39;t exceeded</code></pre>
+<p><strong>Issue: CORS errors</strong></p>
+<pre><code>Solution:
+1. Don&#39;t open index.html directly (file://)
+2. Always use a web server (http://)
+3. For Google Sheets: ensure sheet is public</code></pre>
+<p><strong>Issue: Customer data not loading</strong></p>
+<pre><code>Solution:
+1. Verify Google Sheets is publicly accessible
+2. Check spreadsheet ID in customerManager.js
+3. Ensure correct column format
+4. Check browser console for errors</code></pre>
+<h3 id="performance-issues">Performance Issues</h3>
+<p><strong>Slow map loading</strong></p>
+<pre><code>Solutions:
+1. Reduce initial zoom level
+2. Implement lazy loading for markers
+3. Use marker clustering for many orders
+4. Optimize API calls</code></pre>
+<p><strong>High API usage</strong></p>
+<pre><code>Solutions:
+1. Implement request caching
+2. Use batch geocoding
+3. Monitor API quotas
+4. Implement rate limiting</code></pre>
+<h2 id="installation-checklist">Installation Checklist</h2>
+<p>Before going live, verify:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />Google Maps API key is configured
+and restricted</label></li>
+<li><label><input type="checkbox" />All required APIs are enabled in
+Google Cloud</label></li>
+<li><label><input type="checkbox" />Store location coordinates are
+correct</label></li>
+<li><label><input type="checkbox" />Application loads without console
+errors</label></li>
+<li><label><input type="checkbox" />Maps display correctly</label></li>
+<li><label><input type="checkbox" />Order creation works</label></li>
+<li><label><input type="checkbox" />Route optimization
+functions</label></li>
+<li><label><input type="checkbox" />Customer data loads (if using Google
+Sheets)</label></li>
+<li><label><input type="checkbox" />Application works on mobile
+devices</label></li>
+<li><label><input type="checkbox" />HTTPS is configured for
+production</label></li>
+<li><label><input type="checkbox" />Domain restrictions are set for API
+key</label></li>
+</ul>
+<h2 id="support">📞 Support</h2>
+<p>If you encounter issues during installation:</p>
+<ol type="1">
+<li><strong>Check Browser Console</strong>: Look for error messages</li>
+<li><strong>Verify API Configuration</strong>: Double-check Google Cloud
+settings</li>
+<li><strong>Test Basic Functionality</strong>: Ensure maps load
+first</li>
+<li><strong>Check Network</strong>: Verify internet connectivity</li>
+<li><strong>Review Documentation</strong>: Re-read relevant
+sections</li>
+</ol>
+<p>For persistent issues, check the project repository for: - Issue
+tracker - Discussion forums - Example configurations - Video
+tutorials</p>
+<hr />
+<p><strong>Congratulations! Your Raftaar Order Picker is now ready to
+optimize your delivery operations!</strong></p>
+</body>
+</html>

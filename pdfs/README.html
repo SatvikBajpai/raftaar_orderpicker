@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>README</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+</head>
+<body>
+<h1 id="raftaar-order-picker">Raftaar Order Picker</h1>
+<p>An intelligent order prioritization and route optimization system for
+delivery management with SLA compliance tracking.</p>
+<p><img src="https://img.shields.io/badge/Version-1.0.0-blue"
+alt="Raftaar Order Picker" /> <img
+src="https://img.shields.io/badge/Status-Active-green"
+alt="Status" /></p>
+<h2 id="overview">Overview</h2>
+<p>Raftaar Order Picker is a web-based delivery management system
+designed to optimize order picking and delivery routes for maximum
+efficiency and SLA compliance. The application provides intelligent
+order prioritization, real-time route optimization, and comprehensive
+delivery tracking.</p>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li><strong>Smart Order Prioritization</strong>: AI-driven order
+selection based on SLA deadlines and delivery distance</li>
+<li><strong>Route Optimization</strong>: Advanced algorithms for
+multi-order batch delivery optimization</li>
+<li><strong>Real-time Mapping</strong>: Interactive Google Maps
+integration with live route visualization</li>
+<li><strong>SLA Monitoring</strong>: Automatic SLA deadline tracking
+with visual priority indicators</li>
+<li><strong>Rider Management</strong>: Complete delivery rider
+assignment and tracking system</li>
+<li><strong>Customer Database</strong>: Integrated customer management
+with Google Sheets sync</li>
+<li><strong>Zone-based Batching</strong>: Intelligent grouping of orders
+by delivery zones</li>
+<li><strong>Performance Analytics</strong>: Detailed metrics and route
+efficiency analysis</li>
+</ul>
+<h2 id="technology-stack">Technology Stack</h2>
+<ul>
+<li><strong>Frontend</strong>: HTML5, CSS3, Vanilla JavaScript
+(ES6+)</li>
+<li><strong>Mapping</strong>: Google Maps JavaScript API, Google Routes
+API</li>
+<li><strong>Data Storage</strong>: Browser LocalStorage, Google Sheets
+integration</li>
+<li><strong>Routing</strong>: Google Directions API with optimization
+algorithms</li>
+<li><strong>Deployment</strong>: Static hosting compatible (Netlify,
+Vercel, GitHub Pages)</li>
+</ul>
+<h2 id="project-structure">Project Structure</h2>
+<pre><code>raftaar_orderpicker/
+├── index.html                 # Main application interface
+├── styles.css                 # Application styling
+├── script.js                  # Legacy main application script
+├── netlify.toml               # Netlify deployment configuration
+├── vercel.json                # Vercel deployment configuration
+├── js/                        # Modular JavaScript files
+│   ├── main.js                # Application initialization
+│   ├── orderManager.js        # Order creation and management
+│   ├── optimizationEngine.js  # Route and priority optimization
+│   ├── mapManager.js          # Google Maps integration
+│   ├── customerManager.js     # Customer data management
+│   ├── uiManager.js           # User interface management
+│   ├── storageManager.js      # Data persistence
+│   └── utilityFunctions.js    # Helper functions and calculations
+├── customer_data.xlsx         # Sample customer data
+├── Zones (pattas).kml         # Delivery zone mapping
+├── bell.wav                   # Notification sound
+└── documentation/             # Project documentation</code></pre>
+<h2 id="quick-start">Quick Start</h2>
+<h3 id="prerequisites">Prerequisites</h3>
+<ol type="1">
+<li><strong>Google Maps API Key</strong>: Required for mapping and
+routing functionality</li>
+<li><strong>Web Server</strong>: For proper CORS handling (local file://
+protocol has limitations)</li>
+<li><strong>Modern Browser</strong>: Chrome, Firefox, Safari, or Edge
+with ES6+ support</li>
+</ol>
+<h3 id="installation">Installation</h3>
+<ol type="1">
+<li><p><strong>Clone or Download the Repository</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repository-url<span class="op">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> raftaar_orderpicker</span></code></pre></div></li>
+<li><p><strong>Configure Google Maps API</strong></p>
+<ul>
+<li>Open <code>index.html</code> and locate the Google Maps script
+tag</li>
+<li>Replace <code>YOUR_API_KEY</code> with your actual Google Maps API
+key:</li>
+</ul>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> async defer src</span><span class="op">=</span><span class="st">&quot;https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY</span><span class="er">&amp;</span><span class="st">libraries=routes,geometry,places</span><span class="er">&amp;</span><span class="st">callback=initMap&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div></li>
+<li><p><strong>Serve the Application</strong></p>
+<p>Choose one of these methods:</p>
+<p><strong>Option A: Python HTTP Server</strong></p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">python3</span> <span class="at">-m</span> http.server 8000</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visit http://localhost:8000</span></span></code></pre></div>
+<p><strong>Option B: Node.js HTTP Server</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">npx</span> http-server <span class="at">-p</span> 8000</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Visit http://localhost:8000</span></span></code></pre></div>
+<p><strong>Option C: VS Code Live Server</strong></p>
+<ul>
+<li>Install Live Server extension</li>
+<li>Right-click <code>index.html</code> → “Open with Live Server”</li>
+</ul></li>
+<li><p><strong>Access the Application</strong></p>
+<ul>
+<li>Open your web browser</li>
+<li>Navigate to the local server URL</li>
+<li>The application will automatically load and initialize</li>
+</ul></li>
+</ol>
+<h2 id="core-functionality">Core Functionality</h2>
+<h3 id="order-management">Order Management</h3>
+<ul>
+<li><strong>Add New Orders</strong>: Create orders with customer
+selection, timing, and automatic zone assignment</li>
+<li><strong>Order Prioritization</strong>: Smart priority calculation
+based on SLA deadlines and delivery distance</li>
+<li><strong>Status Tracking</strong>: Real-time order status updates
+(pending, selected, out for delivery, delivered)</li>
+<li><strong>Bulk Operations</strong>: Handle multiple orders efficiently
+with batch processing</li>
+</ul>
+<h3 id="route-optimization">Route Optimization</h3>
+<ul>
+<li><strong>Single Order Mode</strong>: Find the optimal next order
+based on SLA compliance or delivery efficiency</li>
+<li><strong>Batch Mode</strong>: Create optimized multi-order routes
+with zone-based clustering</li>
+<li><strong>Dual-Color Routes</strong>: Visual distinction between
+outbound (blue) and return (green) routes</li>
+<li><strong>Route Segments</strong>: Toggle individual route segments
+for detailed analysis</li>
+</ul>
+<h3 id="rider-management">Rider Management</h3>
+<ul>
+<li><strong>10 Active Riders</strong>: Support for riders A through J
+with individual tracking</li>
+<li><strong>Automatic Availability</strong>: Smart rider status
+management with 15-minute auto-return rule</li>
+<li><strong>Assignment Tracking</strong>: Complete order-to-rider
+assignment with expected return times</li>
+<li><strong>Performance Monitoring</strong>: Track rider efficiency and
+delivery completion</li>
+</ul>
+<h3 id="customer-integration">Customer Integration</h3>
+<ul>
+<li><strong>Google Sheets Sync</strong>: Automatic customer data loading
+from Google Sheets</li>
+<li><strong>Address Geocoding</strong>: Automatic coordinate resolution
+for new addresses</li>
+<li><strong>Zone Assignment</strong>: Smart zone allocation based on
+customer location</li>
+<li><strong>Customer Database</strong>: Persistent customer information
+storage</li>
+</ul>
+<h2 id="user-guide">User Guide</h2>
+<h3 id="getting-started">Getting Started</h3>
+<ol type="1">
+<li><strong>Initial Setup</strong>
+<ul>
+<li>Launch the application in your web browser</li>
+<li>The Google Maps interface will load showing the Raftaar store
+location</li>
+<li>Customer data will automatically sync from Google Sheets (if
+configured)</li>
+</ul></li>
+<li><strong>Adding Your First Order</strong>
+<ul>
+<li>Click the “Add New Order” section</li>
+<li>Enter a unique Order ID (e.g., “ORD-001”)</li>
+<li>Set the order time (current time by default)</li>
+<li>Select a customer from the dropdown (or add manually with
+pincode)</li>
+<li>Zone will auto-fill based on customer location</li>
+<li>Click “Add Order” to create</li>
+</ul></li>
+<li><strong>Order Optimization</strong>
+<ul>
+<li>Orders appear in the queue with color-coded priorities</li>
+<li>Use “Get Next Order” for single-order optimization</li>
+<li>Enable “Zone Batch Optimization” for multi-order routes</li>
+<li>The system will recommend the optimal selection</li>
+</ul></li>
+</ol>
+<h3 id="advanced-features">Advanced Features</h3>
+<h4 id="sla-management">SLA Management</h4>
+<ul>
+<li><strong>Green</strong>: Orders with ample time to meet SLA</li>
+<li><strong>Yellow</strong>: Orders requiring attention (moderate
+urgency)</li>
+<li><strong>Orange</strong>: High priority orders (limited time
+remaining)</li>
+<li><strong>Red</strong>: Overdue or critical orders requiring immediate
+action</li>
+</ul>
+<h4 id="route-visualization">Route Visualization</h4>
+<ul>
+<li><strong>Blue Routes</strong>: Outbound delivery routes from store to
+customers</li>
+<li><strong>Green Routes</strong>: Return routes from customers back to
+store</li>
+<li><strong>Route Controls</strong>: Toggle individual segments, view
+full routes, or analyze specific portions</li>
+<li><strong>Distance/Time Display</strong>: Real-time route metrics with
+Google Maps integration</li>
+</ul>
+<h4 id="batch-optimization">Batch Optimization</h4>
+<ul>
+<li><strong>Zone-Based Clustering</strong>: Automatically groups orders
+by delivery zones</li>
+<li><strong>Route Efficiency</strong>: Calculates optimal order sequence
+within batches</li>
+<li><strong>SLA Risk Analysis</strong>: Identifies orders at risk of
+missing deadlines</li>
+<li><strong>Capacity Management</strong>: Configurable batch sizes (2-8
+orders per batch)</li>
+</ul>
+<h3 id="rider-assignment">Rider Assignment</h3>
+<ol type="1">
+<li><strong>Select Orders</strong>: Use optimization to identify orders
+for delivery</li>
+<li><strong>Choose Rider</strong>: Click “Select for Delivery” and pick
+an available rider</li>
+<li><strong>Track Progress</strong>: Monitor rider status and expected
+return times</li>
+<li><strong>Auto-Updates</strong>: System automatically updates rider
+availability</li>
+</ol>
+<h3 id="data-management">Data Management</h3>
+<ul>
+<li><strong>Automatic Saving</strong>: All data persists in browser
+storage</li>
+<li><strong>Export Capability</strong>: Generate reports and
+analytics</li>
+<li><strong>Backup Options</strong>: Manual data export/import
+functionality</li>
+<li><strong>Sync Management</strong>: Real-time updates across browser
+tabs</li>
+</ul>
+<h2 id="configuration">Configuration</h2>
+<h3 id="google-maps-api-setup">Google Maps API Setup</h3>
+<ol type="1">
+<li><strong>Create a Google Cloud Project</strong>
+<ul>
+<li>Visit <a href="https://console.cloud.google.com/">Google Cloud
+Console</a></li>
+<li>Create a new project or select existing</li>
+</ul></li>
+<li><strong>Enable Required APIs</strong>
+<ul>
+<li>Maps JavaScript API</li>
+<li>Directions API</li>
+<li>Places API</li>
+<li>Geocoding API</li>
+<li>Routes API</li>
+</ul></li>
+<li><strong>Create API Key</strong>
+<ul>
+<li>Generate a new API key</li>
+<li>Apply appropriate restrictions for security</li>
+<li>Update the key in <code>index.html</code></li>
+</ul></li>
+</ol>
+<h3 id="google-sheets-integration">Google Sheets Integration</h3>
+<ol type="1">
+<li><strong>Create Customer Sheet</strong>
+<ul>
+<li>Column A: Customer Name</li>
+<li>Column B: Customer Phone</li>
+<li>Column C: Latitude</li>
+<li>Column D: Longitude</li>
+<li>Column E: Zone</li>
+</ul></li>
+<li><strong>Make Sheet Public</strong>
+<ul>
+<li>File → Share → “Anyone with the link can view”</li>
+<li>Copy the sheet ID from the URL</li>
+</ul></li>
+<li><strong>Update Configuration</strong>
+<ul>
+<li>Modify <code>spreadsheetId</code> in
+<code>js/customerManager.js</code></li>
+<li>Ensure API key has Sheets API access</li>
+</ul></li>
+</ol>
+<h3 id="store-location">Store Location</h3>
+<p>Update the store coordinates in <code>js/main.js</code>:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">this</span><span class="op">.</span><span class="at">storeLocation</span> <span class="op">=</span> {</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lat</span><span class="op">:</span> YOUR_LATITUDE<span class="op">,</span>    <span class="co">// Replace with actual coordinates</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">lng</span><span class="op">:</span> YOUR_LONGITUDE</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>}<span class="op">;</span></span></code></pre></div>
+<h2 id="deployment">Deployment</h2>
+<h3 id="netlify-deployment">Netlify Deployment</h3>
+<ol type="1">
+<li><strong>Connect Repository</strong>
+<ul>
+<li>Link your GitHub repository to Netlify</li>
+<li>Configure build settings (static site)</li>
+</ul></li>
+<li><strong>Environment Variables</strong>
+<ul>
+<li>Set <code>GOOGLE_MAPS_API_KEY</code> in site settings</li>
+<li>Configure any additional environment variables</li>
+</ul></li>
+<li><strong>Deploy</strong>
+<ul>
+<li>Automatic deployment on git push</li>
+<li>Custom domain configuration available</li>
+</ul></li>
+</ol>
+<h3 id="vercel-deployment">Vercel Deployment</h3>
+<ol type="1">
+<li><strong>Import Project</strong>
+<ul>
+<li>Connect repository to Vercel</li>
+<li>Configure as static site</li>
+</ul></li>
+<li><strong>Environment Setup</strong>
+<ul>
+<li>Add Google Maps API key to environment variables</li>
+<li>Configure domain settings</li>
+</ul></li>
+<li><strong>Production Deploy</strong>
+<ul>
+<li>Automatic deployments from main branch</li>
+<li>Instant global CDN distribution</li>
+</ul></li>
+</ol>
+<h3 id="github-pages">GitHub Pages</h3>
+<ol type="1">
+<li><strong>Repository Settings</strong>
+<ul>
+<li>Enable GitHub Pages in repository settings</li>
+<li>Select source branch (usually main)</li>
+</ul></li>
+<li><strong>Configuration</strong>
+<ul>
+<li>Ensure API keys are properly configured</li>
+<li>Update any absolute paths for GitHub Pages URL structure</li>
+</ul></li>
+</ol>
+<h2 id="troubleshooting">Troubleshooting</h2>
+<h3 id="common-issues">Common Issues</h3>
+<p><strong>Map Not Loading</strong> - Verify Google Maps API key is
+valid and has required permissions - Check browser console for error
+messages - Ensure APIs are enabled in Google Cloud Console</p>
+<p><strong>Customer Data Not Loading</strong> - Verify Google Sheets is
+publicly accessible - Check spreadsheet ID in configuration - Ensure
+correct column format in Google Sheets</p>
+<p><strong>Routes Not Displaying</strong> - Confirm Directions API is
+enabled - Check API quota limits in Google Cloud Console - Verify
+network connectivity and CORS settings</p>
+<p><strong>Orders Not Saving</strong> - Check browser localStorage
+availability - Clear browser cache if experiencing issues - Verify no
+browser extensions are blocking storage</p>
+<h3 id="performance-optimization">Performance Optimization</h3>
+<ul>
+<li><strong>API Quota Management</strong>: Monitor Google Maps API
+usage</li>
+<li><strong>Data Caching</strong>: Customer and route data is cached for
+efficiency</li>
+<li><strong>Batch Processing</strong>: Use batch optimization for
+multiple orders</li>
+<li><strong>Route Reuse</strong>: System caches common routes for faster
+loading</li>
+</ul>
+<h2 id="analytics-and-metrics">Analytics and Metrics</h2>
+<p>The application tracks comprehensive metrics:</p>
+<ul>
+<li><strong>Route Efficiency</strong>: Distance optimization and time
+savings</li>
+<li><strong>SLA Compliance</strong>: Success rates and risk
+analysis</li>
+<li><strong>Rider Performance</strong>: Delivery times and capacity
+utilization</li>
+<li><strong>Order Volume</strong>: Daily, weekly, and monthly order
+processing</li>
+<li><strong>Geographic Distribution</strong>: Zone-wise delivery
+analysis</li>
+</ul>
+<h2 id="contributing">Contributing</h2>
+<h3 id="development-setup">Development Setup</h3>
+<ol type="1">
+<li><p><strong>Fork the Repository</strong></p></li>
+<li><p><strong>Create Feature Branch</strong></p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> checkout <span class="at">-b</span> feature/your-feature-name</span></code></pre></div></li>
+<li><p><strong>Make Changes</strong></p></li>
+<li><p><strong>Test Thoroughly</strong></p></li>
+<li><p><strong>Submit Pull Request</strong></p></li>
+</ol>
+<h3 id="code-standards">Code Standards</h3>
+<ul>
+<li>Use ES6+ JavaScript features</li>
+<li>Follow modular architecture patterns</li>
+<li>Implement comprehensive error handling</li>
+<li>Add detailed code comments</li>
+<li>Test across multiple browsers</li>
+</ul>
+<h2 id="license">License</h2>
+<p>This project is licensed under the MIT License - see the <a
+href="LICENSE">LICENSE</a> file for details.</p>
+<h2 id="support">Support</h2>
+<p>For support and questions:</p>
+<ul>
+<li><strong>Issues</strong>: Use GitHub Issues for bug reports</li>
+<li><strong>Discussions</strong>: GitHub Discussions for feature
+requests</li>
+<li><strong>Documentation</strong>: Refer to inline code comments</li>
+<li><strong>Community</strong>: Join project discussions</li>
+</ul>
+<h2 id="roadmap">Roadmap</h2>
+<h3 id="upcoming-features">Upcoming Features</h3>
+<ul>
+<li><strong>Mobile App</strong>: React Native companion app</li>
+<li><strong>Advanced Analytics</strong>: Detailed performance
+dashboards</li>
+<li><strong>Machine Learning</strong>: Predictive route
+optimization</li>
+<li><strong>Real-time Tracking</strong>: Live GPS tracking
+integration</li>
+<li><strong>Multi-store Support</strong>: Support for multiple
+distribution centers</li>
+<li><strong>API Integration</strong>: RESTful API for third-party
+integrations</li>
+</ul>
+<hr />
+<p><strong>Made with care for efficient delivery management</strong></p>
+</body>
+</html>
