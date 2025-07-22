@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DEPENDENCIES</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css" />
+</head>
+<body>
+<h1 id="dependencies-and-external-libraries">Dependencies and External
+Libraries</h1>
+<h2 id="raftaar-order-picker---external-dependencies">Raftaar Order
+Picker - External Dependencies</h2>
+<p>This document provides a comprehensive list of all external
+libraries, APIs, tools, and services used in the Raftaar Order Picker
+application.</p>
+<hr />
+<h2 id="core-external-libraries">Core External Libraries</h2>
+<h3 id="font-awesome-6.0.0">1. Font Awesome 6.0.0</h3>
+<ul>
+<li><strong>Type</strong>: CSS Icon Library</li>
+<li><strong>Source</strong>:
+<code>https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css</code></li>
+<li><strong>Purpose</strong>: Provides scalable vector icons for user
+interface elements</li>
+<li><strong>Usage</strong>: Icons throughout the application (shipping,
+plus, save, search, location, etc.)</li>
+<li><strong>License</strong>: Font Awesome Free License</li>
+<li><strong>Integration</strong>: CDN link in
+<code>index.html</code></li>
+</ul>
+<h3 id="google-maps-javascript-api">2. Google Maps JavaScript API</h3>
+<ul>
+<li><strong>Type</strong>: Mapping and Geolocation Service</li>
+<li><strong>Source</strong>:
+<code>https://maps.googleapis.com/maps/api/js</code></li>
+<li><strong>Purpose</strong>: Core mapping functionality, route
+visualization, and geocoding services</li>
+<li><strong>Required Libraries</strong>:
+<ul>
+<li><code>routes</code> - Advanced route planning and optimization</li>
+<li><code>geometry</code> - Geometric calculations and spatial
+operations</li>
+<li><code>places</code> - Place search, autocomplete, and geocoding</li>
+</ul></li>
+<li><strong>Integration</strong>: Script tag in <code>index.html</code>
+with API key</li>
+<li><strong>Documentation</strong>: <a
+href="https://developers.google.com/maps/documentation/javascript">Google
+Maps JavaScript API</a></li>
+</ul>
+<hr />
+<h2 id="google-cloud-apis">Google Cloud APIs</h2>
+<h3 id="google-sheets-api-v4">3. Google Sheets API v4</h3>
+<ul>
+<li><strong>Type</strong>: Data Integration Service</li>
+<li><strong>Endpoint</strong>:
+<code>https://sheets.googleapis.com/v4/spreadsheets/</code></li>
+<li><strong>Purpose</strong>: Customer data synchronization and
+management</li>
+<li><strong>Usage</strong>: Loading customer database from Google
+Sheets</li>
+<li><strong>Authentication</strong>: API key-based</li>
+<li><strong>Implementation</strong>:
+<code>js/customerManager.js</code></li>
+</ul>
+<h3 id="google-directions-api">4. Google Directions API</h3>
+<ul>
+<li><strong>Type</strong>: Route Calculation Service</li>
+<li><strong>Purpose</strong>: Calculate optimal routes between multiple
+points</li>
+<li><strong>Usage</strong>: Route optimization and turn-by-turn
+directions</li>
+<li><strong>Integration</strong>: Through Google Maps JavaScript
+API</li>
+<li><strong>Implementation</strong>: <code>js/mapManager.js</code>,
+<code>js/optimizationEngine.js</code></li>
+</ul>
+<h3 id="google-places-api">5. Google Places API</h3>
+<ul>
+<li><strong>Type</strong>: Location Data Service</li>
+<li><strong>Purpose</strong>: Address validation, geocoding, and place
+search</li>
+<li><strong>Usage</strong>: Converting addresses to coordinates, place
+autocomplete</li>
+<li><strong>Integration</strong>: Through Google Maps JavaScript
+API</li>
+<li><strong>Implementation</strong>:
+<code>js/customerManager.js</code></li>
+</ul>
+<h3 id="google-geocoding-api">6. Google Geocoding API</h3>
+<ul>
+<li><strong>Type</strong>: Address Conversion Service</li>
+<li><strong>Purpose</strong>: Converting addresses to coordinates and
+vice versa</li>
+<li><strong>Usage</strong>: Automatic coordinate resolution for customer
+addresses</li>
+<li><strong>Integration</strong>: Through Google Maps JavaScript
+API</li>
+<li><strong>Implementation</strong>:
+<code>js/customerManager.js</code></li>
+</ul>
+<h3 id="google-routes-api-advanced">7. Google Routes API (Advanced)</h3>
+<ul>
+<li><strong>Type</strong>: Enhanced Route Planning Service</li>
+<li><strong>Purpose</strong>: Advanced route optimization with real-time
+traffic data</li>
+<li><strong>Usage</strong>: Traffic-aware route calculations and
+optimization</li>
+<li><strong>Integration</strong>: Through Google Maps JavaScript
+API</li>
+<li><strong>Implementation</strong>:
+<code>js/optimizationEngine.js</code></li>
+</ul>
+<hr />
+<h2 id="development-and-documentation-tools">Development and
+Documentation Tools</h2>
+<h3 id="github-markdown-css">8. GitHub Markdown CSS</h3>
+<ul>
+<li><strong>Type</strong>: Styling Library</li>
+<li><strong>Source</strong>:
+<code>https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css</code></li>
+<li><strong>Purpose</strong>: GitHub-style markdown rendering for
+documentation</li>
+<li><strong>Usage</strong>: PDF and HTML documentation generation</li>
+<li><strong>Integration</strong>: <code>generate_pdfs.sh</code>
+script</li>
+<li><strong>Note</strong>: Used only for documentation generation, not
+in main application</li>
+</ul>
+<h3 id="pandoc-development-tool">9. Pandoc (Development Tool)</h3>
+<ul>
+<li><strong>Type</strong>: Document Conversion Tool</li>
+<li><strong>Purpose</strong>: Converting Markdown documentation to
+HTML/PDF formats</li>
+<li><strong>Usage</strong>: Automated documentation generation</li>
+<li><strong>Integration</strong>: <code>generate_pdfs.sh</code>
+script</li>
+<li><strong>Installation</strong>: <code>brew install pandoc</code>
+(macOS)</li>
+</ul>
+<hr />
+<h2 id="native-browser-apis">Native Browser APIs</h2>
+<p>The application extensively uses native browser APIs, eliminating the
+need for additional JavaScript libraries:</p>
+<h3 id="localstorage-api">10. LocalStorage API</h3>
+<ul>
+<li><strong>Type</strong>: Native Browser API</li>
+<li><strong>Purpose</strong>: Client-side data persistence</li>
+<li><strong>Usage</strong>: Storing orders, customer data, and
+application state</li>
+<li><strong>Implementation</strong>:
+<code>js/storageManager.js</code></li>
+</ul>
+<h3 id="fetch-api">11. Fetch API</h3>
+<ul>
+<li><strong>Type</strong>: Native Browser API</li>
+<li><strong>Purpose</strong>: HTTP requests and API communication</li>
+<li><strong>Usage</strong>: Google Sheets API calls and external service
+requests</li>
+<li><strong>Implementation</strong>:
+<code>js/customerManager.js</code></li>
+</ul>
+<h3 id="filereader-api">12. FileReader API</h3>
+<ul>
+<li><strong>Type</strong>: Native Browser API</li>
+<li><strong>Purpose</strong>: File handling for data import/export</li>
+<li><strong>Usage</strong>: Backup and restore functionality</li>
+<li><strong>Implementation</strong>:
+<code>js/storageManager.js</code></li>
+</ul>
+<h3 id="geolocation-api-optional">13. Geolocation API (Optional)</h3>
+<ul>
+<li><strong>Type</strong>: Native Browser API</li>
+<li><strong>Purpose</strong>: User location detection</li>
+<li><strong>Usage</strong>: Auto-location features for enhanced user
+experience</li>
+<li><strong>Implementation</strong>: Optional feature in mapping
+components</li>
+</ul>
+<hr />
+<h2 id="deployment-and-hosting-services">Deployment and Hosting
+Services</h2>
+<h3 id="github-pages">14. GitHub Pages</h3>
+<ul>
+<li><strong>Type</strong>: Static Site Hosting</li>
+<li><strong>Purpose</strong>: Application deployment and hosting</li>
+<li><strong>URL</strong>:
+https://satvikbajpai.github.io/raftaar_orderpicker/</li>
+<li><strong>Configuration</strong>: Automatic deployment from main
+branch</li>
+</ul>
+<h3 id="netlify-configuration-available">15. Netlify (Configuration
+Available)</h3>
+<ul>
+<li><strong>Type</strong>: Static Site Hosting Platform</li>
+<li><strong>Purpose</strong>: Alternative deployment option</li>
+<li><strong>Configuration</strong>: <code>netlify.toml</code></li>
+<li><strong>Features</strong>: Continuous deployment, custom domains,
+environment variables</li>
+</ul>
+<h3 id="vercel-configuration-available">16. Vercel (Configuration
+Available)</h3>
+<ul>
+<li><strong>Type</strong>: Static Site Hosting Platform</li>
+<li><strong>Purpose</strong>: Alternative deployment option</li>
+<li><strong>Configuration</strong>: <code>vercel.json</code></li>
+<li><strong>Features</strong>: Instant deployments, global CDN,
+serverless functions</li>
+</ul>
+<hr />
+<h2 id="architecture-philosophy">Architecture Philosophy</h2>
+<h3 id="minimal-dependencies-approach">Minimal Dependencies
+Approach</h3>
+<p>The Raftaar Order Picker follows a <strong>minimal
+dependencies</strong> philosophy:</p>
+<ul>
+<li><strong>Pure Vanilla JavaScript (ES6+)</strong> - No heavy
+frameworks like React, Vue, or Angular</li>
+<li><strong>Native CSS</strong> - No CSS frameworks like Bootstrap or
+Tailwind CSS</li>
+<li><strong>Modern Browser APIs</strong> - Leveraging native
+capabilities instead of polyfills</li>
+<li><strong>Modular Architecture</strong> - 8 separate JavaScript
+modules for maintainability</li>
+</ul>
+<h3 id="benefits-of-this-approach">Benefits of This Approach</h3>
+<ul>
+<li><strong>Performance</strong>: Faster loading times with minimal
+external dependencies</li>
+<li><strong>Maintainability</strong>: Reduced complexity and version
+conflicts</li>
+<li><strong>Security</strong>: Fewer third-party libraries reduce attack
+surface</li>
+<li><strong>Longevity</strong>: Less dependent on external library
+updates and breaking changes</li>
+<li><strong>Compatibility</strong>: Better browser compatibility with
+native APIs</li>
+</ul>
+<hr />
+<h2 id="version-compatibility">Version Compatibility</h2>
+<h3 id="browser-requirements">Browser Requirements</h3>
+<ul>
+<li><strong>Chrome</strong>: Version 80+ (recommended)</li>
+<li><strong>Firefox</strong>: Version 75+</li>
+<li><strong>Safari</strong>: Version 13+</li>
+<li><strong>Edge</strong>: Version 80+</li>
+</ul>
+<h3 id="api-version-dependencies">API Version Dependencies</h3>
+<ul>
+<li><strong>Google Maps JavaScript API</strong>: Current stable
+version</li>
+<li><strong>Google Sheets API</strong>: v4</li>
+<li><strong>Font Awesome</strong>: 6.0.0</li>
+</ul>
+<hr />
+<h2 id="license-information">License Information</h2>
+<h3 id="external-library-licenses">External Library Licenses</h3>
+<ul>
+<li><strong>Font Awesome</strong>: Font Awesome Free License (Icons: CC
+BY 4.0, Fonts: SIL OFL 1.1, Code: MIT)</li>
+<li><strong>Google APIs</strong>: Subject to Google API Terms of
+Service</li>
+<li><strong>GitHub Markdown CSS</strong>: MIT License</li>
+</ul>
+<h3 id="usage-compliance">Usage Compliance</h3>
+<p>All external dependencies are used in compliance with their
+respective licenses and terms of service. The application follows best
+practices for API usage and rate limiting.</p>
+<hr />
+<h2 id="development-setup-requirements">Development Setup
+Requirements</h2>
+<p>For developers setting up the project locally:</p>
+<h3 id="required">Required</h3>
+<ul>
+<li>Modern web browser with ES6+ support</li>
+<li>Web server (Python SimpleHTTPServer, Node.js http-server, or VS Code
+Live Server)</li>
+<li>Google Maps API key with enabled services</li>
+</ul>
+<h3 id="optional">Optional</h3>
+<ul>
+<li>Pandoc (for documentation generation)</li>
+<li>Git (for version control)</li>
+<li>Code editor with JavaScript support</li>
+</ul>
+<hr />
+<h2 id="api-usage-and-quotas">API Usage and Quotas</h2>
+<h3 id="google-maps-api-quotas">Google Maps API Quotas</h3>
+<ul>
+<li><strong>Maps JavaScript API</strong>: 28,000 map loads per month
+(free tier)</li>
+<li><strong>Directions API</strong>: 2,500 requests per day (free
+tier)</li>
+<li><strong>Geocoding API</strong>: 40,000 requests per month (free
+tier)</li>
+<li><strong>Places API</strong>: Monthly usage limits vary by request
+type</li>
+</ul>
+<h3 id="optimization-strategies">Optimization Strategies</h3>
+<ul>
+<li><strong>Caching</strong>: Coordinate and route data cached in
+LocalStorage</li>
+<li><strong>Rate Limiting</strong>: Implemented to prevent quota
+exhaustion</li>
+<li><strong>Efficient Requests</strong>: Batch processing and request
+optimization</li>
+<li><strong>Fallback Handling</strong>: Graceful degradation when APIs
+are unavailable</li>
+</ul>
+<hr />
+<p><strong>Total External Dependencies: 7 core libraries + 9 supporting
+tools/APIs</strong></p>
+<p><strong>Last Updated</strong>: July 2025<br />
+<strong>Version</strong>: 1.0.0</p>
+</body>
+</html>

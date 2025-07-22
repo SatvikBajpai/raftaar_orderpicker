@@ -5,6 +5,8 @@
 **Raftaar Order Picker** is live and ready to use at:
 **https://satvikbajpai.github.io/raftaar_orderpicker/**
 
+**GitHub Repository**: https://github.com/SatvikBajpai/raftaar_orderpicker
+
 ## Prerequisites
 
 To use Raftaar Order Picker effectively, you need:
@@ -117,7 +119,7 @@ Update your store coordinates within the application:
    ```
 
 3. **Sample Google Sheet Template**
-   - Use this template as reference: [Sample Customer Data Sheet](https://docs.google.com/spreadsheets/d/1SI1WdjT7L77aGVmRKShVKR8ZtFKv6sv_jXXx5YFgD_4/edit?usp=sharing)
+   - Use this spreadsheet as reference: [Customer Data Sheet](https://docs.google.com/spreadsheets/d/1SI1WdjT7L77aGVmRKShVKR8ZtFKv6sv_jXXx5YFgD_4/edit?usp=sharing)
    - Copy the structure and format for your own data
    - Replace with your actual customer information
 
@@ -279,6 +281,13 @@ Before using the application, verify:
 2. **Complete Initial Setup**: Follow the on-screen setup wizard
 3. **Configure Your Settings**: Set store location and API preferences
 4. **Start Managing Orders**: Begin creating and optimizing delivery routes
+
+## Additional Resources
+
+- **GitHub Repository**: https://github.com/SatvikBajpai/raftaar_orderpicker
+- **Documentation**: Available in the repository and application
+- **Issues & Support**: Report issues on GitHub
+- **Feature Requests**: Submit via GitHub Issues or Discussions
 
 ---
 

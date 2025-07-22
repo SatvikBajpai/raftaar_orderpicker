@@ -230,6 +230,23 @@ The system supports 10 active riders (A through J):
    - Update customer database
    - Plan next day operations
 
+## Advanced Settings
+
+### Configurable Travel Time
+
+The application includes a hidden settings panel for advanced configuration:
+
+1. **Accessing Settings**
+   - Look for the gear icon in the bottom-right corner of the screen
+   - Click the gear icon to open the Advanced Settings panel
+   - The settings panel can be closed by clicking the X button
+
+2. **Average Delivery Time Configuration**
+   - **Default Value**: 4.2 minutes per kilometer
+   - **Recommended Range**: 3.0 - 6.0 minutes per kilometer
+   - **Input Range**: 1.0 - 10.0 minutes per kilometer (0.1 step precision)
+   - **Real-time Updates**: Changes apply immediately to all calculations
+
 ## Support and Resources
 
 ### Getting Help

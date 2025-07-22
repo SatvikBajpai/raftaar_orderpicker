@@ -42,6 +42,8 @@ else
     
     echo "Converting RELEASE_NOTES.md to HTML..."
     pandoc RELEASE_NOTES.md -o pdfs/RELEASE_NOTES.html --standalone --css=https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css
+    pandoc DEPENDENCIES.md -o pdfs/DEPENDENCIES.html --standalone --css=https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.2.0/github-markdown-light.min.css
+
     
     # Create combined HTML
     echo "Creating combined documentation HTML..."
